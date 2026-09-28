@@ -88,14 +88,31 @@ not in any `.env`), so none of this is inferred:
 - Whether `permission reload` picks up a `visitor` downgrade without a rejoin.
 - What `allowlist add` does when `online-mode=false`. If it refuses to operate at all, the whole allowlist
   tab is a no-op in that configuration and the `online-mode` warning has to say so.
-- Whether BDS starts cleanly when `server-portv6` is bound but never published. `seedConfig` forces it to
-  the game port + 1 inside the container's own netns. (A default boot binds both 19132 and 19133 happily;
-  what is untested is the two being different numbers.)
 - Whether a pack version mismatch between `world_*_packs.json` and a manifest fails silently, and whether
   a `format_version: 3` semver string is accepted there (we always write the numeric triple).
 - Whether the first entry of `world_resource_packs.json` is the highest priority. New packs are appended and
   the operator gets explicit move up/down, so the design does not depend on the answer — but the `help`
   copy on the add-ons tab names one end as winning and should be correct.
+
+## NetherNet, verified 2026-09-28 on BDS 1.26.52.3
+
+Measured on a throwaway container and on the dev stack (`c72mrym8dv` on `riyadh-01`), with real joins from a PC client.
+
+- `transport=nethernet` boots clean: `Accepting clients on [::]:<server-port>`, `Signed in to signaling service successfully`, no
+  TRANSPORT TYPE ERROR banner. With the key absent or `raknet` the banner prints, but RakNet still accepts 1.26.52 clients.
+- At idle BDS binds only TCP `<server-port>` (dual-stack) and UDP 7551 (LAN discovery). Nothing on UDP `<server-port>`.
+- `GET http://127.0.0.1:<server-port>/v1/join` answers `200`, `Content-Type: application/json`, empty body, `Connection: close`.
+  That is the liveness probe the query uses.
+- Every connected player takes one UDP socket from the `server-udp-ports` range (libwebrtc `BasicPortAllocator`); the first
+  player landed on the first port of the block. The block is therefore sized to the player cap: `count: 64` and `max-players`
+  capped at 64. A reconnecting player may hold a second socket until the old one times out; measured once, not exhaustively.
+- Both mapping shapes joined through Docker NAT: `<publicIp>:<first>-<last>:<first>-<last>` (production) and the empty-ip
+  form `:<first>-<last>:<first>-<last>` (dev fleet, whose agent reports 127.0.0.1), the latter through two NAT layers.
+- The client shows a one-time prompt to trust the server on the first join; the player accepts it and is not asked again.
+- `server-portv6` stays forced to the game port + 1 on purpose: NetherNet ignores it, but under the legacy `raknet` setting a
+  mirrored game port of 19133 would otherwise collide with the BDS default v6 port.
+- One-way door: a per-server rollback to a pre-NetherNet bundle leaves BDS listening on TCP with only UDP published. Set
+  `transport=raknet` in Settings or in `server.properties` before reverting a Bedrock server.
 
 ## Deferred, on purpose
 

@@ -320,7 +320,7 @@ export const terminal: Bridge.Terminal = {
 		},
 		{
 			match:
-				/^NO LOG FILE!|Starting Server|Version:|Session ID:|Build ID:|Branch:|Commit ID:|Configuration:|Contents of server\.properties:|Level Name:|Game mode:|Difficulty:|Opening level|Pack Stack -|IPv[46] supported, port:|Signed in to signaling service|Waiting for Minecraft services/,
+				/^NO LOG FILE!|Starting Server|Version:|Session ID:|Build ID:|Branch:|Commit ID:|Configuration:|Contents of server\.properties:|Level Name:|Game mode:|Difficulty:|Opening level|Pack Stack -|IPv[46] supported, port:|Signed in to signaling service|Accepting clients on|Waiting for Minecraft services/,
 			level: BridgeTerminalLevel.Debug,
 		},
 		{

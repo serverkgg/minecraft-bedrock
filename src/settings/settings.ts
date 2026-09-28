@@ -29,6 +29,7 @@ export const SETTINGS_KEYS: string[] = [
 	PROPERTY_KEYS.serverName,
 	PROPERTY_KEYS.texturepackRequired,
 	PROPERTY_KEYS.tickDistance,
+	PROPERTY_KEYS.transport,
 	PROPERTY_KEYS.viewDistance,
 ];
 

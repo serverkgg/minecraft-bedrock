@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { PROPERTY_KEYS } from "../shared";
+import { BedrockTransport, PROPERTY_KEYS } from "../shared";
 import { readSettings, SETTINGS_KEYS, writeSettings } from "./settings";
 
 describe("reading the settings form out of server.properties", () => {
@@ -28,6 +28,14 @@ describe("reading the settings form out of server.properties", () => {
 				[PROPERTY_KEYS.maxPlayers]: "40",
 			})[PROPERTY_KEYS.maxPlayers],
 		).toBe(40);
+	});
+
+	test("reads the transport as the string bedrock wrote", () => {
+		expect(
+			readSettings({
+				[PROPERTY_KEYS.transport]: BedrockTransport.RakNet,
+			})[PROPERTY_KEYS.transport],
+		).toBe(BedrockTransport.RakNet);
 	});
 });
 
@@ -68,5 +76,13 @@ describe("writing the settings form back", () => {
 		).toEqual([
 			PROPERTY_KEYS.difficulty,
 		]);
+	});
+
+	test("writes the transport the owner picked", () => {
+		expect(
+			writeSettings({
+				[PROPERTY_KEYS.transport]: BedrockTransport.NetherNet,
+			})[PROPERTY_KEYS.transport],
+		).toBe(BedrockTransport.NetherNet);
 	});
 });

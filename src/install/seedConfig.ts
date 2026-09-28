@@ -1,7 +1,8 @@
-import type { Bridge } from "@serverkgg/bridge";
+import type { Bridge, BridgePortBlock } from "@serverkgg/bridge";
 import {
 	ALLOWLIST_FILE,
 	BEHAVIOR_PACKS_DIRECTORY,
+	BedrockTransport,
 	mergeProperties,
 	PERMISSIONS_FILE,
 	PROPERTY_KEYS,
@@ -35,13 +36,49 @@ const DEFAULTS: Record<string, string> = {
 	[PROPERTY_KEYS.viewDistance]: "32",
 };
 
-export const seedValues = (current: Record<string, string>, port: number) => {
+const IPV4 = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
+
+const LOOPBACK_OCTET = 127;
+
+const UNSPECIFIED = "0.0.0.0";
+
+const OCTET_MAX = 255;
+
+const udpAddressOf = (publicAddress: string | null) => {
+	const octets = (IPV4.exec(publicAddress?.trim() ?? "") ?? []).slice(1).map(Number);
+
+	if (octets.length === 0 || octets.some((octet) => octet > OCTET_MAX) || octets.at(0) === LOOPBACK_OCTET) {
+		return "";
+	}
+
+	const address = octets.join(".");
+
+	return address === UNSPECIFIED ? "" : address;
+};
+
+const udpPortsOf = (block: BridgePortBlock, publicAddress: string | null) => {
+	const range = `${block.first}-${block.first + block.count - 1}`;
+
+	return `${udpAddressOf(publicAddress)}:${range}:${range}`;
+};
+
+export const seedValues = (
+	current: Record<string, string>,
+	port: number,
+	block: BridgePortBlock,
+	publicAddress: string | null,
+) => {
 	const values: Record<string, string> = {
 		[PROPERTY_KEYS.contentLogFileEnabled]: "false",
 		[PROPERTY_KEYS.enableLanVisibility]: "true",
 		[PROPERTY_KEYS.serverPort]: String(port),
 		[PROPERTY_KEYS.serverPortV6]: String(port + 1),
+		[PROPERTY_KEYS.serverUdpPorts]: udpPortsOf(block, publicAddress),
 	};
+
+	if ((current[PROPERTY_KEYS.transport] ?? "").trim().length === 0) {
+		values[PROPERTY_KEYS.transport] = BedrockTransport.NetherNet;
+	}
 
 	for (const [key, value] of Object.entries(DEFAULTS)) {
 		if (!Object.hasOwn(current, key)) {
@@ -64,5 +101,13 @@ export const seedConfig = async (context: Bridge.Context) => {
 		}
 	}
 
-	await mergeProperties(context, seedValues(await readProperties(context), context.port("game")));
+	await mergeProperties(
+		context,
+		seedValues(
+			await readProperties(context),
+			context.port("game"),
+			context.portBlock("media"),
+			context.server.publicAddress,
+		),
+	);
 };

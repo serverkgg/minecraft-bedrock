@@ -31,7 +31,12 @@ describe("safe world tools", () => {
 		const context = {
 			server: {
 				running: false,
+				publicAddress: null,
 			},
+			portBlock: () => ({
+				first: 20_000,
+				count: 64,
+			}),
 			files: {
 				exists: async () => false,
 			},
@@ -59,7 +64,12 @@ describe("safe world tools", () => {
 		const context = {
 			server: {
 				running: true,
+				publicAddress: null,
 			},
+			portBlock: () => ({
+				first: 20_000,
+				count: 64,
+			}),
 		} as unknown as Bridge.Context;
 		await expect(
 			worldTools.actions.create?.(context, {
@@ -102,7 +112,12 @@ describe("safe world tools", () => {
 		const context = {
 			server: {
 				running: false,
+				publicAddress: null,
 			},
+			portBlock: () => ({
+				first: 20_000,
+				count: 64,
+			}),
 			exec: async (argv: string[]) => {
 				commands.push(argv);
 				return {

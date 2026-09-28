@@ -20,6 +20,8 @@ It is almost the same everywhere: open the game, choose **Play**, open the **Ser
 
 Hit **Save** and your server appears in the list.
 
+The first time you join, Bedrock asks whether you trust the server. Accept it and carry on — it will not ask again.
+
 > [!note]
 > Phones, tablets and Windows can all add servers normally. Xbox, PlayStation and Switch give you no field to add one — that is Microsoft's decision, not the platform's. Most console players use a DNS app to add servers.
 

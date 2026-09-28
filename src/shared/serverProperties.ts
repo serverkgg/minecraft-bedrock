@@ -25,8 +25,10 @@ export const PROPERTY_KEYS = {
 	serverName: "server-name",
 	serverPort: "server-port",
 	serverPortV6: "server-portv6",
+	serverUdpPorts: "server-udp-ports",
 	texturepackRequired: "texturepack-required",
 	tickDistance: "tick-distance",
+	transport: "transport",
 	viewDistance: "view-distance",
 } as const;
 

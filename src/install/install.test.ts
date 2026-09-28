@@ -25,7 +25,12 @@ const fixture = (binary: boolean, selected: string | null, unavailable = false) 
 	const context = {
 		server: {
 			running: false,
+			publicAddress: null,
 		},
+		portBlock: () => ({
+			first: 20_000,
+			count: 64,
+		}),
 		variable: (name: string) => (name === "BEDROCK_CHANNEL" ? "release" : selected),
 		port: () => 19_132,
 		emit: () => {},

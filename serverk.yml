@@ -22,7 +22,7 @@ resources:
   recommendedMemoryMb: 1024
   minDiskMb: 5120
   playersPerMemoryGb: 10
-  maxRecommendedPlayers: 100
+  maxRecommendedPlayers: 64
 
 container:
   image: serverkgg/minecraft-bedrock
@@ -35,7 +35,7 @@ container:
   ports:
     - key: game
       containerPort: 19132
-      protocol: udp
+      protocol: tcp+udp
       mirror: true
       join: separate
       name:
@@ -48,6 +48,15 @@ container:
         default: 19132
         min: 19132
         max: 19231
+    - key: media
+      containerPort: 20000
+      protocol: udp
+      mirror: true
+      count: 64
+      hostRange:
+        default: 20000
+        min: 20000
+        max: 26399
 
 backup:
   only:

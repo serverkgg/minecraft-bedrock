@@ -7,7 +7,12 @@ const fixture = (initial: Record<string, string>, failOn?: string) => {
 	const context = {
 		server: {
 			running: false,
+			publicAddress: null,
 		},
+		portBlock: () => ({
+			first: 20_000,
+			count: 64,
+		}),
 		files: {
 			exists: async (path: string) => files.has(path),
 			read: async (path: string) => files.get(path) ?? "",

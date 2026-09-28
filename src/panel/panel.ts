@@ -9,7 +9,14 @@ import {
 	BridgeUploadMode,
 } from "@serverkgg/bridge";
 import { CHANNEL_VARIABLE, VERSION_VARIABLE } from "../install";
-import { PACK_EXTENSIONS, PACK_STAGING, PROPERTY_KEYS, WORLD_EXTENSIONS, WORLD_STAGING } from "../shared";
+import {
+	BedrockTransport,
+	PACK_EXTENSIONS,
+	PACK_STAGING,
+	PROPERTY_KEYS,
+	WORLD_EXTENSIONS,
+	WORLD_STAGING,
+} from "../shared";
 
 const GAME_MODES: Bridge.Option[] = [
 	{
@@ -110,6 +117,23 @@ const CHAT_RESTRICTIONS: Bridge.Option[] = [
 		label: {
 			ar: "مقفل",
 			en: "Disabled",
+		},
+	},
+];
+
+const TRANSPORTS: Bridge.Option[] = [
+	{
+		value: BedrockTransport.NetherNet,
+		label: {
+			ar: "NetherNet",
+			en: "NetherNet",
+		},
+	},
+	{
+		value: BedrockTransport.RakNet,
+		label: {
+			ar: "RakNet (القديم)",
+			en: "RakNet (legacy)",
 		},
 	},
 ];
@@ -300,7 +324,7 @@ const settingsTab: Bridge.Tab = {
 						en: "Player slots",
 					},
 					min: 1,
-					max: 100,
+					max: 64,
 				},
 				{
 					key: PROPERTY_KEYS.defaultPlayerPermissionLevel,
@@ -351,6 +375,23 @@ const settingsTab: Bridge.Tab = {
 						ar: "لما تشغّلها، ما يدخل إلا اللي في القائمة — وهذي طريقتك الوحيدة تمنع أحد.",
 						en: "With it on, only players on the list can join — and it is your only way to keep someone out.",
 					},
+				},
+				{
+					key: PROPERTY_KEYS.transport,
+					control: BridgeControl.Select,
+					label: {
+						ar: "طريقة الاتصال",
+						en: "Connection transport",
+					},
+					help: {
+						ar: "خله على NetherNet. هذي الطريقة اللي تدخل فيها نسخ بيدروك الجديدة.",
+						en: "Keep it on NetherNet. It is how current Bedrock clients join.",
+					},
+					warning: {
+						ar: "موجانق بيشيل RakNet في نسخة 1.26.60، واللاعبين على النسخ الأحدث ما بيقدرون يدخلون عليه.",
+						en: "Mojang removes RakNet in 1.26.60, and players on newer clients cannot join over it.",
+					},
+					options: TRANSPORTS,
 				},
 				{
 					key: PROPERTY_KEYS.playerIdleTimeout,
