@@ -39,6 +39,18 @@ const multipleWorlds = new BridgeUserError({
 	en: "the archive holds more than one world, upload them one at a time",
 });
 
+const ACTIVE_MARK = "✓";
+
+const ACTIVE_WORLD_DELETE: Bridge.Text = {
+	ar: "ما تقدر تحذف الماب المفعّلة. فعّل ماب ثانية الأول.",
+	en: "you cannot delete the active world — activate another one first",
+};
+
+const ACTIVE_WORLD_ACTIVATE: Bridge.Text = {
+	ar: "هذي الماب مفعّلة أصلًا.",
+	en: "this world is already the active one",
+};
+
 const unpack = async (context: Bridge.Context, archive: string, destination: string) => {
 	await context.files.remove(destination);
 	await context.files.ensure(destination);
@@ -75,7 +87,7 @@ export const worlds: Bridge.Collection = {
 				name: await worldDisplayName(context, folder),
 				folder,
 				size: formatByteSize(await worldSize(context, folder)),
-				active: folder === active ? "✓" : "",
+				active: folder === active ? ACTIVE_MARK : "",
 			});
 		}
 
@@ -178,10 +190,7 @@ export const worlds: Bridge.Collection = {
 			const previous = await activeWorld(context);
 
 			if (folder === previous) {
-				throw new BridgeUserError({
-					ar: "هذي الماب مفعّلة أصلًا.",
-					en: "this world is already the active one",
-				});
+				throw new BridgeUserError(ACTIVE_WORLD_ACTIVATE);
 			}
 
 			await setActiveWorld(context, folder);
@@ -205,14 +214,10 @@ export const worlds: Bridge.Collection = {
 		},
 
 		async delete(context, row) {
-			requireStopped(context);
 			const folder = await existingWorld(context, String(row.id));
 
 			if (folder === (await activeWorld(context))) {
-				throw new BridgeUserError({
-					ar: "ما تقدر تحذف الماب المفعّلة. فعّل ماب ثانية الأول.",
-					en: "you cannot delete the active world — activate another one first",
-				});
+				throw new BridgeUserError(ACTIVE_WORLD_DELETE);
 			}
 
 			await context.files.remove(worldPath(folder));
@@ -233,5 +238,16 @@ export const worlds: Bridge.Collection = {
 				},
 			});
 		},
+	},
+
+	async unavailable(_context, row): Promise<Bridge.Unavailable> {
+		if (row.active !== ACTIVE_MARK) {
+			return {};
+		}
+
+		return {
+			delete: ACTIVE_WORLD_DELETE,
+			activate: ACTIVE_WORLD_ACTIVATE,
+		};
 	},
 };

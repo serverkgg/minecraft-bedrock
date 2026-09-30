@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { installableListing, packLoadState, repairable, strayArchives } from "./packHealth";
+import { installableListing, packLoadState, repairable, repairRefusal, strayArchives } from "./packHealth";
 import { PackKind, parsePackManifest } from "./packManifest";
 import type { PackRecord } from "./packSidecar";
 
@@ -196,5 +196,57 @@ describe("offering the repair", () => {
 				],
 			}),
 		).toBe(true);
+	});
+});
+
+describe("saying why the repair is not offered", () => {
+	const healthy = {
+		world: "world",
+		archives: [],
+		unusable: [],
+		inactive: [],
+		missing: [],
+		beta: [],
+		betaApis: true,
+	};
+
+	test("says nothing while there is something to repair", () => {
+		expect(
+			repairRefusal({
+				...healthy,
+				inactive: [
+					record("manual"),
+				],
+			}),
+		).toBeNull();
+	});
+
+	test("says there is nothing to repair when nothing needs it", () => {
+		expect(repairRefusal(healthy)?.en).toBe("There is nothing to repair here.");
+	});
+
+	test("points to the details when what is wrong is beyond the repair", () => {
+		const beyond = "This cannot be repaired automatically. Open the Add-on check in the Add-ons tab for the details.";
+
+		expect(
+			repairRefusal({
+				...healthy,
+				missing: [
+					{
+						pack: record("needy"),
+						uuid: "gone",
+					},
+				],
+			})?.en,
+		).toBe(beyond);
+		expect(
+			repairRefusal({
+				...healthy,
+				beta: [
+					record("beta"),
+				],
+				betaApis: null,
+			})?.en,
+		).toBe(beyond);
 	});
 });

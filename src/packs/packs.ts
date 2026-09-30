@@ -17,13 +17,36 @@ import {
 	packsToggledActivity,
 	UPLOAD_PROVIDER,
 } from "./packActivity";
-import { manifestFor, packWorlds } from "./packCompatibility";
+import { manifestFor, type PackUsage, readPackUsage } from "./packCompatibility";
 import { inventoryPacks } from "./packDiscovery";
 import { packLoadState } from "./packHealth";
 import { installPackSource } from "./packInstall";
 import { PackKind } from "./packManifest";
-import { removePacks, setPacksEnabled } from "./packMutation";
+import { packRemovalRefusal, removePacks, setPacksEnabled } from "./packMutation";
 import { movePackEntry, readWorldPacks, writeWorldPacks } from "./packRegistry";
+import type { PackSidecar } from "./packSidecar";
+
+const oncePerContext = <Value>(read: (context: Bridge.Context) => Promise<Value>) => {
+	const reads = new WeakMap<Bridge.Context, Promise<Value>>();
+
+	return (context: Bridge.Context) => {
+		const known = reads.get(context);
+
+		if (known) {
+			return known;
+		}
+
+		const value = read(context);
+
+		reads.set(context, value);
+
+		return value;
+	};
+};
+
+const inventoryOnce = oncePerContext<PackSidecar>(inventoryPacks);
+
+const usageOnce = oncePerContext<PackUsage>(readPackUsage);
 
 export const packs: Bridge.Collection = {
 	kind: BridgeKind.Collection,
@@ -32,7 +55,8 @@ export const packs: Bridge.Collection = {
 	],
 
 	async list(context) {
-		const sidecar = await inventoryPacks(context);
+		const sidecar = await inventoryOnce(context);
+		const usage = await usageOnce(context);
 		const world = await activeWorld(context);
 		const betaApis = betaApisEnabled(await readLevelExperiments(context, world));
 		const active = new Map<PackKind, string[]>();
@@ -68,7 +92,7 @@ export const packs: Bridge.Collection = {
 					version: pack.versionText,
 					enabled: listed.includes(pack.uuid) ? "✓" : "",
 					order: String(listed.indexOf(pack.uuid) + 1),
-					worlds: (await packWorlds(context, pack)).join(", "),
+					worlds: (await usage.worldsUsing(pack)).join(", "),
 					requirements:
 						manifest?.requirements
 							.map((entry) => `${entry.uuid ?? entry.module} ${entry.version?.text ?? ""}`)
@@ -150,6 +174,22 @@ export const packs: Bridge.Collection = {
 				context.activity.report(packsRemovedActivity(removed, String(row.name)));
 			}
 		},
+	},
+
+	async unavailable(context, row): Promise<Bridge.Unavailable> {
+		const refusal = await packRemovalRefusal(
+			await usageOnce(context),
+			[
+				String(row.id),
+			],
+			await inventoryOnce(context),
+		);
+
+		return refusal
+			? {
+					remove: refusal,
+				}
+			: {};
 	},
 };
 

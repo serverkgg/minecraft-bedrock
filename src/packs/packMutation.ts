@@ -8,6 +8,8 @@ import {
 	assertRemovable,
 	linkedPacks,
 	manifestFor,
+	type PackUsage,
+	removalRefusal,
 } from "./packCompatibility";
 import { inventoryPacks } from "./packDiscovery";
 import { PackKind } from "./packManifest";
@@ -114,13 +116,21 @@ export const setPacksEnabled = async (
 	return ordered;
 };
 
+const removalOf = (ids: string[], sidecar: PackSidecar) => {
+	return linkedPacks(ids, sidecar.packs).flatMap((id) => sidecar.packs[id] ?? []);
+};
+
+export const packRemovalRefusal = async (usage: PackUsage, ids: string[], sidecar: PackSidecar) => {
+	return await removalRefusal(usage, removalOf(ids, sidecar), sidecar.packs);
+};
+
 export const removePacks = async (context: Bridge.Context, ids: string[]): Promise<PackRecord[]> => {
 	requireStopped(context);
 	await recoverFileTransaction(context);
 	const sidecar = await inventoryPacks(context);
-	const world = await activeWorld(context);
-	const selected = linkedPacks(ids, sidecar.packs).flatMap((id) => sidecar.packs[id] ?? []);
+	const selected = removalOf(ids, sidecar);
 	await assertRemovable(context, selected, sidecar.packs);
+	const world = await activeWorld(context);
 	const registries = await worldRegistries(context, world);
 	for (const pack of selected) {
 		registries.set(pack.kind, withPackDeactivated(registries.get(pack.kind) ?? [], pack.uuid));

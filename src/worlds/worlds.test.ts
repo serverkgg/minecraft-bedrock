@@ -33,6 +33,8 @@ const harness = () => {
 			},
 		},
 		files: {
+			exists: async () => false,
+			size: async () => 100,
 			remove: async (path: string) => {
 				removed.push(path);
 			},
@@ -108,5 +110,43 @@ describe("reporting world changes", () => {
 			),
 		).rejects.toThrow();
 		expect(run.reports).toEqual([]);
+	});
+});
+
+describe("which world actions apply", () => {
+	const listedRow = async (context: Bridge.Context, id: string) => {
+		const row = (await worlds.list(context)).find((entry) => entry.id === id);
+
+		if (!row) {
+			throw new Error(`the list built no row for ${id}`);
+		}
+
+		return row;
+	};
+
+	test("the active world cannot be deleted or activated, and says why in the words the refusal uses", async () => {
+		const run = harness();
+		const active = await listedRow(run.context, "world");
+
+		const unavailable = await worlds.unavailable?.(run.context, active);
+
+		expect(Object.keys(unavailable ?? {}).sort()).toEqual([
+			"activate",
+			"delete",
+		]);
+		await expect(worlds.actions?.delete?.(run.context, active, {})).rejects.toThrow(unavailable?.delete?.en);
+		await expect(worlds.actions?.activate?.(run.context, active, {})).rejects.toThrow(unavailable?.activate?.en);
+		expect(run.removed).toEqual([]);
+	});
+
+	test("any other world, and a row that carries only its id, keeps every action", async () => {
+		const run = harness();
+
+		expect(await worlds.unavailable?.(run.context, await listedRow(run.context, "skyblock"))).toEqual({});
+		expect(
+			await worlds.unavailable?.(run.context, {
+				id: "skyblock",
+			}),
+		).toEqual({});
 	});
 });

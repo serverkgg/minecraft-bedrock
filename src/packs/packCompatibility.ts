@@ -1,7 +1,7 @@
 import { type Bridge, BridgeUserError } from "@serverkgg/bridge";
 import { readInstallStamp } from "../install";
 import { activeWorld, discoverWorlds } from "../worlds";
-import { type PackManifest, type PackVersion, parsePackManifest } from "./packManifest";
+import { type PackKind, type PackManifest, type PackVersion, parsePackManifest } from "./packManifest";
 import { readWorldPacks } from "./packRegistry";
 import type { PackRecord } from "./packSidecar";
 
@@ -83,19 +83,72 @@ export const assertCompatible = async (
 	}
 };
 
-export const packWorlds = async (context: Bridge.Context, pack: PackRecord) => {
+export interface PackUsage {
+	active: string;
+	worldsUsing(pack: PackRecord): Promise<string[]>;
+}
+
+export const readPackUsage = async (context: Bridge.Context): Promise<PackUsage> => {
 	const worlds = await discoverWorlds(context);
 	const active = await activeWorld(context);
 	if (!worlds.includes(active)) {
 		worlds.push(active);
 	}
-	const used: string[] = [];
-	for (const world of worlds) {
-		if ((await readWorldPacks(context, world, pack.kind)).some((entry) => entry.pack_id === pack.uuid)) {
-			used.push(world);
+	const registries = new Map<string, Promise<Set<string>>>();
+	const registryOf = (world: string, kind: PackKind) => {
+		const key = `${world}/${kind}`;
+		const known = registries.get(key);
+		if (known) {
+			return known;
+		}
+		const read = readWorldPacks(context, world, kind).then((entries) => new Set(entries.map((entry) => entry.pack_id)));
+		registries.set(key, read);
+		return read;
+	};
+	return {
+		active,
+		async worldsUsing(pack) {
+			const used: string[] = [];
+			for (const world of worlds) {
+				if ((await registryOf(world, pack.kind)).has(pack.uuid)) {
+					used.push(world);
+				}
+			}
+			return used;
+		},
+	};
+};
+
+export const packWorlds = async (context: Bridge.Context, pack: PackRecord) => {
+	return await (await readPackUsage(context)).worldsUsing(pack);
+};
+
+export const removalRefusal = async (
+	usage: PackUsage,
+	selected: PackRecord[],
+	packs: Record<string, PackRecord>,
+): Promise<Bridge.Text | null> => {
+	const ids = new Set(selected.map((pack) => pack.uuid));
+	for (const pack of selected) {
+		if (!safePackFolder(pack.folder)) {
+			throw new Error("invalid pack folder");
+		}
+		const otherWorlds = (await usage.worldsUsing(pack)).filter((world) => world !== usage.active);
+		const dependents = Object.values(packs).filter(
+			(entry) => !ids.has(entry.uuid) && entry.dependencies.includes(pack.uuid),
+		);
+		if (otherWorlds.length > 0 || dependents.length > 0) {
+			const users = [
+				...otherWorlds,
+				...dependents.map((entry) => entry.title),
+			].join(", ");
+			return {
+				ar: `الأدون مستخدم في مابات أو أدونات ثانية: ${users}. فك ارتباطه أول.`,
+				en: `This pack is used by other worlds or add-ons: ${users}. Remove those references first.`,
+			};
 		}
 	}
-	return used;
+	return null;
 };
 
 export const assertRemovable = async (
@@ -103,28 +156,9 @@ export const assertRemovable = async (
 	selected: PackRecord[],
 	packs: Record<string, PackRecord>,
 ) => {
-	const active = await activeWorld(context);
-	const ids = new Set(selected.map((pack) => pack.uuid));
-	for (const pack of selected) {
-		if (!safePackFolder(pack.folder)) {
-			throw new Error("invalid pack folder");
-		}
-		const otherWorlds = (await packWorlds(context, pack)).filter((world) => world !== active);
-		const dependents = Object.values(packs).filter(
-			(entry) => !ids.has(entry.uuid) && entry.dependencies.includes(pack.uuid),
-		);
-		if (otherWorlds.length > 0 || dependents.length > 0) {
-			throw new BridgeUserError({
-				ar: `الأدون مستخدم في مابات أو أدونات ثانية: ${[
-					...otherWorlds,
-					...dependents.map((entry) => entry.title),
-				].join(", ")}. فك ارتباطه أول.`,
-				en: `This pack is used by other worlds or add-ons: ${[
-					...otherWorlds,
-					...dependents.map((entry) => entry.title),
-				].join(", ")}. Remove those references first.`,
-			});
-		}
+	const refusal = await removalRefusal(await readPackUsage(context), selected, packs);
+	if (refusal !== null) {
+		throw new BridgeUserError(refusal);
 	}
 };
 

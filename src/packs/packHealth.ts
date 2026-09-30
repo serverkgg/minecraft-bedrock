@@ -267,6 +267,23 @@ const betaBlocked = (diagnosis: PackDiagnosis) => {
 	return diagnosis.beta.length > 0 && diagnosis.betaApis !== true;
 };
 
+const NOTHING_TO_REPAIR: Bridge.Text = {
+	ar: "ما فيه شي نصلّحه هنا.",
+	en: "There is nothing to repair here.",
+};
+
+const CANNOT_REPAIR: Bridge.Text = {
+	ar: "هذا ما نقدر نصلّحه تلقائيًا. افتح فحص الأدونات في تبويب الأدونات وشوف التفاصيل.",
+	en: "This cannot be repaired automatically. Open the Add-on check in the Add-ons tab for the details.",
+};
+
+export const repairRefusal = (diagnosis: PackDiagnosis): Bridge.Text | null => {
+	if (repairable(diagnosis)) {
+		return null;
+	}
+	return diagnosis.missing.length > 0 || betaBlocked(diagnosis) ? CANNOT_REPAIR : NOTHING_TO_REPAIR;
+};
+
 const betaAdvice = (diagnosis: PackDiagnosis) => {
 	if (!betaBlocked(diagnosis)) {
 		return null;
@@ -426,6 +443,7 @@ export const packHealth: Bridge.Detail = {
 
 	async read(context) {
 		const diagnosis = await diagnosePacks(context);
+		const refusal = repairRefusal(diagnosis);
 
 		return {
 			id: "pack-health",
@@ -443,11 +461,19 @@ export const packHealth: Bridge.Detail = {
 			stats: stats(diagnosis),
 			links: [],
 			stale: false,
-			actions: repairable(diagnosis)
-				? [
-						"repair",
-					]
-				: [],
+			actions:
+				refusal === null
+					? [
+							"repair",
+						]
+					: [],
+			...(refusal === null
+				? {}
+				: {
+						unavailable: {
+							repair: refusal,
+						},
+					}),
 		};
 	},
 
