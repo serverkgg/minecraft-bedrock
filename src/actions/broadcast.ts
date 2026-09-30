@@ -1,5 +1,6 @@
 import { type Bridge, BridgeKind, BridgeUserError } from "@serverkgg/bridge";
-import { rawTextCommand, send, titleCommand } from "../shared";
+import { activityExcerpt, BridgeEventName } from "@serverkgg/bridge/protocol";
+import { rawTextCommand, sanitizeMessage, send, titleCommand } from "../shared";
 
 const messageOf = (args: Bridge.Values) => {
 	const value = args.message;
@@ -20,11 +21,41 @@ export const broadcast: Bridge.Actions = {
 
 	actions: {
 		async say(context, args) {
-			await send(context, rawTextCommand(messageOf(args)));
+			const message = messageOf(args);
+
+			await send(context, rawTextCommand(message));
+
+			const excerpt = activityExcerpt(sanitizeMessage(message));
+
+			context.activity.report({
+				name: BridgeEventName.BroadcastSent,
+				text: {
+					ar: `تم إرسال رسالة للاعبين: «${excerpt}»`,
+					en: `Sent a message to players: "${excerpt}"`,
+				},
+				details: {
+					style: "chat",
+				},
+			});
 		},
 
 		async title(context, args) {
-			await send(context, titleCommand(messageOf(args)));
+			const message = messageOf(args);
+
+			await send(context, titleCommand(message));
+
+			const excerpt = activityExcerpt(sanitizeMessage(message));
+
+			context.activity.report({
+				name: BridgeEventName.BroadcastSent,
+				text: {
+					ar: `تم عرض عنوان للاعبين: «${excerpt}»`,
+					en: `Showed a title to players: "${excerpt}"`,
+				},
+				details: {
+					style: "title",
+				},
+			});
 		},
 	},
 };

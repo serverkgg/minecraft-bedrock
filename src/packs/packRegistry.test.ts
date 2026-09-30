@@ -150,6 +150,9 @@ test("a corrupt activation registry cannot be silently replaced with an empty li
 			exists: async () => true,
 			read: async () => "{broken",
 		},
+		activity: {
+			report: () => {},
+		},
 	} as unknown as Context;
 	await expect(readWorldPacks(context, "world", PackKind.Behavior)).rejects.toThrow();
 });

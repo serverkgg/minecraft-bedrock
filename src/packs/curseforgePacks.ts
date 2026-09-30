@@ -8,6 +8,7 @@ import {
 } from "@serverkgg/bridge/catalogs";
 import { PACK_STAGING, requireStopped } from "../shared";
 import { activeWorld } from "../worlds";
+import { packInstalledActivity, packsRemovedActivity, packsTitle, packsToggledActivity } from "./packActivity";
 import { inventoryPacks } from "./packDiscovery";
 import { installPackSource } from "./packInstall";
 import { PackKind } from "./packManifest";
@@ -35,6 +36,15 @@ export const decodeRef = (id: string) => {
 };
 
 export const encodeRef = (project: number | string) => `${PROVIDER}:${project}`;
+
+const matchingPacks = async (context: Bridge.Context, id: string) => {
+	const sidecar = await inventoryPacks(context);
+	const project = decodeRef(id);
+
+	return Object.values(sidecar.packs)
+		.filter((pack) => pack.uuid === id || (project !== null && pack.project === project))
+		.map((pack) => pack.uuid);
+};
 
 export const packCatalog: Bridge.Catalog = {
 	kind: BridgeKind.Catalog,
@@ -210,7 +220,7 @@ export const packCatalog: Bridge.Catalog = {
 			sizeBytes: file.fileLength,
 		});
 
-		const installed = await installPackSource(context, {
+		const result = await installPackSource(context, {
 			archive,
 			bundle: mod.name,
 			provider: PROVIDER,
@@ -220,7 +230,15 @@ export const packCatalog: Bridge.Catalog = {
 			pageUrl: mod.links?.websiteUrl ?? null,
 		});
 
-		const first = installed.at(0);
+		context.activity.report(
+			packInstalledActivity(result, {
+				bundle: mod.name,
+				provider: PROVIDER,
+				sizeBytes: file.fileLength,
+			}),
+		);
+
+		const first = result.packs.at(0);
 
 		return {
 			id,
@@ -238,24 +256,17 @@ export const packCatalog: Bridge.Catalog = {
 	},
 
 	async remove(context, id) {
-		const sidecar = await inventoryPacks(context);
-		const project = decodeRef(id);
-		await removePacks(
-			context,
-			Object.values(sidecar.packs)
-				.filter((pack) => pack.uuid === id || (project !== null && pack.project === project))
-				.map((pack) => pack.uuid),
-		);
+		const removed = await removePacks(context, await matchingPacks(context, id));
+
+		if (removed.length > 0) {
+			context.activity.report(packsRemovedActivity(removed, packsTitle(removed, id)));
+		}
 	},
 	async toggle(context, id, enabled) {
-		const sidecar = await inventoryPacks(context);
-		const project = decodeRef(id);
-		await setPacksEnabled(
-			context,
-			Object.values(sidecar.packs)
-				.filter((pack) => pack.uuid === id || (project !== null && pack.project === project))
-				.map((pack) => pack.uuid),
-			enabled,
-		);
+		const changed = await setPacksEnabled(context, await matchingPacks(context, id), enabled);
+
+		if (changed.length > 0) {
+			context.activity.report(packsToggledActivity(changed, packsTitle(changed, id), enabled));
+		}
 	},
 };

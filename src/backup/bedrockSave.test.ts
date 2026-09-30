@@ -109,6 +109,9 @@ test("fresh query subscription supplies a snapshot without reading old log tails
 				groups: {},
 			};
 		},
+		activity: {
+			report: () => {},
+		},
 	} as unknown as Context;
 	try {
 		expect(await holdSave(context)).toEqual({

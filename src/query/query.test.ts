@@ -88,6 +88,9 @@ const harness = (properties: Record<string, string>, listed = 0): Harness => {
 			},
 			error: () => {},
 		}),
+		activity: {
+			report: () => {},
+		},
 	} as unknown as Bridge.Context;
 
 	return {

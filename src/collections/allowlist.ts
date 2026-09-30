@@ -1,8 +1,11 @@
 import { type Bridge, BridgeKind, BridgeUserError } from "@serverkgg/bridge";
+import { BridgeEventName } from "@serverkgg/bridge/protocol";
 import {
 	ALLOWLIST_FILE,
 	allowlistCommand,
+	type KnownPlayer,
 	knownPlayerOf,
+	lookupKnownPlayer,
 	readJsonList,
 	readKnownPlayers,
 	send,
@@ -60,6 +63,19 @@ export const withoutAllowed = (entries: AllowlistEntry[], name: string) => {
 	return entries.filter((listed) => listed.name.toLowerCase() !== lowered);
 };
 
+const allowlistDetails = (name: string, xuid: string | null): Bridge.Values => {
+	return xuid === null || xuid.length === 0
+		? {
+				list: "allowlist",
+				player: name,
+			}
+		: {
+				list: "allowlist",
+				player: name,
+				xuid,
+			};
+};
+
 const readAllowlist = async (context: Bridge.Context) => {
 	return normalizeAllowlist(await readJsonList(context, ALLOWLIST_FILE));
 };
@@ -92,28 +108,39 @@ export const allowlist: Bridge.Collection = {
 			});
 		}
 
+		let known: KnownPlayer | null;
+
 		if (context.server.running) {
 			await send(context, allowlistCommand("add", name));
 
-			return;
+			known = await lookupKnownPlayer(context, name);
+		} else {
+			known = knownPlayerOf(await readKnownPlayers(context), name);
+
+			await writeJsonList(
+				context,
+				ALLOWLIST_FILE,
+				withAllowed(await readAllowlist(context), {
+					ignoresPlayerLimit: false,
+					name,
+					...(known === null
+						? {}
+						: {
+								xuid: known.xuid,
+							}),
+				}),
+			);
 		}
 
-		const players = await readKnownPlayers(context);
-		const known = knownPlayerOf(players, name);
-
-		await writeJsonList(
-			context,
-			ALLOWLIST_FILE,
-			withAllowed(await readAllowlist(context), {
-				ignoresPlayerLimit: false,
-				name,
-				...(known === null
-					? {}
-					: {
-							xuid: known.xuid,
-						}),
-			}),
-		);
+		context.activity.report({
+			name: BridgeEventName.AccessGranted,
+			text: {
+				ar: `تمت إضافة ${name} للقائمة البيضاء`,
+				en: `Added ${name} to the allowlist`,
+			},
+			subject: name,
+			details: allowlistDetails(name, known?.xuid ?? null),
+		});
 	},
 
 	actions: {
@@ -122,11 +149,19 @@ export const allowlist: Bridge.Collection = {
 
 			if (context.server.running) {
 				await send(context, allowlistCommand("remove", name));
-
-				return;
+			} else {
+				await writeJsonList(context, ALLOWLIST_FILE, withoutAllowed(await readAllowlist(context), name));
 			}
 
-			await writeJsonList(context, ALLOWLIST_FILE, withoutAllowed(await readAllowlist(context), name));
+			context.activity.report({
+				name: BridgeEventName.AccessRevoked,
+				text: {
+					ar: `تمت إزالة ${name} من القائمة البيضاء`,
+					en: `Removed ${name} from the allowlist`,
+				},
+				subject: name,
+				details: allowlistDetails(name, String(row.xuid ?? "")),
+			});
 		},
 	},
 };

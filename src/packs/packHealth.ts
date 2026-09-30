@@ -10,6 +10,7 @@ import {
 	withoutExtension,
 } from "../shared";
 import { activeWorld, betaApisEnabled, enableBetaApis, readLevelExperiments } from "../worlds";
+import { BetaApisRepair, type PackRepairSummary, packRepairActivity } from "./packActivity";
 import { manifestFor } from "./packCompatibility";
 import { inventoryPacks } from "./packDiscovery";
 import { installPackSource } from "./packInstall";
@@ -171,9 +172,36 @@ const reasonOf = (error: unknown) => {
 	return error instanceof Error ? error.message : String(error);
 };
 
-export const repairPacks = async (context: Bridge.Context) => {
+const repairBetaApis = async (context: Bridge.Context): Promise<BetaApisRepair> => {
+	const repaired = await diagnosePacks(context);
+	if (repaired.beta.length === 0) {
+		return BetaApisRepair.NotNeeded;
+	}
+	if (repaired.betaApis === null) {
+		context.log.warn("repair left Beta APIs alone because the world's level file could not be read", {
+			world: repaired.world,
+		});
+		return BetaApisRepair.Unreadable;
+	}
+	try {
+		await enableBetaApis(context, repaired.world);
+	} catch (error) {
+		context.log.warn("repair could not turn on Beta APIs", {
+			world: repaired.world,
+			reason: reasonOf(error),
+		});
+		return BetaApisRepair.Failed;
+	}
+	return repaired.betaApis ? BetaApisRepair.AlreadyOn : BetaApisRepair.TurnedOn;
+};
+
+export const repairPacks = async (context: Bridge.Context): Promise<PackRepairSummary> => {
 	requireStopped(context);
 	const diagnosis = await diagnosePacks(context);
+	let activated = 0;
+	let activationFailed = 0;
+	let installed = 0;
+	let installFailed = 0;
 	for (const pack of diagnosis.inactive) {
 		try {
 			await setPacksEnabled(
@@ -183,10 +211,12 @@ export const repairPacks = async (context: Bridge.Context) => {
 				],
 				true,
 			);
+			activated += 1;
 			context.log("repair activated an add-on that was never activated", {
 				pack: pack.title,
 			});
 		} catch (error) {
+			activationFailed += 1;
 			context.log.warn("repair could not activate an add-on", {
 				pack: pack.title,
 				reason: reasonOf(error),
@@ -199,15 +229,17 @@ export const repairPacks = async (context: Bridge.Context) => {
 		await context.files.ensure(PACK_STAGING);
 		await context.files.move(archive, staged);
 		try {
-			const installed = await installPackSource(context, {
+			const result = await installPackSource(context, {
 				archive: staged,
 				bundle: withoutExtension(nameOf(archive)),
 			});
+			installed += 1;
 			context.log("repair installed an add-on file that was uploaded through Files", {
 				file: archive,
-				packs: installed.map((pack) => pack.title).join(", "),
+				packs: result.packs.map((pack) => pack.title).join(", "),
 			});
 		} catch (error) {
+			installFailed += 1;
 			if (await context.files.exists(staged)) {
 				await context.files.move(staged, archive);
 			}
@@ -218,24 +250,13 @@ export const repairPacks = async (context: Bridge.Context) => {
 			});
 		}
 	}
-	const repaired = await diagnosePacks(context);
-	if (repaired.beta.length === 0) {
-		return;
-	}
-	if (repaired.betaApis === null) {
-		context.log.warn("repair left Beta APIs alone because the world's level file could not be read", {
-			world: repaired.world,
-		});
-		return;
-	}
-	try {
-		await enableBetaApis(context, repaired.world);
-	} catch (error) {
-		context.log.warn("repair could not turn on Beta APIs", {
-			world: repaired.world,
-			reason: reasonOf(error),
-		});
-	}
+	return {
+		activated,
+		activationFailed,
+		installed,
+		installFailed,
+		betaApis: await repairBetaApis(context),
+	};
 };
 
 const listed = (items: string[]) => {
@@ -432,7 +453,7 @@ export const packHealth: Bridge.Detail = {
 
 	actions: {
 		async repair(context) {
-			await repairPacks(context);
+			context.activity.report(packRepairActivity(await repairPacks(context)));
 			return null;
 		},
 	},

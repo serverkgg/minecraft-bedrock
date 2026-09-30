@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { BridgeUserError } from "@serverkgg/bridge";
 import { ReleaseChannel } from "./channel";
 import { type LinksResponse, linkOf, releaseOf, urlForVersion, versionFromUrl } from "./releases";
 
@@ -76,5 +77,65 @@ describe("reading a build out of mojang's download list", () => {
 				null,
 			),
 		).toThrow();
+	});
+});
+
+const failureOf = (run: () => unknown) => {
+	try {
+		run();
+	} catch (error) {
+		return error;
+	}
+	return null;
+};
+
+describe("telling the owner the download service has no build", () => {
+	test("names the channel in both languages and keeps the raw reason for staff", () => {
+		const failure = failureOf(() =>
+			releaseOf(
+				{
+					result: {
+						links: [],
+					},
+				},
+				ReleaseChannel.Preview,
+				null,
+			),
+		);
+
+		expect(failure).toBeInstanceOf(BridgeUserError);
+		expect(failure instanceof BridgeUserError ? failure.text : null).toEqual({
+			ar: "خدمة تحميل موجانق ما فيها نسخة سيرفر بيدروك لقناة بريفيو الحين. جرّب بعد شوي.",
+			en: "Mojang's download service has no Bedrock server build on the Preview channel right now. Try again in a bit.",
+		});
+		expect(failure instanceof Error && failure.cause instanceof Error ? failure.cause.message : "").toBe(
+			"the download service listed no serverBedrockPreviewLinux build",
+		);
+	});
+
+	test("says the same when the build url cannot be read, and keeps the url in the cause", () => {
+		const failure = failureOf(() =>
+			releaseOf(
+				{
+					result: {
+						links: [
+							{
+								downloadType: "serverBedrockLinux",
+								downloadUrl: "https://x/bedrock-server.zip",
+							},
+						],
+					},
+				},
+				ReleaseChannel.Release,
+				null,
+			),
+		);
+
+		expect(failure instanceof BridgeUserError ? failure.text.en : "").toBe(
+			"Mojang's download service has no Bedrock server build on the Release channel right now. Try again in a bit.",
+		);
+		expect(failure instanceof Error && failure.cause instanceof Error ? failure.cause.message : "").toBe(
+			"the download service answered with an unreadable build url: https://x/bedrock-server.zip",
+		);
 	});
 });

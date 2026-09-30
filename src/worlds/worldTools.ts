@@ -1,4 +1,5 @@
 import { type Bridge, BridgeKind, BridgeUserError } from "@serverkgg/bridge";
+import { BridgeEventName } from "@serverkgg/bridge/protocol";
 import { execDetail } from "@serverkgg/bridge/utils";
 import { safePackFolder } from "../packs/packCompatibility";
 import { listPackManifests } from "../packs/packDiscovery";
@@ -60,6 +61,7 @@ export const cloneWorld = async (context: Bridge.Context, source: string, name: 
 	} finally {
 		await context.files.remove(staging);
 	}
+	return folder;
 };
 
 const copyDirectory = async (context: Bridge.Context, source: string, destination: string) => {
@@ -195,6 +197,23 @@ export const worldTools: Bridge.Actions = {
 			});
 			context.log("the new world will generate on startup", {
 				folder,
+			});
+			context.activity.report({
+				name: BridgeEventName.WorldCreated,
+				text: {
+					ar: `تم إنشاء ماب ${folder} وتفعيله، ويتولّد مع التشغيل الجاي`,
+					en: `Created and activated world ${folder}, it generates on the next start`,
+				},
+				subject: folder,
+				details:
+					seed.length === 0
+						? {
+								folder,
+							}
+						: {
+								folder,
+								seed,
+							},
 			});
 		},
 	},

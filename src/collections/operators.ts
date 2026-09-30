@@ -1,10 +1,14 @@
 import { type Bridge, BridgeKind, BridgeUserError } from "@serverkgg/bridge";
+import { BridgeEventName } from "@serverkgg/bridge/protocol";
 import {
 	knownPlayerOf,
+	optionText,
+	PERMISSION_LEVELS,
 	PERMISSIONS_FILE,
 	quoted,
 	readJsonList,
 	readKnownPlayers,
+	roster,
 	send,
 	writeJsonList,
 } from "../shared";
@@ -75,6 +79,37 @@ const levelOf = (args: Bridge.Values) => {
 	return typeof value === "string" && LEVELS.has(value) ? (value as PermissionLevel) : PermissionLevel.Operator;
 };
 
+const operatorDetails = (xuid: string, level: string): Bridge.Values => {
+	return xuid.length === 0
+		? {
+				list: "operators",
+				level,
+			}
+		: {
+				list: "operators",
+				level,
+				xuid,
+			};
+};
+
+const displayOf = (row: Bridge.Row) => {
+	const name = String(row.name ?? "");
+
+	return name.length > 0 ? name : String(row.xuid);
+};
+
+const reportGranted = (context: Bridge.Context, player: string, xuid: string) => {
+	context.activity.report({
+		name: BridgeEventName.AccessGranted,
+		text: {
+			ar: `تمت إضافة ${player} لقائمة الأوبريتر`,
+			en: `Added ${player} to the operator list`,
+		},
+		subject: player,
+		details: operatorDetails(xuid, PermissionLevel.Operator),
+	});
+};
+
 export const operators: Bridge.Collection = {
 	kind: BridgeKind.Collection,
 
@@ -100,12 +135,19 @@ export const operators: Bridge.Collection = {
 		}
 
 		if (context.server.running) {
+			const online = roster.find(needle);
+
 			await send(context, `op ${quoted(needle)}`);
+
+			if (online !== null) {
+				reportGranted(context, online.name.length > 0 ? online.name : needle, online.xuid);
+			}
 
 			return;
 		}
 
 		const known = knownPlayerOf(await readKnownPlayers(context), needle);
+		const player = known !== null && known.name.length > 0 ? known.name : needle;
 
 		if (known === null) {
 			throw new BridgeUserError({
@@ -119,6 +161,8 @@ export const operators: Bridge.Collection = {
 			PERMISSIONS_FILE,
 			withPermission(await readPermissions(context), known.xuid, PermissionLevel.Operator),
 		);
+
+		reportGranted(context, player, known.xuid);
 	},
 
 	actions: {
@@ -134,26 +178,55 @@ export const operators: Bridge.Collection = {
 			if (context.server.running) {
 				await send(context, "permission reload");
 			}
+
+			const player = displayOf(row);
+			const label = optionText(PERMISSION_LEVELS, level);
+
+			context.activity.report({
+				name: BridgeEventName.PlayerChanged,
+				text: {
+					ar: `تم تغيير صلاحية ${player} إلى ${label.ar}`,
+					en: `Set ${player}'s permission to ${label.en}`,
+				},
+				subject: player,
+				details: operatorDetails(String(row.xuid), level),
+			});
 		},
 
 		async remove(context, row) {
 			const name = String(row.name);
 
 			if (context.server.running && name.length > 0) {
+				const online = roster.online(String(row.xuid ?? "")) || roster.online(name);
+
 				await send(context, `deop ${quoted(name)}`);
 
-				return;
+				if (!online) {
+					return;
+				}
+			} else {
+				await writeJsonList(
+					context,
+					PERMISSIONS_FILE,
+					withoutPermission(await readPermissions(context), String(row.xuid)),
+				);
+
+				if (context.server.running) {
+					await send(context, "permission reload");
+				}
 			}
 
-			await writeJsonList(
-				context,
-				PERMISSIONS_FILE,
-				withoutPermission(await readPermissions(context), String(row.xuid)),
-			);
+			const player = displayOf(row);
 
-			if (context.server.running) {
-				await send(context, "permission reload");
-			}
+			context.activity.report({
+				name: BridgeEventName.AccessRevoked,
+				text: {
+					ar: `تمت إزالة ${player} من قائمة الأوبريتر`,
+					en: `Removed ${player} from the operator list`,
+				},
+				subject: player,
+				details: operatorDetails(String(row.xuid), String(row.permission ?? "")),
+			});
 		},
 	},
 };

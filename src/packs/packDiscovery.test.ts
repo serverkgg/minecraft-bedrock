@@ -61,6 +61,9 @@ const contextWith = (files: Record<string, string>, level: string) => {
 				}),
 			},
 		},
+		activity: {
+			report: () => {},
+		},
 	} as unknown as Bridge.Context;
 	return {
 		context,

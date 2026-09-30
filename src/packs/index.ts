@@ -1,4 +1,5 @@
 export * from "./curseforgePacks";
+export * from "./packActivity";
 export * from "./packArchive";
 export * from "./packHealth";
 export * from "./packInstall";

@@ -9,6 +9,7 @@ import {
 	requireStopped,
 } from "../shared";
 import { activeWorld, betaApisEnabled, readLevelExperiments } from "../worlds";
+import type { PackInstallResult } from "./packActivity";
 import { discoverPacks, unpackArchive } from "./packArchive";
 import { activationOrder, assertCompatible, manifestFor, packWorlds, safePackFolder } from "./packCompatibility";
 import { inventoryPacks } from "./packDiscovery";
@@ -53,7 +54,7 @@ export interface PackSource {
 	pageUrl?: string | null;
 }
 
-export const installPackSource = async (context: Bridge.Context, source: PackSource): Promise<PackRecord[]> => {
+export const installPackSource = async (context: Bridge.Context, source: PackSource): Promise<PackInstallResult> => {
 	requireStopped(context);
 	await recoverFileTransaction(context);
 	const unpacked = `${PACK_STAGING}/unpacked`;
@@ -223,7 +224,8 @@ export const installPackSource = async (context: Bridge.Context, source: PackSou
 	});
 
 	const beta = found.filter((pack) => pack.manifest.betaModules.length > 0);
-	if (beta.length > 0 && betaApisEnabled(await readLevelExperiments(context, world)) !== true) {
+	const betaApisOff = beta.length > 0 && betaApisEnabled(await readLevelExperiments(context, world)) !== true;
+	if (betaApisOff) {
 		context.log.warn(
 			"this add-on needs the Beta APIs experiment, which is not on for this world, so its scripts will not load until Repair add-ons turns it on",
 			{
@@ -235,5 +237,8 @@ export const installPackSource = async (context: Bridge.Context, source: PackSou
 		);
 	}
 
-	return installed;
+	return {
+		packs: installed,
+		betaApisOff,
+	};
 };

@@ -1,5 +1,62 @@
 import { describe, expect, test } from "bun:test";
-import { normalizeAllowlist, withAllowed, withoutAllowed } from "./allowlist";
+import type { Bridge } from "@serverkgg/bridge";
+import { BridgeEventName } from "@serverkgg/bridge/protocol";
+import { allowlist, normalizeAllowlist, withAllowed, withoutAllowed } from "./allowlist";
+
+const SECRET = "hunter2-super-secret";
+
+const harness = (running: boolean) => {
+	const files = new Map<string, string>([
+		[
+			".serverk-players.json",
+			JSON.stringify([
+				{
+					xuid: "2535",
+					name: "Meslzy",
+					lastSeen: "2026-09-28T10:00:00.000Z",
+				},
+			]),
+		],
+	]);
+	const commands: string[] = [];
+	const reports: Bridge.Activity[] = [];
+	const context = {
+		server: {
+			running,
+			publicAddress: null,
+		},
+		variable: () => SECRET,
+		command: async (input: string) => {
+			commands.push(input);
+			return {
+				line: "",
+				groups: {},
+			};
+		},
+		files: {
+			exists: async (path: string) => files.has(path),
+			read: async (path: string) => files.get(path) ?? "",
+			write: async (path: string, value: string) => {
+				files.set(path, value);
+			},
+		},
+		log: Object.assign(() => {}, {
+			warn: () => {},
+			error: () => {},
+		}),
+		activity: {
+			report: (entry: Bridge.Activity) => {
+				reports.push(entry);
+			},
+		},
+	} as unknown as Bridge.Context;
+	return {
+		context,
+		files,
+		commands,
+		reports,
+	};
+};
 
 describe("reading allowlist.json, which is a top-level array the json codec cannot read", () => {
 	test("keeps the entries bedrock writes, including the xuid it fills in on first connect", () => {
@@ -77,5 +134,91 @@ describe("changing the allowlist", () => {
 
 	test("removes by gamertag, whatever the case", () => {
 		expect(withoutAllowed(listed, "MESLZY")).toHaveLength(0);
+	});
+});
+
+describe("reporting allowlist changes", () => {
+	test("adding a known player while the server is off reports the gamertag and xuid", async () => {
+		const run = harness(false);
+		await allowlist.add?.(run.context, "Meslzy");
+		expect(JSON.parse(run.files.get("allowlist.json") ?? "[]")).toEqual([
+			{
+				ignoresPlayerLimit: false,
+				name: "Meslzy",
+				xuid: "2535",
+			},
+		]);
+		expect(run.reports).toEqual([
+			{
+				name: BridgeEventName.AccessGranted,
+				text: {
+					ar: "تمت إضافة Meslzy للقائمة البيضاء",
+					en: "Added Meslzy to the allowlist",
+				},
+				subject: "Meslzy",
+				details: {
+					list: "allowlist",
+					player: "Meslzy",
+					xuid: "2535",
+				},
+			},
+		]);
+		expect(JSON.stringify(run.reports)).not.toContain(SECRET);
+	});
+
+	test("adding an unknown player on a running server reports the gamertag alone", async () => {
+		const run = harness(true);
+		await allowlist.add?.(run.context, "Noura");
+		expect(run.commands).toEqual([
+			"allowlist add Noura",
+		]);
+		expect(run.reports.at(0)?.details).toEqual({
+			list: "allowlist",
+			player: "Noura",
+		});
+	});
+
+	test("removing a player reports the revoked access", async () => {
+		const run = harness(true);
+		await allowlist.actions?.remove?.(
+			run.context,
+			{
+				id: "2535",
+				name: "Meslzy",
+				xuid: "2535",
+			},
+			{},
+		);
+		expect(run.reports.at(0)).toMatchObject({
+			name: BridgeEventName.AccessRevoked,
+			subject: "Meslzy",
+			details: {
+				list: "allowlist",
+				xuid: "2535",
+			},
+		});
+	});
+});
+
+describe("building an allowlist report never fails the change", () => {
+	test("an unreadable player ledger does not fail an add on a running server", async () => {
+		const run = harness(true);
+		const failing = {
+			...run.context,
+			files: {
+				exists: async () => true,
+				read: async () => {
+					throw new Error("disk read failed");
+				},
+			},
+		} as unknown as Bridge.Context;
+		await allowlist.add?.(failing, "Meslzy");
+		expect(run.commands).toEqual([
+			"allowlist add Meslzy",
+		]);
+		expect(run.reports.at(0)?.details).toEqual({
+			list: "allowlist",
+			player: "Meslzy",
+		});
 	});
 });

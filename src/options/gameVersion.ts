@@ -3,6 +3,8 @@ import { CHANNEL_VARIABLE, channelOf, readInstallStamp, resolveRelease } from ".
 
 const TTL_SECONDS = 1800;
 
+const reasonOf = (error: unknown) => (error instanceof Error ? error.message : String(error));
+
 export const gameVersion: Bridge.Options = {
 	kind: BridgeKind.Options,
 	dependsOn: [
@@ -42,7 +44,8 @@ export const gameVersion: Bridge.Options = {
 			});
 		} catch (error) {
 			context.log.warn("could not reach the download service while listing builds", {
-				reason: error instanceof Error ? error.message : String(error),
+				reason: reasonOf(error),
+				cause: error instanceof Error && error.cause !== undefined ? reasonOf(error.cause) : null,
 			});
 		}
 

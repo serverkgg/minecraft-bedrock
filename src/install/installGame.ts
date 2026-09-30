@@ -1,4 +1,4 @@
-import type { Bridge } from "@serverkgg/bridge";
+import { type Bridge, BridgeUserError, describeDownloadFailure } from "@serverkgg/bridge";
 import { INSTALL_STAMP_FILE, writeStamp } from "@serverkgg/bridge/install";
 import { execDetail } from "@serverkgg/bridge/utils";
 import {
@@ -92,9 +92,15 @@ export const installGame = async (
 		version: release.version,
 	});
 
-	await context.files.download(archive, release.url, {
-		timeoutMs: DOWNLOAD_TIMEOUT_MS,
-	});
+	try {
+		await context.files.download(archive, release.url, {
+			timeoutMs: DOWNLOAD_TIMEOUT_MS,
+		});
+	} catch (error) {
+		throw new BridgeUserError(describeDownloadFailure(error, `Bedrock ${release.label}`), {
+			cause: error,
+		});
+	}
 
 	const staged = `${DOWNLOAD_STAGING}/unpacked`;
 	const entries = await context.files.extract(archive, staged, {

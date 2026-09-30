@@ -1,5 +1,6 @@
 export * from "./bedrockLog";
 export * from "./bedrockRoster";
+export * from "./choices";
 export * from "./console";
 export * from "./fileTransaction";
 export * from "./format";

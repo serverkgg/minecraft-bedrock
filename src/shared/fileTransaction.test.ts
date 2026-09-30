@@ -39,6 +39,9 @@ const fixture = (initial: Record<string, string>, failOn?: string) => {
 				files.delete(from);
 			},
 		},
+		activity: {
+			report: () => {},
+		},
 	} as unknown as Bridge.Context;
 	return {
 		context,

@@ -1,10 +1,12 @@
 import { type Bridge, BridgeKind, BridgeUserError } from "@serverkgg/bridge";
+import { BridgeEventName } from "@serverkgg/bridge/protocol";
 import {
 	formatByteSize,
 	isUnder,
 	nameOf,
 	relativeUploadPath,
 	requireStopped,
+	sizeForReport,
 	WORLD_STAGING,
 	withoutExtension,
 	worldPath,
@@ -121,17 +123,51 @@ export const worlds: Bridge.Collection = {
 			});
 		}
 
+		const sizeBytes = await sizeForReport(context, relative);
+
 		await context.files.move(directory, destination);
 		await context.files.remove(WORLD_STAGING);
 
 		context.log("imported a world", {
 			folder,
 		});
+
+		context.activity.report({
+			name: BridgeEventName.WorldImported,
+			text: {
+				ar: `تم استيراد ماب ${folder}`,
+				en: `Imported world ${folder}`,
+			},
+			subject: folder,
+			details:
+				sizeBytes === null
+					? {
+							folder,
+						}
+					: {
+							folder,
+							sizeBytes,
+						},
+		});
 	},
 
 	actions: {
 		async clone(context, row, args) {
-			await cloneWorld(context, String(row.id), String(args.name ?? ""));
+			const source = String(row.id);
+			const folder = await cloneWorld(context, source, String(args.name ?? ""));
+
+			context.activity.report({
+				name: BridgeEventName.WorldCloned,
+				text: {
+					ar: `تم نسخ ماب ${source} باسم ${folder}`,
+					en: `Cloned world ${source} as ${folder}`,
+				},
+				subject: folder,
+				details: {
+					source,
+					folder,
+				},
+			});
 		},
 		async export(context, row) {
 			await exportWorld(context, String(row.id));
@@ -139,8 +175,9 @@ export const worlds: Bridge.Collection = {
 		async activate(context, row) {
 			requireStopped(context);
 			const folder = await existingWorld(context, String(row.id));
+			const previous = await activeWorld(context);
 
-			if (folder === (await activeWorld(context))) {
+			if (folder === previous) {
 				throw new BridgeUserError({
 					ar: "هذي الماب مفعّلة أصلًا.",
 					en: "this world is already the active one",
@@ -151,6 +188,19 @@ export const worlds: Bridge.Collection = {
 
 			context.log("changed the active world", {
 				folder,
+			});
+
+			context.activity.report({
+				name: BridgeEventName.WorldActivated,
+				text: {
+					ar: `تم تفعيل ماب ${folder} بدل ${previous}`,
+					en: `Activated world ${folder} in place of ${previous}`,
+				},
+				subject: folder,
+				details: {
+					folder,
+					previous,
+				},
 			});
 		},
 
@@ -169,6 +219,18 @@ export const worlds: Bridge.Collection = {
 
 			context.log("deleted a world", {
 				folder,
+			});
+
+			context.activity.report({
+				name: BridgeEventName.WorldDeleted,
+				text: {
+					ar: `تم حذف ماب ${folder}`,
+					en: `Deleted world ${folder}`,
+				},
+				subject: folder,
+				details: {
+					folder,
+				},
 			});
 		},
 	},

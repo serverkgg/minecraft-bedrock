@@ -11,91 +11,15 @@ import {
 import { CHANNEL_VARIABLE, VERSION_VARIABLE } from "../install";
 import {
 	BedrockTransport,
+	DIFFICULTIES,
+	GAME_MODES,
 	PACK_EXTENSIONS,
 	PACK_STAGING,
+	PERMISSION_LEVELS,
 	PROPERTY_KEYS,
 	WORLD_EXTENSIONS,
 	WORLD_STAGING,
 } from "../shared";
-
-const GAME_MODES: Bridge.Option[] = [
-	{
-		value: "survival",
-		label: {
-			ar: "البقاء",
-			en: "Survival",
-		},
-	},
-	{
-		value: "creative",
-		label: {
-			ar: "الإبداع",
-			en: "Creative",
-		},
-	},
-	{
-		value: "adventure",
-		label: {
-			ar: "المغامرة",
-			en: "Adventure",
-		},
-	},
-];
-
-const DIFFICULTIES: Bridge.Option[] = [
-	{
-		value: "peaceful",
-		label: {
-			ar: "مسالم",
-			en: "Peaceful",
-		},
-	},
-	{
-		value: "easy",
-		label: {
-			ar: "سهل",
-			en: "Easy",
-		},
-	},
-	{
-		value: "normal",
-		label: {
-			ar: "عادي",
-			en: "Normal",
-		},
-	},
-	{
-		value: "hard",
-		label: {
-			ar: "صعب",
-			en: "Hard",
-		},
-	},
-];
-
-const PERMISSION_LEVELS: Bridge.Option[] = [
-	{
-		value: "visitor",
-		label: {
-			ar: "زائر",
-			en: "Visitor",
-		},
-	},
-	{
-		value: "member",
-		label: {
-			ar: "عضو",
-			en: "Member",
-		},
-	},
-	{
-		value: "operator",
-		label: {
-			ar: "أوبريتر",
-			en: "Operator",
-		},
-	},
-];
 
 const CHAT_RESTRICTIONS: Bridge.Option[] = [
 	{

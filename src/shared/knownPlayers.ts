@@ -150,3 +150,15 @@ export const writeKnownPlayers = async (context: Bridge.Context, players: Map<st
 
 	await context.files.write(PLAYER_LEDGER_FILE, `${JSON.stringify(entries, null, 2)}\n`);
 };
+
+export const lookupKnownPlayer = async (context: Bridge.Context, needle: string): Promise<KnownPlayer | null> => {
+	try {
+		return knownPlayerOf(await readKnownPlayers(context), needle);
+	} catch (error) {
+		context.log.warn("could not read the known-player ledger, reporting the player by name only", {
+			reason: error instanceof Error ? error.message : String(error),
+		});
+
+		return null;
+	}
+};

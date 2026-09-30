@@ -18,7 +18,7 @@ import {
 	withPackDeactivated,
 	worldPackFile,
 } from "./packRegistry";
-import type { PackSidecar } from "./packSidecar";
+import type { PackRecord, PackSidecar } from "./packSidecar";
 
 const commitState = async (
 	context: Bridge.Context,
@@ -59,7 +59,11 @@ const worldRegistries = async (context: Bridge.Context, world: string) => {
 	return registries;
 };
 
-export const setPacksEnabled = async (context: Bridge.Context, ids: string[], enabled: boolean) => {
+export const setPacksEnabled = async (
+	context: Bridge.Context,
+	ids: string[],
+	enabled: boolean,
+): Promise<PackRecord[]> => {
 	requireStopped(context);
 	await recoverFileTransaction(context);
 	const sidecar = await inventoryPacks(context);
@@ -107,9 +111,10 @@ export const setPacksEnabled = async (context: Bridge.Context, ids: string[], en
 		);
 	}
 	await commitState(context, world, sidecar, registries);
+	return ordered;
 };
 
-export const removePacks = async (context: Bridge.Context, ids: string[]) => {
+export const removePacks = async (context: Bridge.Context, ids: string[]): Promise<PackRecord[]> => {
 	requireStopped(context);
 	await recoverFileTransaction(context);
 	const sidecar = await inventoryPacks(context);
@@ -128,4 +133,5 @@ export const removePacks = async (context: Bridge.Context, ids: string[]) => {
 		registries,
 		selected.map((pack) => pack.folder),
 	);
+	return selected;
 };

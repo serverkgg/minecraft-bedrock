@@ -275,6 +275,9 @@ test("shared packs cannot be removed from another world's registry", async () =>
 					},
 				]),
 		},
+		activity: {
+			report: () => {},
+		},
 	} as unknown as Context;
 	await expect(
 		assertRemovable(

@@ -1,6 +1,6 @@
 import type { Bridge } from "@serverkgg/bridge";
 import { BridgeUserError } from "@serverkgg/bridge";
-import { ReleaseChannel } from "./channel";
+import { CHANNEL_TEXT, ReleaseChannel } from "./channel";
 
 export const LINKS_URL = "https://net-secondary.web.minecraft-services.net/api/v1.0/download/links";
 
@@ -53,17 +53,31 @@ export const linkOf = (response: LinksResponse, channel: ReleaseChannel): string
 	return null;
 };
 
+const noBuild = (channel: ReleaseChannel, reason: string) => {
+	const text = CHANNEL_TEXT[channel];
+
+	return new BridgeUserError(
+		{
+			ar: `خدمة تحميل موجانق ما فيها نسخة سيرفر بيدروك لقناة ${text.ar} الحين. جرّب بعد شوي.`,
+			en: `Mojang's download service has no Bedrock server build on the ${text.en} channel right now. Try again in a bit.`,
+		},
+		{
+			cause: new Error(reason),
+		},
+	);
+};
+
 export const releaseOf = (response: LinksResponse, channel: ReleaseChannel, pinned: string | null): Release => {
 	const url = linkOf(response, channel);
 
 	if (url === null) {
-		throw new Error(`the download service listed no ${DOWNLOAD_TYPES[channel]} build`);
+		throw noBuild(channel, `the download service listed no ${DOWNLOAD_TYPES[channel]} build`);
 	}
 
 	const latest = versionFromUrl(url);
 
 	if (latest === null) {
-		throw new Error(`the download service answered with an unreadable build url: ${url}`);
+		throw noBuild(channel, `the download service answered with an unreadable build url: ${url}`);
 	}
 
 	if (pinned === null) {

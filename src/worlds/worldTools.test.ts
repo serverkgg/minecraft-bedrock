@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import type { Bridge } from "@serverkgg/bridge";
+import { BridgeEventName } from "@serverkgg/bridge/protocol";
 import { existingWorld, exportWorld, validateWorldFolder, worldTools } from "./worldTools";
 
 describe("safe world tools", () => {
@@ -22,12 +23,16 @@ describe("safe world tools", () => {
 				stdout: "worlds/real/level.dat",
 				stderr: "",
 			}),
+			activity: {
+				report: () => {},
+			},
 		} as unknown as Bridge.Context;
 		await expect(existingWorld(context, "forged")).rejects.toThrow();
 		expect(await existingWorld(context, "real")).toBe("real");
 	});
 	test("creates a world with one property update, preserving the old worlds", async () => {
 		const writes: Record<string, string>[] = [];
+		const reports: Bridge.Activity[] = [];
 		const context = {
 			server: {
 				running: false,
@@ -48,6 +53,11 @@ describe("safe world tools", () => {
 				},
 			},
 			log: () => {},
+			activity: {
+				report: (entry: Bridge.Activity) => {
+					reports.push(entry);
+				},
+			},
 		} as unknown as Bridge.Context;
 		await worldTools.actions.create?.(context, {
 			name: "New World",
@@ -57,6 +67,20 @@ describe("safe world tools", () => {
 			{
 				"level-name": "New-World",
 				"level-seed": "123",
+			},
+		]);
+		expect(reports).toEqual([
+			{
+				name: BridgeEventName.WorldCreated,
+				text: {
+					ar: "تم إنشاء ماب New-World وتفعيله، ويتولّد مع التشغيل الجاي",
+					en: "Created and activated world New-World, it generates on the next start",
+				},
+				subject: "New-World",
+				details: {
+					folder: "New-World",
+					seed: "123",
+				},
 			},
 		]);
 	});
@@ -70,6 +94,9 @@ describe("safe world tools", () => {
 				first: 20_000,
 				count: 64,
 			}),
+			activity: {
+				report: () => {},
+			},
 		} as unknown as Bridge.Context;
 		await expect(
 			worldTools.actions.create?.(context, {
@@ -156,6 +183,9 @@ describe("safe world tools", () => {
 				},
 			},
 			log: () => {},
+			activity: {
+				report: () => {},
+			},
 		} as unknown as Bridge.Context;
 
 		await exportWorld(context, "real");

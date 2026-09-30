@@ -1,6 +1,22 @@
 import { type Bridge, BridgeKind, BridgeUserError } from "@serverkgg/bridge";
-import { isUnder, nameOf, PACK_STAGING, relativeUploadPath, requireStopped, withoutExtension } from "../shared";
+import {
+	isUnder,
+	nameOf,
+	PACK_STAGING,
+	relativeUploadPath,
+	requireStopped,
+	sizeForReport,
+	withoutExtension,
+} from "../shared";
 import { activeWorld, betaApisEnabled, readLevelExperiments } from "../worlds";
+import {
+	PackMove,
+	packInstalledActivity,
+	packMovedActivity,
+	packsRemovedActivity,
+	packsToggledActivity,
+	UPLOAD_PROVIDER,
+} from "./packActivity";
 import { manifestFor, packWorlds } from "./packCompatibility";
 import { inventoryPacks } from "./packDiscovery";
 import { packLoadState } from "./packHealth";
@@ -73,49 +89,71 @@ export const packs: Bridge.Collection = {
 			});
 		}
 
-		await installPackSource(context, {
+		const bundle = withoutExtension(nameOf(relative));
+		const sizeBytes = await sizeForReport(context, relative);
+		const result = await installPackSource(context, {
 			archive: relative,
-			bundle: withoutExtension(nameOf(relative)),
+			bundle,
 		});
+
+		context.activity.report(
+			packInstalledActivity(result, {
+				bundle,
+				provider: UPLOAD_PROVIDER,
+				sizeBytes,
+			}),
+		);
 	},
 
 	actions: {
 		async enable(context, row) {
-			await setPacksEnabled(
+			const changed = await setPacksEnabled(
 				context,
 				[
 					String(row.id),
 				],
 				true,
 			);
+
+			if (changed.length > 0) {
+				context.activity.report(packsToggledActivity(changed, String(row.name), true));
+			}
 		},
 		async disable(context, row) {
-			await setPacksEnabled(
+			const changed = await setPacksEnabled(
 				context,
 				[
 					String(row.id),
 				],
 				false,
 			);
+
+			if (changed.length > 0) {
+				context.activity.report(packsToggledActivity(changed, String(row.name), false));
+			}
 		},
 
 		async moveUp(context, row) {
-			await reorder(context, String(row.id), -1);
+			await reorder(context, String(row.id), PackMove.Up);
 		},
 
 		async moveDown(context, row) {
-			await reorder(context, String(row.id), 1);
+			await reorder(context, String(row.id), PackMove.Down);
 		},
 
 		async remove(context, row) {
-			await removePacks(context, [
+			const removed = await removePacks(context, [
 				String(row.id),
 			]);
+
+			if (removed.length > 0) {
+				context.activity.report(packsRemovedActivity(removed, String(row.name)));
+			}
 		},
 	},
 };
 
-const reorder = async (context: Bridge.Context, uuid: string, delta: -1 | 1) => {
+const reorder = async (context: Bridge.Context, uuid: string, move: PackMove) => {
 	requireStopped(context);
 	const sidecar = await inventoryPacks(context);
 	const pack = sidecar.packs[uuid];
@@ -126,6 +164,13 @@ const reorder = async (context: Bridge.Context, uuid: string, delta: -1 | 1) => 
 
 	const world = await activeWorld(context);
 	const entries = await readWorldPacks(context, world, pack.kind);
+	const moved = movePackEntry(entries, uuid, move === PackMove.Up ? -1 : 1);
 
-	await writeWorldPacks(context, world, pack.kind, movePackEntry(entries, uuid, delta));
+	await writeWorldPacks(context, world, pack.kind, moved);
+
+	const position = moved.findIndex((entry) => entry.pack_id === uuid);
+
+	if (position !== entries.findIndex((entry) => entry.pack_id === uuid)) {
+		context.activity.report(packMovedActivity(pack.title, move, position + 1));
+	}
 };

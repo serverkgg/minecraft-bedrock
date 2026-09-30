@@ -85,6 +85,25 @@ export const roster = {
 			...players.values(),
 		];
 	},
+
+	find(needle: string) {
+		const trimmed = needle.trim();
+		const lowered = trimmed.toLowerCase();
+
+		if (trimmed.length === 0) {
+			return null;
+		}
+
+		return (
+			[
+				...players.values(),
+			].find((player) => player.xuid === trimmed || player.name.toLowerCase() === lowered) ?? null
+		);
+	},
+
+	online(needle: string) {
+		return roster.find(needle) !== null;
+	},
 };
 
 export const presenceOf = (player: BedrockPlayer): Bridge.Values => {

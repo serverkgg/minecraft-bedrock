@@ -14,6 +14,17 @@ export const CHANNEL_LABELS: Record<ReleaseChannel, string> = {
 	[ReleaseChannel.Release]: "Release",
 };
 
+export const CHANNEL_TEXT: Record<ReleaseChannel, Bridge.Text> = {
+	[ReleaseChannel.Preview]: {
+		ar: "بريفيو",
+		en: "Preview",
+	},
+	[ReleaseChannel.Release]: {
+		ar: "النسخة العادية",
+		en: "Release",
+	},
+};
+
 const CHANNELS = new Set<string>(Object.values(ReleaseChannel));
 
 export const channelFrom = (declared: string | null): ReleaseChannel => {
