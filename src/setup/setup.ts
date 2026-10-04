@@ -14,7 +14,7 @@ export const setup: Bridge.Setup = {
 				en: "Name your server",
 			},
 			help: {
-				ar: "هذا الاسم اللي يشوفه اللاعبين في قائمة السيرفرات عندهم.",
+				ar: "الاسم الذي يظهر للاعبين في قائمة السيرفرات لديهم.",
 				en: "This is the name players see in their server list.",
 			},
 			tab: "settings",
@@ -31,11 +31,11 @@ export const setup: Bridge.Setup = {
 			kind: BridgeSetupStepKind.Form,
 			required: false,
 			title: {
-				ar: "مين يقدر يدخل",
+				ar: "من يستطيع الدخول",
 				en: "Who can join",
 			},
 			help: {
-				ar: "لو تبي سيرفر خاص، شغّل القائمة البيضاء وضيف أصحابك فيها. في بيدروك ما فيه حظر، فهذي طريقتك.",
+				ar: "لسيرفر خاص، فعّل القائمة البيضاء وأضف أصحابك إليها. لا يوجد حظر في بيدروك، لذلك هذه هي الطريقة.",
 				en: "For a private server, turn the allowlist on and add your friends to it. Bedrock has no ban, so this is your way.",
 			},
 			tab: "settings",
@@ -50,12 +50,12 @@ export const setup: Bridge.Setup = {
 			kind: BridgeSetupStepKind.Open,
 			required: false,
 			title: {
-				ar: "عزم أصحابك",
+				ar: "ادعُ أصحابك",
 				en: "Invite your friends",
 			},
 			help: {
-				ar: "في بيدروك العنوان والمنفذ خانتين منفصلات — انسخهم من هنا وأرسلهم لأصحابك.",
-				en: "On Bedrock the address and the port are two separate fields — copy them from here and send them over.",
+				ar: "في بيدروك، العنوان والمنفذ في خانتين منفصلتين. انسخهما من هنا وأرسلهما إلى أصحابك.",
+				en: "On Bedrock, the address and the port are two separate fields. Copy them from here and send them to your friends.",
 			},
 			target: {
 				tab: GuideOpenTab.Access,

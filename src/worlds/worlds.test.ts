@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import type { Bridge } from "@serverkgg/bridge";
 import { BridgeEventName } from "@serverkgg/bridge/protocol";
 import { worlds } from "./worlds";
@@ -64,7 +64,7 @@ const SKYBLOCK: Bridge.Row = {
 };
 
 describe("reporting world changes", () => {
-	test("activating a world reports it and the world it replaced", async () => {
+	it("activating a world reports it and the world it replaced", async () => {
 		const run = harness();
 		await worlds.actions?.activate?.(run.context, SKYBLOCK, {});
 		expect(run.properties["level-name"]).toBe("skyblock");
@@ -72,7 +72,7 @@ describe("reporting world changes", () => {
 			{
 				name: BridgeEventName.WorldActivated,
 				text: {
-					ar: "تم تفعيل ماب skyblock بدل world",
+					ar: "تم تفعيل ماب skyblock بدلًا من world",
 					en: "Activated world skyblock in place of world",
 				},
 				subject: "skyblock",
@@ -85,7 +85,7 @@ describe("reporting world changes", () => {
 		expect(JSON.stringify(run.reports)).not.toContain(SECRET);
 	});
 
-	test("deleting a world reports the folder it removed", async () => {
+	it("deleting a world reports the folder it removed", async () => {
 		const run = harness();
 		await worlds.actions?.delete?.(run.context, SKYBLOCK, {});
 		expect(run.removed).toEqual([
@@ -97,7 +97,7 @@ describe("reporting world changes", () => {
 		});
 	});
 
-	test("a refused activation reports nothing", async () => {
+	it("a refused activation reports nothing", async () => {
 		const run = harness();
 		await expect(
 			worlds.actions?.activate?.(
@@ -124,7 +124,7 @@ describe("which world actions apply", () => {
 		return row;
 	};
 
-	test("the active world cannot be deleted or activated, and says why in the words the refusal uses", async () => {
+	it("the active world cannot be deleted or activated, and says why in the words the refusal uses", async () => {
 		const run = harness();
 		const active = await listedRow(run.context, "world");
 
@@ -139,7 +139,7 @@ describe("which world actions apply", () => {
 		expect(run.removed).toEqual([]);
 	});
 
-	test("any other world, and a row that carries only its id, keeps every action", async () => {
+	it("any other world, and a row that carries only its id, keeps every action", async () => {
 		const run = harness();
 
 		expect(await worlds.unavailable?.(run.context, await listedRow(run.context, "skyblock"))).toEqual({});

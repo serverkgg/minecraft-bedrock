@@ -1,8 +1,8 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import { parseSaveFiles } from "./bedrockSave";
 
 describe("Bedrock snapshot file boundaries", () => {
-	test("reads both server-relative and world-relative reports including spaces", () => {
+	it("reads both server-relative and world-relative reports including spaces", () => {
 		expect(parseSaveFiles("My World/db/000123.ldb:42, worlds/My World/level.dat:12", "My World")).toEqual([
 			{
 				path: "worlds/My World/db/000123.ldb",
@@ -14,7 +14,7 @@ describe("Bedrock snapshot file boundaries", () => {
 			},
 		]);
 	});
-	test("rejects another world, traversal and unsafe byte counts", () => {
+	it("rejects another world, traversal and unsafe byte counts", () => {
 		for (const report of [
 			"other/db/file:42",
 			"world/../secret:1",
@@ -24,12 +24,12 @@ describe("Bedrock snapshot file boundaries", () => {
 			expect(() => parseSaveFiles(report, "world")).toThrow();
 		}
 	});
-	test("does not treat readiness alone as a complete snapshot", () => {
+	it("does not treat readiness alone as a complete snapshot", () => {
 		expect(() => parseSaveFiles("Data saved. Files are now ready to be copied.", "world")).toThrow();
 	});
 });
 
-test("fresh query subscription supplies a snapshot without reading old log tails", async () => {
+it("fresh query subscription supplies a snapshot without reading old log tails", async () => {
 	const { holdSave, holding, resumeSave } = await import("./bedrockSave");
 	type Context = import("@serverkgg/bridge").Bridge.Context;
 	let listener: ((match: RegExpMatchArray) => void) | null = null;

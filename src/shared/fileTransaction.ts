@@ -15,7 +15,7 @@ interface Entry {
 export const requireStopped = (context: Bridge.Context) => {
 	if (context.server.running) {
 		throw new BridgeUserError({
-			ar: "أوقف السيرفر قبل تعديل المابات أو الأدونات عشان نحافظ على ملفاتك.",
+			ar: "وقّف السيرفر قبل تعديل المابات أو الإضافات لحماية ملفاتك.",
 			en: "Stop the server before changing worlds or add-ons to protect your files.",
 		});
 	}

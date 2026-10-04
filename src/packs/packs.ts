@@ -108,8 +108,8 @@ export const packs: Bridge.Collection = {
 
 		if (relative === null || !isUnder(relative, PACK_STAGING)) {
 			throw new BridgeUserError({
-				ar: "ما قدرنا نقرأ الملف اللي رفعته. جرّب ترفعه مرة ثانية.",
-				en: "we could not read the file you uploaded — try uploading it again",
+				ar: "تعذّرت قراءة الملف المرفوع، ارفعه مرة ثانية.",
+				en: "We couldn't read the file you uploaded. Try uploading it again.",
 			});
 		}
 

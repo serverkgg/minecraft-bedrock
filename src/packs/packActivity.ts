@@ -67,7 +67,7 @@ export const packInstalledActivity = (result: PackInstallResult, source: PackIns
 	return {
 		name: BridgeEventName.ModInstalled,
 		text: {
-			ar: `تم تثبيت أدون ${named}`,
+			ar: `تم تثبيت إضافة ${named}`,
 			en: `Installed add-on ${named}`,
 		},
 		subject: title,
@@ -94,11 +94,11 @@ export const packsToggledActivity = (packs: PackRecord[], title: string, enabled
 		name: enabled ? BridgeEventName.ModEnabled : BridgeEventName.ModDisabled,
 		text: enabled
 			? {
-					ar: `تم تفعيل أدون ${title}`,
+					ar: `تم تفعيل إضافة ${title}`,
 					en: `Enabled add-on ${title}`,
 				}
 			: {
-					ar: `تم إيقاف أدون ${title}`,
+					ar: `تم إيقاف إضافة ${title}`,
 					en: `Disabled add-on ${title}`,
 				},
 		subject: title,
@@ -110,7 +110,7 @@ export const packsRemovedActivity = (packs: PackRecord[], title: string): Bridge
 	return {
 		name: BridgeEventName.ModRemoved,
 		text: {
-			ar: `تمت إزالة أدون ${title}`,
+			ar: `تمت إزالة إضافة ${title}`,
 			en: `Removed add-on ${title}`,
 		},
 		subject: title,
@@ -124,11 +124,11 @@ export const packMovedActivity = (title: string, move: PackMove, position: numbe
 		text:
 			move === PackMove.Up
 				? {
-						ar: `تم نقل أدون ${title} لفوق في ترتيب التحميل، وصار رقم ${position}`,
+						ar: `تم نقل إضافة ${title} إلى الأعلى في ترتيب التحميل، وأصبحت رقم ${position}`,
 						en: `Moved add-on ${title} up the load order, now number ${position}`,
 					}
 				: {
-						ar: `تم نقل أدون ${title} لتحت في ترتيب التحميل، وصار رقم ${position}`,
+						ar: `تم نقل إضافة ${title} إلى الأسفل في ترتيب التحميل، وأصبحت رقم ${position}`,
 						en: `Moved add-on ${title} down the load order, now number ${position}`,
 					},
 		subject: title,
@@ -145,7 +145,7 @@ export const packRepairActivity = (summary: PackRepairSummary): Bridge.Activity 
 	const failed = summary.activationFailed + summary.installFailed;
 	const turnedOn = summary.betaApis === BetaApisRepair.TurnedOn;
 	const counts = {
-		ar: `مثبّتة ${summary.installed}، مفعّلة ${summary.activated}${failed > 0 ? `، ما انصلحت ${failed}` : ""}`,
+		ar: `مثبّتة ${summary.installed}، مفعّلة ${summary.activated}${failed > 0 ? `، تعذّر إصلاح ${failed}` : ""}`,
 		en: `${summary.installed} installed, ${summary.activated} enabled${failed > 0 ? `, ${failed} not fixed` : ""}`,
 	};
 
@@ -153,11 +153,11 @@ export const packRepairActivity = (summary: PackRepairSummary): Bridge.Activity 
 		name: BridgeEventName.SettingsApplied,
 		text: turnedOn
 			? {
-					ar: `تم إصلاح الأدونات وتفعيل Beta APIs (${counts.ar})`,
+					ar: `تم إصلاح الإضافات وتفعيل Beta APIs (${counts.ar})`,
 					en: `Repaired the add-ons and enabled Beta APIs (${counts.en})`,
 				}
 			: {
-					ar: `تم إصلاح الأدونات (${counts.ar})`,
+					ar: `تم إصلاح الإضافات (${counts.ar})`,
 					en: `Repaired the add-ons (${counts.en})`,
 				},
 		details: {

@@ -8,14 +8,18 @@ metadata:
     ar: ماينكرافت بيدروك
     en: Minecraft Bedrock
   description:
-    ar: سيرفر ماينكرافت بيدروك أصلي — الجوال والكونسول وويندوز كلهم في نفس الماب، ويشتغل على طول بدون إعداد.
-    en: A native Minecraft Bedrock server — phone, console and Windows all in one world, running the moment your order completes.
+    ar: سيرفر ماينكرافت بيدروك أصلي يجمع الجوال والكونسول وويندوز في الماب نفسها، ويشتغل فورًا دون أي إعداد.
+    en: A native Minecraft Bedrock server with phone, console and Windows players in one world, running the moment your order completes.
   tagline:
-    ar: العب مع أصحابك من أي جهاز — سيرفرك جاهز خلال دقيقة
-    en: Play with your friends from any device — your server, ready in a minute
+    ar: العب مع أصحابك من أي جهاز، وسيرفرك جاهز خلال دقيقة
+    en: Play with your friends from any device, with your server ready in a minute
   category: sandbox
   logo: assets/logo.webp
   banner: assets/banner.webp
+  extensions:
+    - kind: addons
+      sources:
+        - curseforge
 
 resources:
   minMemoryMb: 512
@@ -42,8 +46,8 @@ container:
         ar: بيدروك
         en: Bedrock
       hint:
-        ar: في بيدروك حط العنوان في خانة "عنوان السيرفر" والمنفذ في خانة "المنفذ".
-        en: In Bedrock, put the address in the "Server Address" field and the port in the "Port" field.
+        ar: في بيدروك، اكتب العنوان في خانة «عنوان السيرفر» والمنفذ في خانة «المنفذ».
+        en: In Bedrock, type the address in the "Server Address" field and the port in the "Port" field.
       hostRange:
         default: 19132
         min: 19132
@@ -108,8 +112,8 @@ reset:
 secrets:
   - key: CURSEFORGE_API_KEY
     description:
-      ar: مفتاح CurseForge API — بدونه ما يشتغل كتالوج الأدونات، بس تقدر ترفع أدوناتك بنفسك.
-      en: CurseForge API key — without it the add-on catalog stays off, but you can still upload your own add-ons.
+      ar: مفتاح CurseForge API. بدونه يبقى كتالوج الإضافات موقوفًا، ويظل رفع الإضافات يدويًا متاحًا.
+      en: CurseForge API key. Without it, the add-on catalog stays off, but you can still upload your own add-ons.
     required: false
 
 presence:
@@ -118,7 +122,7 @@ presence:
   fields:
     - key: xuid
       label:
-        ar: رقم الحساب
+        ar: معرّف اللاعب
         en: Account id
     - key: permission
       label:
@@ -158,8 +162,8 @@ files:
       color: "#5ba32b"
       restart: true
       note:
-        ar: إعدادات السيرفر الأساسية — الاسم، عدد اللاعبين، الصعوبة، ووضع اللعب. أي تعديل يبي إعادة تشغيل.
-        en: The core server settings — name, player slots, difficulty and game mode. Any change needs a restart.
+        ar: "إعدادات السيرفر الأساسية: الاسم وعدد اللاعبين والصعوبة ووضع اللعب. أي تعديل يتطلب ريستارت."
+        en: "The core server settings: name, player slots, difficulty and game mode. Any change needs a restart."
     - match: worlds
       label:
         ar: المابات
@@ -167,8 +171,8 @@ files:
       icon: map
       color: "#4a8fd4"
       note:
-        ar: ماباتك كلها هنا، كل ماب في مجلد لحالها. لا تحذف شيء إلا وأنت متأكد، وخذ نسخة احتياطية قبل أي تعديل.
-        en: All your worlds live here, one folder each. Do not delete anything unless you are sure, and take a backup before touching it.
+        ar: كل ماباتك هنا، ولكل ماب مجلد خاص بها. لا تحذف أي شيء إلا إذا كنت متأكدًا، وخذ نسخة احتياطية قبل أي تعديل.
+        en: All your worlds live here, one folder each. Don't delete anything unless you're sure, and take a backup before you change anything.
     - match: "worlds/**"
       label:
         ar: بيانات الماب
@@ -176,7 +180,7 @@ files:
       icon: map
       color: "#4a8fd4"
       note:
-        ar: جزء من بيانات الماب. في بيدروك الأوفرورلد والنذر والإند كلهم في قاعدة بيانات وحدة، وتعديلها والسيرفر شغّال يخرب الماب.
+        ar: جزء من بيانات الماب. في بيدروك يُحفظ الأوفرورلد والنذر والإند في قاعدة بيانات واحدة، وتعديلها والسيرفر شغّال يتلف الماب.
         en: Part of your world data. On Bedrock the Overworld, Nether and End all live in one database, and editing it while the server runs will corrupt the world.
     - match: allowlist.json
       label:
@@ -185,8 +189,8 @@ files:
       icon: users
       color: "#e0a458"
       note:
-        ar: القائمة البيضاء. إذا كانت مفعّلة، بس اللي هنا يقدر يدخل — وهذي طريقتك الوحيدة تمنع لاعب في بيدروك.
-        en: The allowlist. When it is on, only the players here can join — and it is your only way to keep a player out on Bedrock.
+        ar: القائمة البيضاء. عند تفعيلها، لا يدخل إلا اللاعبون الموجودون هنا، وهي الطريقة الوحيدة لمنع لاعب من الدخول في بيدروك.
+        en: The allowlist. When it's on, only the players here can join. It's your only way to keep a player out on Bedrock.
     - match: permissions.json
       label:
         ar: الصلاحيات
@@ -195,38 +199,38 @@ files:
       color: "#e0a458"
       restart: true
       note:
-        ar: صلاحيات اللاعبين. بيدروك يحفظها برقم الحساب (XUID) مو بالاسم، عشان كذا اللاعب لازم يدخل مرة قبل تعطيه أوبريتر.
+        ar: صلاحيات اللاعبين. يحفظها بيدروك بمعرّف اللاعب (XUID) وليس بالاسم، لذلك يلزم أن يدخل اللاعب مرة واحدة قبل أن تجعله أوبريتر.
         en: Player permissions. Bedrock stores these by account id (XUID), not by name, which is why a player has to join once before you can make them an operator.
     - match: behavior_packs
       label:
-        ar: أدونات السلوك
+        ar: إضافات السلوك
         en: Behavior packs
       icon: puzzle
       color: "#c77dff"
       restart: true
       note:
-        ar: أدونات السلوك — اللي تغيّر الوحوش والأشياء وقوانين اللعبة. ارفع الأدونات من تبويب الأدونات؛ الملف اللي تحطه هنا ما يتركّب إلا لما تضغط «صلّح الأدونات».
-        en: Behavior packs — the ones that change mobs, items and game rules. Upload add-ons from the Add-ons tab; a file dropped here is not installed until you press Repair add-ons.
+        ar: إضافات السلوك التي تغيّر الوحوش والأغراض وقوانين اللعبة. ارفع الإضافات من تبويب الإضافات، فالملف الذي تضعه هنا لا يُثبَّت إلا عند الضغط على «أصلح الإضافات».
+        en: Behavior packs change mobs, items and game rules. Upload add-ons from the Add-ons tab. A file dropped here isn't installed until you press Repair add-ons.
     - match: resource_packs
       label:
-        ar: أدونات المظهر
+        ar: إضافات المظهر
         en: Resource packs
       icon: puzzle
       color: "#c77dff"
       restart: true
       note:
-        ar: أدونات المظهر — الأشكال والأصوات. كل لاعب بينزّلها أول ما يدخل السيرفر. ارفع الأدونات من تبويب الأدونات؛ الملف اللي تحطه هنا ما يتركّب إلا لما تضغط «صلّح الأدونات».
-        en: Resource packs — textures and sounds. Every player downloads them when they join. Upload add-ons from the Add-ons tab; a file dropped here is not installed until you press Repair add-ons.
+        ar: إضافات المظهر للأشكال والأصوات، ويُنزّلها كل لاعب عند دخوله السيرفر. ارفع الإضافات من تبويب الإضافات، فالملف الذي تضعه هنا لا يُثبَّت إلا عند الضغط على «أصلح الإضافات».
+        en: Resource packs change textures and sounds. Every player downloads them when they join. Upload add-ons from the Add-ons tab. A file dropped here isn't installed until you press Repair add-ons.
     - match: valid_known_packs.json
       label:
-        ar: فهرس الأدونات
+        ar: فهرس الإضافات
         en: Pack index
       icon: box
       color: "#8d99ae"
       restart: true
       note:
-        ar: فهرس السيرفر للأدونات المركّبة. السيرفر يكتبه بنفسه — لا تعدّله.
-        en: The server's own index of installed packs. It writes this itself — do not edit it.
+        ar: فهرس السيرفر للإضافات المثبّتة. يكتبه السيرفر بنفسه، فلا تعدّله.
+        en: The server's own index of installed add-ons. The server writes it itself, so don't edit it.
 
 guideTags:
   - id: start
@@ -244,8 +248,8 @@ guides:
       ar: البدء بسيرفرك
       en: Getting started
     summary:
-      ar: من إنشاء السيرفر حتى دخول أول لاعب — من الجوال أو الكونسول أو ويندوز.
-      en: From creating the server to the first player joining — on phone, console or Windows.
+      ar: من إنشاء السيرفر حتى دخول أول لاعب من الجوال أو الكونسول أو ويندوز.
+      en: From creating the server to the first player joining on phone, console or Windows.
     tags:
       - start
     surfaces:
@@ -257,10 +261,10 @@ guides:
       en: guides/getting-started/en.md
   - id: players
     title:
-      ar: اللاعبين — القائمة البيضاء والأوبريتر
-      en: Players — the allowlist and operators
+      ar: "اللاعبون: القائمة البيضاء والأوبريتر"
+      en: "Players: the allowlist and operators"
     summary:
-      ar: كيف تتحكم بمين يدخل سيرفرك ومين يقدر يستخدم أوامر الإدارة، وليش بيدروك يشتغل كذا.
+      ar: كيف تتحكم في من يدخل سيرفرك ومن يستطيع استخدام أوامر الإدارة، وسبب اختلاف بيدروك في ذلك.
       en: How to control who joins and who can run admin commands, and why Bedrock works the way it does.
     tags:
       - features
@@ -272,10 +276,10 @@ guides:
       en: guides/players/en.md
   - id: worlds
     title:
-      ar: المابات — ترفع وتبدّل وتحفظ
-      en: Worlds — upload, switch and keep safe
+      ar: "المابات: الرفع والتبديل والحماية"
+      en: "Worlds: upload, switch and keep safe"
     summary:
-      ar: ارفع مابك من جوالك، بدّل بين مابات، وافهم ليش النسخة الاحتياطية أهم شيء في بيدروك.
+      ar: ارفع مابك من جوالك، وبدّل بين المابات، واعرف لماذا تُعد النسخة الاحتياطية أهم شيء في بيدروك.
       en: Upload a world from your phone, switch between worlds, and understand why backups matter most on Bedrock.
     tags:
       - features
@@ -288,10 +292,10 @@ guides:
       en: guides/worlds/en.md
   - id: addons
     title:
-      ar: الأدونات — سلوك ومظهر
-      en: Add-ons — behavior and resource packs
+      ar: "الإضافات: السلوك والمظهر"
+      en: "Add-ons: behavior and resource packs"
     summary:
-      ar: ركّب أدونات من الكتالوج أو ارفع ملف mcaddon بنفسك، وفعّلها على مابك.
+      ar: ثبّت إضافات من الكتالوج أو ارفع ملف mcaddon بنفسك، ثم فعّلها على مابك.
       en: Install add-ons from the catalog or upload your own .mcaddon, then activate them on your world.
     tags:
       - features
@@ -302,10 +306,10 @@ guides:
       en: guides/addons/en.md
   - id: preview
     title:
-      ar: نسخة البريفيو — جرّب الجديد قبل الكل
-      en: The preview build — try what is coming next
+      ar: "إصدار البريفيو: جرّب الجديد قبل الجميع"
+      en: "The preview build: try what's coming next"
     summary:
-      ar: وش هي نسخة البريفيو، ومتى تستخدمها، وليش الرجوع منها للنسخة العادية صعب.
+      ar: ما هو إصدار البريفيو، ومتى تستخدمه، ولماذا يصعب الرجوع منه إلى الإصدار العادي.
       en: What the preview build is, when to use it, and why going back to release is hard.
     tags:
       - start

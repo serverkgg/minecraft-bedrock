@@ -1,9 +1,9 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import type { Bridge } from "@serverkgg/bridge";
 import { gameVersion } from "./gameVersion";
 
 describe("listing builds while the download service has none", () => {
-	test("logs the raw cause beside the friendly reason and still offers the installed build", async () => {
+	it("logs the raw cause beside the friendly reason and still offers the installed build", async () => {
 		const warnings: Bridge.Values[] = [];
 		const context = {
 			variable: () => "release",
@@ -32,7 +32,7 @@ describe("listing builds while the download service has none", () => {
 		expect(warnings).toEqual([
 			{
 				reason:
-					"Mojang's download service has no Bedrock server build on the Release channel right now. Try again in a bit.",
+					"Mojang's download service has no Bedrock server build on the Release channel right now. Try again in a moment.",
 				cause: "the download service listed no serverBedrockLinux build",
 			},
 		]);

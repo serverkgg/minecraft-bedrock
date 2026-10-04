@@ -88,16 +88,16 @@ export const packLoadState = (manifest: PackManifest | null, betaApis: boolean |
 	if (manifest.betaModules.length > 0 && betaApis !== true) {
 		return betaApis === false
 			? {
-					ar: "يحتاج Beta APIs · مقفلة على الماب",
+					ar: "يتطلب Beta APIs · موقوفة في الماب",
 					en: "Needs Beta APIs · off on this world",
 				}
 			: {
-					ar: "يحتاج Beta APIs",
+					ar: "يتطلب Beta APIs",
 					en: "Needs Beta APIs",
 				};
 	}
 	return {
-		ar: "مركّب · التشغيل غير مؤكّد",
+		ar: "مثبّت · التشغيل غير مؤكد",
 		en: "Installed · load unverified",
 	};
 };
@@ -268,13 +268,13 @@ const betaBlocked = (diagnosis: PackDiagnosis) => {
 };
 
 const NOTHING_TO_REPAIR: Bridge.Text = {
-	ar: "ما فيه شي نصلّحه هنا.",
-	en: "There is nothing to repair here.",
+	ar: "لا يوجد ما يلزم إصلاحه هنا.",
+	en: "There's nothing to repair here.",
 };
 
 const CANNOT_REPAIR: Bridge.Text = {
-	ar: "هذا ما نقدر نصلّحه تلقائيًا. افتح فحص الأدونات في تبويب الأدونات وشوف التفاصيل.",
-	en: "This cannot be repaired automatically. Open the Add-on check in the Add-ons tab for the details.",
+	ar: "لا يمكن إصلاح هذا تلقائيًا. افتح «فحص الإضافات» في تبويب الإضافات لمعرفة التفاصيل.",
+	en: "This can't be repaired automatically. Open the Add-on check in the Add-ons tab for the details.",
 };
 
 export const repairRefusal = (diagnosis: PackDiagnosis): Bridge.Text | null => {
@@ -290,12 +290,12 @@ const betaAdvice = (diagnosis: PackDiagnosis) => {
 	}
 	return diagnosis.betaApis === false
 		? {
-				ar: "بعض أدوناتك تحتاج Beta APIs وهي مقفلة على الماب. اضغط «صلّح الأدونات» ونفعّلها لك.",
-				en: "Some of your add-ons need Beta APIs, which is off for this world. Press Repair add-ons and we turn it on.",
+				ar: "بعض إضافاتك تتطلب Beta APIs، وهي موقوفة في الماب. اضغط «أصلح الإضافات» ونفعّلها لك.",
+				en: "Some of your add-ons need Beta APIs, which is off for this world. Press Repair add-ons and we'll turn it on.",
 			}
 		: {
-				ar: "بعض أدوناتك تحتاج Beta APIs، وما قدرنا نقرأ إعدادات الماب. افتح الماب على جهازك، فعّل Beta APIs من Experiments، صدّر الماب وارفعها من تبويب المابات.",
-				en: "Some of your add-ons need Beta APIs, and we could not read this world's settings. Open the world on your device, turn on Beta APIs under Experiments, export the world and upload it from the Worlds tab.",
+				ar: "بعض إضافاتك تتطلب Beta APIs، وتعذّرت قراءة إعدادات الماب. افتح الماب على جهازك، وفعّل Beta APIs من Experiments، ثم صدّر الماب وارفعها من تبويب المابات.",
+				en: "Some of your add-ons need Beta APIs, and we couldn't read this world's settings. Open the world on your device, turn on Beta APIs under Experiments, export the world and upload it from the Worlds tab.",
 			};
 };
 
@@ -304,7 +304,7 @@ const badges = (diagnosis: PackDiagnosis): Bridge.DetailBadge[] => {
 	if (diagnosis.archives.length > 0) {
 		found.push({
 			label: {
-				ar: `${diagnosis.archives.length} ملف أدون ما تركّب`,
+				ar: `ملفات إضافات غير مثبّتة: ${diagnosis.archives.length}`,
 				en: `${diagnosis.archives.length} add-on files never installed`,
 			},
 			tone: BridgeDetailTone.Warning,
@@ -313,8 +313,8 @@ const badges = (diagnosis: PackDiagnosis): Bridge.DetailBadge[] => {
 	if (diagnosis.unusable.length > 0) {
 		found.push({
 			label: {
-				ar: `${diagnosis.unusable.length} ملف مو أدون`,
-				en: `${diagnosis.unusable.length} files are not add-ons`,
+				ar: `ملفات ليست إضافات: ${diagnosis.unusable.length}`,
+				en: `${diagnosis.unusable.length} files aren't add-ons`,
 			},
 			tone: BridgeDetailTone.Neutral,
 		});
@@ -322,8 +322,8 @@ const badges = (diagnosis: PackDiagnosis): Bridge.DetailBadge[] => {
 	if (diagnosis.inactive.length > 0) {
 		found.push({
 			label: {
-				ar: `${diagnosis.inactive.length} أدون مو مفعّل`,
-				en: `${diagnosis.inactive.length} packs not active`,
+				ar: `إضافات غير مفعّلة: ${diagnosis.inactive.length}`,
+				en: `${diagnosis.inactive.length} add-ons not active`,
 			},
 			tone: BridgeDetailTone.Warning,
 		});
@@ -331,7 +331,7 @@ const badges = (diagnosis: PackDiagnosis): Bridge.DetailBadge[] => {
 	if (diagnosis.missing.length > 0) {
 		found.push({
 			label: {
-				ar: `${diagnosis.missing.length} متطلب ناقص`,
+				ar: `متطلبات ناقصة: ${diagnosis.missing.length}`,
 				en: `${diagnosis.missing.length} missing required packs`,
 			},
 			tone: BridgeDetailTone.Danger,
@@ -340,7 +340,7 @@ const badges = (diagnosis: PackDiagnosis): Bridge.DetailBadge[] => {
 	if (betaBlocked(diagnosis)) {
 		found.push({
 			label: {
-				ar: "فيه أدونات تحتاج Beta APIs",
+				ar: "بعض الإضافات تتطلب Beta APIs",
 				en: "Some add-ons need Beta APIs",
 			},
 			tone: BridgeDetailTone.Warning,
@@ -349,7 +349,7 @@ const badges = (diagnosis: PackDiagnosis): Bridge.DetailBadge[] => {
 	if (found.length === 0) {
 		found.push({
 			label: {
-				ar: "الأدونات سليمة",
+				ar: "الإضافات سليمة",
 				en: "Add-ons look healthy",
 			},
 			tone: BridgeDetailTone.Success,
@@ -361,7 +361,7 @@ const badges = (diagnosis: PackDiagnosis): Bridge.DetailBadge[] => {
 const betaApisLabel = (betaApis: boolean | null) => {
 	if (betaApis === null) {
 		return {
-			ar: "ما قدرنا نقرأها",
+			ar: "غير معروفة",
 			en: "Unknown",
 		};
 	}
@@ -371,7 +371,7 @@ const betaApisLabel = (betaApis: boolean | null) => {
 				en: "On",
 			}
 		: {
-				ar: "مقفلة",
+				ar: "موقوفة",
 				en: "Off",
 			};
 };
@@ -381,7 +381,7 @@ const stats = (diagnosis: PackDiagnosis): Bridge.DetailStat[] => {
 		{
 			key: "archives",
 			label: {
-				ar: "ملفات ما تركّبت",
+				ar: "ملفات غير مثبّتة",
 				en: "Files not installed",
 			},
 			value: listed(diagnosis.archives.map(nameOf)),
@@ -390,8 +390,8 @@ const stats = (diagnosis: PackDiagnosis): Bridge.DetailStat[] => {
 		{
 			key: "unusable",
 			label: {
-				ar: "ملفات مو أدونات",
-				en: "Files that are not add-ons",
+				ar: "ملفات ليست إضافات",
+				en: "Files that aren't add-ons",
 			},
 			value: listed(diagnosis.unusable.map(nameOf)),
 			format: BridgeDetailFormat.Text,
@@ -399,8 +399,8 @@ const stats = (diagnosis: PackDiagnosis): Bridge.DetailStat[] => {
 		{
 			key: "inactive",
 			label: {
-				ar: "أدونات مو مفعّلة",
-				en: "Packs not active",
+				ar: "إضافات غير مفعّلة",
+				en: "Add-ons not active",
 			},
 			value: listed(diagnosis.inactive.map((pack) => pack.title)),
 			format: BridgeDetailFormat.Text,
@@ -417,7 +417,7 @@ const stats = (diagnosis: PackDiagnosis): Bridge.DetailStat[] => {
 		{
 			key: "beta",
 			label: {
-				ar: "تحتاج Beta APIs",
+				ar: "تتطلب Beta APIs",
 				en: "Need Beta APIs",
 			},
 			value: listed(diagnosis.beta.map((pack) => pack.title)),
@@ -426,7 +426,7 @@ const stats = (diagnosis: PackDiagnosis): Bridge.DetailStat[] => {
 		{
 			key: "betaApis",
 			label: {
-				ar: "Beta APIs على الماب",
+				ar: "Beta APIs في الماب",
 				en: "Beta APIs on this world",
 			},
 			value: betaApisLabel(diagnosis.betaApis),
@@ -448,7 +448,7 @@ export const packHealth: Bridge.Detail = {
 		return {
 			id: "pack-health",
 			title: {
-				ar: "فحص الأدونات",
+				ar: "فحص الإضافات",
 				en: "Add-on check",
 			},
 			subtitle: {

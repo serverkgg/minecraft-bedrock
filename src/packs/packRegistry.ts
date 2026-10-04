@@ -111,8 +111,8 @@ export const readWorldPacks = async (context: Bridge.Context, world: string, kin
 		return entries;
 	} catch {
 		throw new BridgeUserError({
-			ar: `ملف الأدونات ${path} مو سليم. أصلحه من الملفات أو استرجع نسخة احتياطية قبل التعديل.`,
-			en: `The pack registry ${path} is invalid. Repair it in Files or restore a backup before changing packs.`,
+			ar: `ملف الإضافات ${path} غير سليم. أصلحه من الملفات أو رجّع نسخة احتياطية قبل التعديل.`,
+			en: `The add-on registry ${path} is invalid. Repair it in Files or restore a backup before changing add-ons.`,
 		});
 	}
 };

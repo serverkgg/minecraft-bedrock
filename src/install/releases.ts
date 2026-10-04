@@ -58,8 +58,8 @@ const noBuild = (channel: ReleaseChannel, reason: string) => {
 
 	return new BridgeUserError(
 		{
-			ar: `خدمة تحميل موجانق ما فيها نسخة سيرفر بيدروك لقناة ${text.ar} الحين. جرّب بعد شوي.`,
-			en: `Mojang's download service has no Bedrock server build on the ${text.en} channel right now. Try again in a bit.`,
+			ar: `لا يتوفر حاليًا إصدار من سيرفر بيدروك لقناة ${text.ar} في خدمة التنزيل لدى Mojang. جرب مرة ثانية بعد لحظة.`,
+			en: `Mojang's download service has no Bedrock server build on the ${text.en} channel right now. Try again in a moment.`,
 		},
 		{
 			cause: new Error(reason),
@@ -91,8 +91,8 @@ export const releaseOf = (response: LinksResponse, channel: ReleaseChannel, pinn
 
 	if (!VERSION_PATTERN.test(pinned)) {
 		throw new BridgeUserError({
-			ar: `رقم النسخة "${pinned}" مو مكتوب صح. لازم يكون بشكل 1.26.45.1`,
-			en: `the version "${pinned}" is not a valid build number, it has to look like 1.26.45.1`,
+			ar: `رقم الإصدار «${pinned}» غير صحيح. يلزم أن يكون بالشكل 1.26.45.1`,
+			en: `The version "${pinned}" isn't a valid build number. It has to look like 1.26.45.1`,
 		});
 	}
 

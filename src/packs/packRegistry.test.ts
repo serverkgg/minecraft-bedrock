@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import { PackKind } from "./packManifest";
 import {
 	movePackEntry,
@@ -22,12 +22,12 @@ const entry = (id: string) => ({
 });
 
 describe("the per-world pack registry", () => {
-	test("writes behavior and resource packs to the two files bedrock reads", () => {
+	it("writes behavior and resource packs to the two files bedrock reads", () => {
 		expect(worldPackFile("world", PackKind.Behavior)).toBe("worlds/world/world_behavior_packs.json");
 		expect(worldPackFile("world", PackKind.Resource)).toBe("worlds/world/world_resource_packs.json");
 	});
 
-	test("keeps the entries bedrock wrote", () => {
+	it("keeps the entries bedrock wrote", () => {
 		expect(
 			normalizeWorldPacks([
 				{
@@ -51,7 +51,7 @@ describe("the per-world pack registry", () => {
 		]);
 	});
 
-	test("drops an entry with no uuid, which bedrock would refuse to match", () => {
+	it("drops an entry with no uuid, which bedrock would refuse to match", () => {
 		expect(
 			normalizeWorldPacks([
 				{
@@ -73,11 +73,11 @@ describe("activating and ordering packs", () => {
 		entry("c"),
 	];
 
-	test("appends a new pack, so it cannot silently override packs already tuned", () => {
+	it("appends a new pack, so it cannot silently override packs already tuned", () => {
 		expect(withPackActivated(entries, entry("d")).at(-1)?.pack_id).toBe("d");
 	});
 
-	test("never lists the same uuid twice, even when the version changed", () => {
+	it("never lists the same uuid twice, even when the version changed", () => {
 		const upgraded = withPackActivated(entries, {
 			pack_id: "b",
 			version: [
@@ -95,7 +95,7 @@ describe("activating and ordering packs", () => {
 		]);
 	});
 
-	test("puts an upgrade back at the index it held, so order survives", () => {
+	it("puts an upgrade back at the index it held, so order survives", () => {
 		const upgraded = withPackActivated(
 			entries,
 			{
@@ -116,14 +116,14 @@ describe("activating and ordering packs", () => {
 		]);
 	});
 
-	test("deactivates by uuid", () => {
+	it("deactivates by uuid", () => {
 		expect(withPackDeactivated(entries, "b").map((listed) => listed.pack_id)).toEqual([
 			"a",
 			"c",
 		]);
 	});
 
-	test("moves a pack up and down the priority list", () => {
+	it("moves a pack up and down the priority list", () => {
 		expect(movePackEntry(entries, "b", -1).map((listed) => listed.pack_id)).toEqual([
 			"b",
 			"a",
@@ -136,13 +136,13 @@ describe("activating and ordering packs", () => {
 		]);
 	});
 
-	test("leaves the list alone at either end, rather than wrapping around", () => {
+	it("leaves the list alone at either end, rather than wrapping around", () => {
 		expect(movePackEntry(entries, "a", -1)).toEqual(entries);
 		expect(movePackEntry(entries, "c", 1)).toEqual(entries);
 	});
 });
 
-test("a corrupt activation registry cannot be silently replaced with an empty list", async () => {
+it("a corrupt activation registry cannot be silently replaced with an empty list", async () => {
 	const { readWorldPacks } = await import("./packRegistry");
 	type Context = import("@serverkgg/bridge").Bridge.Context;
 	const context = {

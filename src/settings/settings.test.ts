@@ -1,9 +1,9 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import { BedrockTransport, PROPERTY_KEYS } from "../shared";
 import { readSettings, SETTINGS_KEYS, writeSettings } from "./settings";
 
 describe("reading the settings form out of server.properties", () => {
-	test("answers every declared key even for a file that carries none of them", () => {
+	it("answers every declared key even for a file that carries none of them", () => {
 		const values = readSettings({});
 
 		for (const key of SETTINGS_KEYS) {
@@ -11,7 +11,7 @@ describe("reading the settings form out of server.properties", () => {
 		}
 	});
 
-	test("reads bedrock's true and false strings as booleans", () => {
+	it("reads bedrock's true and false strings as booleans", () => {
 		const values = readSettings({
 			[PROPERTY_KEYS.allowCheats]: "true",
 			[PROPERTY_KEYS.onlineMode]: "false",
@@ -21,7 +21,7 @@ describe("reading the settings form out of server.properties", () => {
 		expect(values[PROPERTY_KEYS.onlineMode]).toBe(false);
 	});
 
-	test("answers null for a number the file does not carry, rather than zero", () => {
+	it("answers null for a number the file does not carry, rather than zero", () => {
 		expect(readSettings({})[PROPERTY_KEYS.maxPlayers]).toBeNull();
 		expect(
 			readSettings({
@@ -30,7 +30,7 @@ describe("reading the settings form out of server.properties", () => {
 		).toBe(40);
 	});
 
-	test("reads the transport as the string bedrock wrote", () => {
+	it("reads the transport as the string bedrock wrote", () => {
 		expect(
 			readSettings({
 				[PROPERTY_KEYS.transport]: BedrockTransport.RakNet,
@@ -40,7 +40,7 @@ describe("reading the settings form out of server.properties", () => {
 });
 
 describe("writing the settings form back", () => {
-	test("refuses a key the form does not own, so the port cannot be rewritten", () => {
+	it("refuses a key the form does not own, so the port cannot be rewritten", () => {
 		const properties = writeSettings({
 			[PROPERTY_KEYS.serverPort]: 1234,
 			[PROPERTY_KEYS.serverPortV6]: 1235,
@@ -56,7 +56,7 @@ describe("writing the settings form back", () => {
 		expect(properties[PROPERTY_KEYS.maxPlayers]).toBe("20");
 	});
 
-	test("writes booleans the way bedrock reads them, never as 1 and 0", () => {
+	it("writes booleans the way bedrock reads them, never as 1 and 0", () => {
 		const properties = writeSettings({
 			[PROPERTY_KEYS.allowList]: true,
 			[PROPERTY_KEYS.allowCheats]: false,
@@ -66,7 +66,7 @@ describe("writing the settings form back", () => {
 		expect(properties[PROPERTY_KEYS.allowCheats]).toBe("false");
 	});
 
-	test("leaves out a key the form did not submit, so a partial save cannot blank the rest", () => {
+	it("leaves out a key the form did not submit, so a partial save cannot blank the rest", () => {
 		expect(
 			Object.keys(
 				writeSettings({
@@ -78,7 +78,7 @@ describe("writing the settings form back", () => {
 		]);
 	});
 
-	test("writes the transport the owner picked", () => {
+	it("writes the transport the owner picked", () => {
 		expect(
 			writeSettings({
 				[PROPERTY_KEYS.transport]: BedrockTransport.NetherNet,

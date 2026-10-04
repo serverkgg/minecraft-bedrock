@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import type { Bridge } from "@serverkgg/bridge";
 import { removePacks } from "./packMutation";
 import { packs } from "./packs";
@@ -129,18 +129,18 @@ const harness = (extra: Record<string, string> = {}) => {
 };
 
 describe("refusing to remove a pack another world still uses", () => {
-	test("the refusal comes before anything on disk changes", async () => {
+	it("the refusal comes before anything on disk changes", async () => {
 		const run = harness();
 
 		await expect(
 			removePacks(run.context, [
 				SHARED,
 			]),
-		).rejects.toThrow("This pack is used by other worlds or add-ons: other. Remove those references first.");
+		).rejects.toThrow("This add-on is used by other worlds or add-ons: other. Remove those references first.");
 		expect(run.writes).toEqual([]);
 	});
 
-	test("an interrupted change is rolled back first, and the refusal still follows", async () => {
+	it("an interrupted change is rolled back first, and the refusal still follows", async () => {
 		const run = harness({
 			[JOURNAL]: JSON.stringify([
 				{
@@ -163,7 +163,7 @@ describe("refusing to remove a pack another world still uses", () => {
 		]);
 	});
 
-	test("the panel greys out remove with the same sentence, and leaves a pack only this world uses alone", async () => {
+	it("the panel greys out remove with the same sentence, and leaves a pack only this world uses alone", async () => {
 		const run = harness();
 
 		const shared = await packs.unavailable?.(run.context, {
@@ -174,13 +174,13 @@ describe("refusing to remove a pack another world still uses", () => {
 		});
 
 		expect(shared?.remove?.en).toBe(
-			"This pack is used by other worlds or add-ons: other. Remove those references first.",
+			"This add-on is used by other worlds or add-ons: other. Remove those references first.",
 		);
 		expect(lone).toEqual({});
 		expect(run.writes).toEqual([]);
 	});
 
-	test("one availability pass lists the worlds once, however many packs it answers for", async () => {
+	it("one availability pass lists the worlds once, however many packs it answers for", async () => {
 		const run = harness();
 
 		const rows = await packs.list(run.context);

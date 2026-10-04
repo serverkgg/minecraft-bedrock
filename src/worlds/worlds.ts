@@ -25,30 +25,30 @@ import {
 import { cloneWorld, existingWorld, exportWorld } from "./worldTools";
 
 const notAWorld = new BridgeUserError({
-	ar: "ما لقينا ملف level.dat جوّا الملف. تأكد إنك رافع ملف ماب بصيغة .mcworld طالع من اللعبة نفسها.",
-	en: "the archive holds no level.dat — make sure you are uploading a .mcworld exported from the game itself",
+	ar: "لا يحتوي الملف على level.dat. تأكد من أنك ترفع ملف ماب بصيغة .mcworld مُصدَّرًا من اللعبة نفسها.",
+	en: "The file has no level.dat. Make sure you're uploading a .mcworld exported from the game itself.",
 });
 
 const notABedrockWorld = new BridgeUserError({
-	ar: "هذي ماب جافا مو بيدروك. ما نقدر نحوّلها — لازم ماب طالعة من ماينكرافت بيدروك.",
-	en: "this is a Java world, not a Bedrock one — we cannot convert it, you need a world exported from Minecraft Bedrock",
+	ar: "هذه ماب جافا وليست ماب بيدروك، ولا يمكن تحويلها. يلزم استخدام ماب مُصدَّرة من ماينكرافت بيدروك.",
+	en: "This is a Java world, not a Bedrock one, and we can't convert it. You need a world exported from Minecraft Bedrock.",
 });
 
 const multipleWorlds = new BridgeUserError({
-	ar: "الملف فيه أكثر من ماب، ارفع كل ماب لحالها.",
-	en: "the archive holds more than one world, upload them one at a time",
+	ar: "يحتوي الملف على أكثر من ماب، ارفع كل ماب على حدة.",
+	en: "The file has more than one world. Upload them one at a time.",
 });
 
 const ACTIVE_MARK = "✓";
 
 const ACTIVE_WORLD_DELETE: Bridge.Text = {
-	ar: "ما تقدر تحذف الماب المفعّلة. فعّل ماب ثانية الأول.",
-	en: "you cannot delete the active world — activate another one first",
+	ar: "لا يمكن حذف الماب المفعّلة. فعّل ماب أخرى أولًا.",
+	en: "You can't delete the active world. Activate another one first.",
 };
 
 const ACTIVE_WORLD_ACTIVATE: Bridge.Text = {
-	ar: "هذي الماب مفعّلة أصلًا.",
-	en: "this world is already the active one",
+	ar: "هذه الماب مفعّلة مسبقًا.",
+	en: "This world is already the active one.",
 };
 
 const unpack = async (context: Bridge.Context, archive: string, destination: string) => {
@@ -64,8 +64,8 @@ const unpack = async (context: Bridge.Context, archive: string, destination: str
 			reason: error instanceof Error ? error.message : String(error),
 		});
 		throw new BridgeUserError({
-			ar: "ما قدرنا نفك الماب. تأكد إن الملف سليم وحجمه يناسب مساحة السيرفر.",
-			en: "We could not unpack the world. Check the archive and available server space.",
+			ar: "تعذّر فك ضغط الماب. تأكد من أن الملف سليم وأن حجمه يناسب مساحة السيرفر.",
+			en: "We couldn't unpack the world. Check the file and the free space on your server.",
 		});
 	}
 };
@@ -100,8 +100,8 @@ export const worlds: Bridge.Collection = {
 
 		if (relative === null || !isUnder(relative, WORLD_STAGING)) {
 			throw new BridgeUserError({
-				ar: "ما قدرنا نقرأ الملف اللي رفعته. جرّب ترفعه مرة ثانية.",
-				en: "we could not read the file you uploaded — try uploading it again",
+				ar: "تعذّرت قراءة الملف المرفوع، ارفعه مرة ثانية.",
+				en: "We couldn't read the file you uploaded. Try uploading it again.",
 			});
 		}
 
@@ -130,8 +130,8 @@ export const worlds: Bridge.Collection = {
 
 		if (await context.files.exists(destination)) {
 			throw new BridgeUserError({
-				ar: `عندك ماب بنفس الاسم "${folder}"، غيّر اسم الملف وارفعه.`,
-				en: `a world named "${folder}" is already here — rename the file and upload it again`,
+				ar: `توجد ماب بالاسم نفسه «${folder}»، غيّر اسم الملف وارفعه مرة ثانية.`,
+				en: `A world named "${folder}" is already here. Rename the file and upload it again.`,
 			});
 		}
 
@@ -202,7 +202,7 @@ export const worlds: Bridge.Collection = {
 			context.activity.report({
 				name: BridgeEventName.WorldActivated,
 				text: {
-					ar: `تم تفعيل ماب ${folder} بدل ${previous}`,
+					ar: `تم تفعيل ماب ${folder} بدلًا من ${previous}`,
 					en: `Activated world ${folder} in place of ${previous}`,
 				},
 				subject: folder,

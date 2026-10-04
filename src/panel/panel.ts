@@ -25,7 +25,7 @@ const CHAT_RESTRICTIONS: Bridge.Option[] = [
 	{
 		value: "None",
 		label: {
-			ar: "بدون قيود",
+			ar: "دون قيود",
 			en: "None",
 		},
 	},
@@ -39,7 +39,7 @@ const CHAT_RESTRICTIONS: Bridge.Option[] = [
 	{
 		value: "Disabled",
 		label: {
-			ar: "مقفل",
+			ar: "موقوف",
 			en: "Disabled",
 		},
 	},
@@ -85,7 +85,7 @@ const REASON_FIELD: Bridge.Field = {
 const versionTab: Bridge.Tab = {
 	id: "version",
 	title: {
-		ar: "النسخة",
+		ar: "الإصدار",
 		en: "Version",
 	},
 	icon: BridgeIcon.Tag,
@@ -94,19 +94,19 @@ const versionTab: Bridge.Tab = {
 			layout: BridgeLayout.Form,
 			id: "channel",
 			title: {
-				ar: "نسخة السيرفر",
+				ar: "إصدار السيرفر",
 				en: "Server build",
 			},
 			help: {
-				ar: "اختر تشتغل على النسخة العادية ولا نسخة البريفيو، وثبّت رقم نسخة معيّن لو تبي.",
+				ar: "اختر الإصدار العادي أو إصدار البريفيو، وثبّت رقم إصدار محددًا إذا أردت.",
 				en: "Choose the release or the preview build, and pin a specific version if you want one.",
 			},
 			target: BridgeFormTarget.Variables,
 			reinstall: true,
 			confirm: BridgeConfirm.Strong,
 			confirmText: {
-				ar: "بنأخذ نسخة للرجوع قبل تركيب النسخة الجديدة. الرجوع من البريفيو يحتاج ماب محفوظة قبل التبديل، مو بس تغيير رقم النسخة.",
-				en: "We create a recovery backup before installing the new build. Returning from preview requires a world saved before the switch, not just a different build number.",
+				ar: "نأخذ نسخة احتياطية قبل تثبيت الإصدار الجديد. الرجوع من البريفيو يتطلب ماب محفوظة قبل التبديل، وليس مجرد تغيير رقم الإصدار.",
+				en: "We take a backup before installing the new build. Returning from preview requires a world saved before the switch, not just a different build number.",
 			},
 			fields: [
 				{
@@ -117,14 +117,14 @@ const versionTab: Bridge.Tab = {
 						en: "Channel",
 					},
 					help: {
-						ar: "البريفيو يجرّب الجديد قبل الكل، ويحتاج كل اللاعبين يكونون على تطبيق Minecraft Preview.",
-						en: "Preview tries what is coming next, and needs every player on the Minecraft Preview app.",
+						ar: "يتيح البريفيو تجربة الجديد قبل الجميع، ويتطلب أن يكون كل اللاعبين على تطبيق Minecraft Preview.",
+						en: "Preview lets you try what's coming next, and needs every player on the Minecraft Preview app.",
 					},
 					options: [
 						{
 							value: "release",
 							label: {
-								ar: "النسخة العادية",
+								ar: "الإصدار العادي",
 								en: "Release",
 							},
 						},
@@ -141,12 +141,12 @@ const versionTab: Bridge.Tab = {
 					key: VERSION_VARIABLE,
 					control: BridgeControl.Select,
 					label: {
-						ar: "رقم النسخة",
+						ar: "رقم الإصدار",
 						en: "Build",
 					},
 					help: {
-						ar: "احتفظ بالنسخة المركّبة، أو اختر رقم النسخة الجديدة عشان تحدّث.",
-						en: "Keep the installed build, or select a new build number to update.",
+						ar: "احتفظ بالإصدار المثبّت، أو اختر رقم الإصدار الجديد للتحديث.",
+						en: "Keep the installed build, or pick a new build number to update.",
 					},
 					options: {
 						module: "gameVersion",
@@ -173,7 +173,7 @@ const settingsTab: Bridge.Tab = {
 				en: "World and play",
 			},
 			help: {
-				ar: "اسم السيرفر ووضع اللعب والصعوبة. أي تعديل هنا يبي إعادة تشغيل.",
+				ar: "اسم السيرفر ووضع اللعب والصعوبة. أي تعديل هنا يتطلب ريستارت.",
 				en: "Your server name, game mode and difficulty. Anything here needs a restart.",
 			},
 			target: BridgeFormTarget.Settings,
@@ -193,12 +193,12 @@ const settingsTab: Bridge.Tab = {
 					key: PROPERTY_KEYS.levelSeed,
 					control: BridgeControl.Text,
 					label: {
-						ar: "السييد",
+						ar: "السيد",
 						en: "Seed",
 					},
 					help: {
-						ar: "يشتغل بس على ماب جديدة ما انبنت بعد.",
-						en: "Only used for a world that does not exist yet.",
+						ar: "يُستخدم فقط لماب جديدة لم تتولد بعد.",
+						en: "Only used for a world that doesn't exist yet.",
 					},
 					maxLength: 64,
 				},
@@ -215,7 +215,7 @@ const settingsTab: Bridge.Tab = {
 					key: PROPERTY_KEYS.forceGamemode,
 					control: BridgeControl.Boolean,
 					label: {
-						ar: "افرض وضع اللعب",
+						ar: "فرض وضع اللعب",
 						en: "Force game mode",
 					},
 				},
@@ -232,11 +232,11 @@ const settingsTab: Bridge.Tab = {
 					key: PROPERTY_KEYS.allowCheats,
 					control: BridgeControl.Boolean,
 					label: {
-						ar: "اسمح بالتشيتات",
+						ar: "السماح بالتشيتات",
 						en: "Allow cheats",
 					},
 					warning: {
-						ar: "يخلي أوامر اللعبة تشتغل داخل الماب، وهذا يغيّر طريقة اللعب.",
+						ar: "يفعّل أوامر اللعبة داخل الماب، وهذا يغيّر طريقة اللعب.",
 						en: "Turns game commands on inside the world, which changes how it plays.",
 					},
 				},
@@ -269,7 +269,7 @@ const settingsTab: Bridge.Tab = {
 				en: "Access and chat",
 			},
 			help: {
-				ar: "مين يقدر يدخل، وكيف يتكلمون.",
+				ar: "من يستطيع الدخول، وكيف يتواصل اللاعبون.",
 				en: "Who can get in, and how they talk.",
 			},
 			target: BridgeFormTarget.Settings,
@@ -280,11 +280,11 @@ const settingsTab: Bridge.Tab = {
 					key: PROPERTY_KEYS.onlineMode,
 					control: BridgeControl.Boolean,
 					label: {
-						ar: "تحقق من حساب إكس بوكس",
+						ar: "التحقق من حساب Xbox",
 						en: "Require an Xbox account",
 					},
 					warning: {
-						ar: "لو قفلته، بيدروك ما يعطينا أرقام حسابات اللاعبين، وقائمة الأوبريتر بتوقف عن الشغل.",
+						ar: "عند إيقافه، لا يرسل بيدروك أرقام حسابات اللاعبين، وتتعطل قائمة الأوبريتر.",
 						en: "Turning it off stops Bedrock giving us player account ids, and the operator list stops working.",
 					},
 				},
@@ -296,8 +296,8 @@ const settingsTab: Bridge.Tab = {
 						en: "Allowlist",
 					},
 					help: {
-						ar: "لما تشغّلها، ما يدخل إلا اللي في القائمة — وهذي طريقتك الوحيدة تمنع أحد.",
-						en: "With it on, only players on the list can join — and it is your only way to keep someone out.",
+						ar: "عند تفعيلها، لا يدخل إلا اللاعبون الموجودون في القائمة، وهي الطريقة الوحيدة لمنع أي لاعب من الدخول.",
+						en: "With it on, only players on the list can join. It's your only way to keep someone out.",
 					},
 				},
 				{
@@ -308,12 +308,12 @@ const settingsTab: Bridge.Tab = {
 						en: "Connection transport",
 					},
 					help: {
-						ar: "خله على NetherNet. هذي الطريقة اللي تدخل فيها نسخ بيدروك الجديدة.",
-						en: "Keep it on NetherNet. It is how current Bedrock clients join.",
+						ar: "اتركه على NetherNet، فهي الطريقة التي تدخل بها إصدارات بيدروك الحالية.",
+						en: "Keep it on NetherNet. It's how current Bedrock clients join.",
 					},
 					warning: {
-						ar: "موجانق بيشيل RakNet في نسخة 1.26.60، واللاعبين على النسخ الأحدث ما بيقدرون يدخلون عليه.",
-						en: "Mojang removes RakNet in 1.26.60, and players on newer clients cannot join over it.",
+						ar: "تزيل Mojang طريقة RakNet في الإصدار 1.26.60، ولن يتمكن اللاعبون على الإصدارات الأحدث من الدخول بها.",
+						en: "Mojang removes RakNet in 1.26.60, and players on newer clients can't join over it.",
 					},
 					options: TRANSPORTS,
 				},
@@ -321,7 +321,7 @@ const settingsTab: Bridge.Tab = {
 					key: PROPERTY_KEYS.playerIdleTimeout,
 					control: BridgeControl.Number,
 					label: {
-						ar: "طرد الواقف (بالدقائق)",
+						ar: "طرد اللاعب الخامل بعد (بالدقائق)",
 						en: "Kick idle players after (minutes)",
 					},
 					min: 0,
@@ -340,7 +340,7 @@ const settingsTab: Bridge.Tab = {
 					key: PROPERTY_KEYS.disablePlayerInteraction,
 					control: BridgeControl.Boolean,
 					label: {
-						ar: "امنع تفاعل اللاعبين",
+						ar: "منع تفاعل اللاعبين",
 						en: "Disable player interaction",
 					},
 				},
@@ -348,19 +348,19 @@ const settingsTab: Bridge.Tab = {
 					key: PROPERTY_KEYS.texturepackRequired,
 					control: BridgeControl.Boolean,
 					label: {
-						ar: "الزم أدون المظهر",
+						ar: "إلزام إضافة المظهر",
 						en: "Require the resource pack",
 					},
 					warning: {
-						ar: "أي لاعب يرفض ينزّل الأدون بينطرد من السيرفر.",
-						en: "Any player who declines the pack download gets disconnected.",
+						ar: "يُطرد من السيرفر أي لاعب يرفض تنزيل الإضافة.",
+						en: "Any player who declines the add-on download is disconnected.",
 					},
 				},
 				{
 					key: PROPERTY_KEYS.disableCustomSkins,
 					control: BridgeControl.Boolean,
 					label: {
-						ar: "امنع السكنات المخصصة",
+						ar: "منع السكنات المخصصة",
 						en: "Disable custom skins",
 					},
 				},
@@ -374,7 +374,7 @@ const settingsTab: Bridge.Tab = {
 				en: "Performance",
 			},
 			help: {
-				ar: "كل ما زدت المسافات، زاد الحمل على السيرفر.",
+				ar: "كلما زادت المسافات، زاد الحمل على السيرفر.",
 				en: "The further the server draws, the more work it does.",
 			},
 			target: BridgeFormTarget.Settings,
@@ -429,7 +429,7 @@ const settingsTab: Bridge.Tab = {
 const playersTab: Bridge.Tab = {
 	id: "players",
 	title: {
-		ar: "اللاعبين",
+		ar: "اللاعبون",
 		en: "Players",
 	},
 	icon: BridgeIcon.Users,
@@ -438,7 +438,7 @@ const playersTab: Bridge.Tab = {
 			layout: BridgeLayout.Table,
 			id: "online",
 			title: {
-				ar: "الحاضرين",
+				ar: "المتصلون",
 				en: "Online",
 			},
 			place: BridgePlace.Players,
@@ -454,13 +454,13 @@ const playersTab: Bridge.Tab = {
 				{
 					key: "xuid",
 					label: {
-						ar: "رقم الحساب",
+						ar: "معرّف اللاعب",
 						en: "Account id",
 					},
 				},
 			],
 			empty: {
-				ar: "ما فيه أحد داخل الحين.",
+				ar: "لا يوجد لاعبون متصلون حاليًا.",
 				en: "Nobody is online right now.",
 			},
 			actions: [
@@ -478,12 +478,12 @@ const playersTab: Bridge.Tab = {
 				{
 					id: "op",
 					label: {
-						ar: "خله أوبريتر",
+						ar: "اجعله أوبريتر",
 						en: "Make operator",
 					},
 					confirm: BridgeConfirm.Strong,
 					confirmText: {
-						ar: "الأوبريتر يقدر يستخدم كل أوامر الإدارة داخل اللعبة، ويغيّر الماب كيف ما يبي.",
+						ar: "يستطيع الأوبريتر استخدام كل أوامر الإدارة داخل اللعبة، وتغيير الماب كما يشاء.",
 						en: "An operator can run every admin command in game and change the world however they like.",
 					},
 				},
@@ -521,8 +521,8 @@ const playersTab: Bridge.Tab = {
 					},
 					confirm: BridgeConfirm.Normal,
 					confirmText: {
-						ar: "بيموت ويطيح كل اللي معه في مكانه.",
-						en: "They die and drop everything they are carrying where they stand.",
+						ar: "يموت اللاعب وتسقط كل أغراضه في مكانه.",
+						en: "They die and drop everything they're carrying where they stand.",
 					},
 				},
 			],
@@ -535,7 +535,7 @@ const playersTab: Bridge.Tab = {
 				en: "Allowlist",
 			},
 			help: {
-				ar: "لما تشغّل القائمة البيضاء من الإعدادات، ما يدخل سيرفرك إلا اللي هنا. في بيدروك ما فيه حظر، فهذي طريقتك.",
+				ar: "عند تفعيل القائمة البيضاء من الإعدادات، لا يدخل سيرفرك إلا اللاعبون الموجودون هنا. لا يوجد حظر في بيدروك، لذلك هذه هي الطريقة.",
 				en: "With the allowlist on in Settings, only the players here can join. Bedrock has no ban, so this is your way.",
 			},
 			place: BridgePlace.Players,
@@ -551,7 +551,7 @@ const playersTab: Bridge.Tab = {
 				{
 					key: "xuid",
 					label: {
-						ar: "رقم الحساب",
+						ar: "معرّف اللاعب",
 						en: "Account id",
 					},
 				},
@@ -565,20 +565,20 @@ const playersTab: Bridge.Tab = {
 			],
 			add: {
 				label: {
-					ar: "ضيف لاعب",
+					ar: "أضف لاعبًا",
 					en: "Add a player",
 				},
 				placeholder: "Gamertag",
 			},
 			empty: {
-				ar: "القائمة فاضية. رقم الحساب يتعبّى لحاله أول ما يدخل اللاعب.",
+				ar: "القائمة فارغة. يُملأ معرّف اللاعب تلقائيًا عند أول دخول للاعب.",
 				en: "The list is empty. The account id fills itself in the first time that player joins.",
 			},
 			actions: [
 				{
 					id: "remove",
 					label: {
-						ar: "شيله",
+						ar: "أزله",
 						en: "Remove",
 					},
 					confirm: BridgeConfirm.Normal,
@@ -594,8 +594,8 @@ const playersTab: Bridge.Tab = {
 				en: "Operators",
 			},
 			help: {
-				ar: "بيدروك يحفظ الصلاحيات برقم الحساب، فاللاعب لازم يدخل مرة قبل تقدر تعطيه أوبريتر والسيرفر مطفي.",
-				en: "Bedrock stores permissions by account id, so a player has to join once before you can op them while the server is off.",
+				ar: "يحفظ بيدروك الصلاحيات بمعرّف اللاعب، لذلك يلزم أن يدخل اللاعب مرة واحدة قبل أن تجعله أوبريتر والسيرفر متوقف.",
+				en: "Bedrock stores permissions by account id, so a player has to join once before you can make them an operator while the server is stopped.",
 			},
 			place: BridgePlace.Players,
 			module: "operators",
@@ -610,7 +610,7 @@ const playersTab: Bridge.Tab = {
 				{
 					key: "xuid",
 					label: {
-						ar: "رقم الحساب",
+						ar: "معرّف اللاعب",
 						en: "Account id",
 					},
 				},
@@ -624,13 +624,13 @@ const playersTab: Bridge.Tab = {
 			],
 			add: {
 				label: {
-					ar: "ضيف أوبريتر",
+					ar: "أضف أوبريتر",
 					en: "Add an operator",
 				},
 				placeholder: "Gamertag",
 			},
 			empty: {
-				ar: "ما فيه أوبريتر غيرك.",
+				ar: "لا يوجد أوبريتر غيرك.",
 				en: "Nobody else is an operator.",
 			},
 			actions: [
@@ -656,7 +656,7 @@ const playersTab: Bridge.Tab = {
 				{
 					id: "remove",
 					label: {
-						ar: "شيله",
+						ar: "أزله",
 						en: "Remove",
 					},
 					confirm: BridgeConfirm.Normal,
@@ -683,7 +683,7 @@ const liveTab: Bridge.Tab = {
 				en: "World",
 			},
 			help: {
-				ar: "هذي تشتغل على طول على السيرفر الشغّال، وترجع لإعداداتك بعد إعادة التشغيل.",
+				ar: "تُطبَّق فورًا على السيرفر الشغّال، وتعود إلى إعداداتك بعد الريستارت.",
 				en: "These apply to the running server right away, and fall back to your settings after a restart.",
 			},
 			module: "gameplay",
@@ -691,35 +691,35 @@ const liveTab: Bridge.Tab = {
 				{
 					id: "timeDay",
 					label: {
-						ar: "خلها نهار",
+						ar: "اجعله نهارًا",
 						en: "Set day",
 					},
 				},
 				{
 					id: "timeNight",
 					label: {
-						ar: "خلها ليل",
+						ar: "اجعله ليلًا",
 						en: "Set night",
 					},
 				},
 				{
 					id: "weatherClear",
 					label: {
-						ar: "صفّي الجو",
+						ar: "طقس صافٍ",
 						en: "Clear weather",
 					},
 				},
 				{
 					id: "weatherRain",
 					label: {
-						ar: "نزّل مطر",
+						ar: "مطر",
 						en: "Rain",
 					},
 				},
 				{
 					id: "weatherThunder",
 					label: {
-						ar: "نزّل رعد",
+						ar: "رعد وبرق",
 						en: "Thunder",
 					},
 				},
@@ -744,14 +744,14 @@ const liveTab: Bridge.Tab = {
 				{
 					id: "allowlistOn",
 					label: {
-						ar: "شغّل القائمة البيضاء",
+						ar: "فعّل القائمة البيضاء",
 						en: "Allowlist on",
 					},
 				},
 				{
 					id: "allowlistOff",
 					label: {
-						ar: "اقفل القائمة البيضاء",
+						ar: "وقّف القائمة البيضاء",
 						en: "Allowlist off",
 					},
 				},
@@ -772,7 +772,7 @@ const liveTab: Bridge.Tab = {
 				en: "Message players",
 			},
 			help: {
-				ar: "بيدروك ما فيه أمر say، فنستخدم tellraw.",
+				ar: "لا يحتوي بيدروك على أمر say، لذلك نستخدم tellraw.",
 				en: "Bedrock has no say command, so we use tellraw.",
 			},
 			module: "broadcast",
@@ -790,7 +790,7 @@ const liveTab: Bridge.Tab = {
 				{
 					id: "title",
 					label: {
-						ar: "اعرض عنوان",
+						ar: "اعرض عنوانًا",
 						en: "Show a title",
 					},
 					fields: [
@@ -840,7 +840,7 @@ const worldsTab: Bridge.Tab = {
 							key: "seed",
 							control: BridgeControl.Text,
 							label: {
-								ar: "السييد (اختياري)",
+								ar: "السيد (اختياري)",
 								en: "Seed (optional)",
 							},
 							maxLength: 64,
@@ -857,8 +857,8 @@ const worldsTab: Bridge.Tab = {
 				en: "Worlds",
 			},
 			help: {
-				ar: "أي تغيير على المابات يبي سيرفرك واقف. الحذف بس ناخذ له نسخة استرجاع ونرجّع السيرفر شغّال إذا كان شغّال. على بيدروك الأبعاد كلها في قاعدة بيانات وحدة، فما نقدر نصفّر بُعد لحاله.",
-				en: "Every world change needs your server stopped. Only a delete saves a recovery backup and restarts the server if it was running. Bedrock stores all dimensions together, so a single dimension cannot be reset separately.",
+				ar: "أي تغيير على المابات يتطلب أن يكون سيرفرك متوقفًا. عند الحذف فقط نأخذ نسخة احتياطية ونشغّل السيرفر من جديد إذا كان شغّالًا. في بيدروك تُحفظ الأبعاد كلها في قاعدة بيانات واحدة، لذلك لا يمكن تنفيذ ريسيت لبُعد واحد وحده.",
+				en: "Every world change needs your server stopped. Only a delete takes a backup first and starts the server again if it was running. Bedrock stores all dimensions together, so a single dimension can't be reset on its own.",
 			},
 			module: "worlds",
 			columns: [
@@ -901,7 +901,7 @@ const worldsTab: Bridge.Tab = {
 				mode: BridgeUploadMode.File,
 			},
 			empty: {
-				ar: "ما فيه مابات مرفوعة.",
+				ar: "لا توجد مابات مرفوعة.",
 				en: "No worlds uploaded yet.",
 			},
 			actions: [
@@ -909,15 +909,15 @@ const worldsTab: Bridge.Tab = {
 					id: "clone",
 					label: {
 						ar: "انسخ الماب",
-						en: "Clone world",
+						en: "Copy world",
 					},
 					fields: [
 						{
 							key: "name",
 							control: BridgeControl.Text,
 							label: {
-								ar: "اسم النسخة",
-								en: "Copy name",
+								ar: "اسم الماب الجديدة",
+								en: "New world name",
 							},
 							maxLength: 64,
 						},
@@ -931,32 +931,32 @@ const worldsTab: Bridge.Tab = {
 					},
 					confirm: BridgeConfirm.Normal,
 					confirmText: {
-						ar: "بنجهّز ملف .mcworld داخل مجلد exports في الملفات. تقدر تنزّله وتفتحه في بيدروك.",
+						ar: "نجهّز ملف .mcworld داخل مجلد exports في الملفات. نزّله وافتحه في بيدروك.",
 						en: "We prepare a .mcworld in the exports folder in Files. Download it and open it in Bedrock.",
 					},
 				},
 				{
 					id: "activate",
 					label: {
-						ar: "فعّلها",
+						ar: "فعّل الماب",
 						en: "Activate",
 					},
 					confirm: BridgeConfirm.Normal,
 					confirmText: {
-						ar: "بنبدّل الماب المفعّلة، ولازم سيرفرك يكون واقف. شغّله بعدها عشان تفتح الماب الجديدة.",
+						ar: "نبدّل الماب المفعّلة، ويلزم أن يكون سيرفرك متوقفًا. شغّله بعد ذلك لتُفتح الماب الجديدة.",
 						en: "We switch the active world, and your server must be stopped. Start it again afterwards to open the new world.",
 					},
 				},
 				{
 					id: "delete",
 					label: {
-						ar: "احذفها",
+						ar: "احذف الماب",
 						en: "Delete",
 					},
 					confirm: BridgeConfirm.Strong,
 					confirmText: {
-						ar: "حذف الماب يشيل الأوفرورلد والنذر والإند وكل شيء بنيتوه. بنأخذ نسخة للرجوع قبل الحذف؛ لو النسخ فشل، الحذف ما يكمل.",
-						en: "Deleting the world removes the Overworld, Nether, End and everything you built. We create a recovery backup first; if backup fails, deletion stops.",
+						ar: "حذف الماب يزيل الأوفرورلد والنذر والإند وكل ما بنيتموه نهائيًا. نأخذ نسخة احتياطية قبل الحذف، وإذا تعذّر أخذها لا يتم الحذف.",
+						en: "Deleting the world removes the Overworld, Nether, End and everything you built for good. We take a backup first, and if the backup fails, nothing is deleted.",
 					},
 				},
 			],
@@ -967,7 +967,7 @@ const worldsTab: Bridge.Tab = {
 const addonsTab: Bridge.Tab = {
 	id: "addons",
 	title: {
-		ar: "الأدونات",
+		ar: "الإضافات",
 		en: "Add-ons",
 	},
 	icon: BridgeIcon.Puzzle,
@@ -976,12 +976,12 @@ const addonsTab: Bridge.Tab = {
 			layout: BridgeLayout.Catalog,
 			id: "catalog",
 			title: {
-				ar: "كتالوج الأدونات",
+				ar: "كتالوج الإضافات",
 				en: "Add-on catalog",
 			},
 			help: {
-				ar: "دوّر على أدون وركّبه بضغطة وسيرفرك واقف. نركّبه ونفعّله على مابك، وبعدها شغّل سيرفرك.",
-				en: "Install an add-on in one click with your server stopped. We install it and activate it on your world; start your server afterwards.",
+				ar: "ابحث عن إضافة وثبّتها بضغطة وسيرفرك متوقف. نثبّتها ونفعّلها على مابك، ثم شغّل سيرفرك.",
+				en: "Install an add-on in one click with your server stopped. We install it and activate it on your world. Start your server afterwards.",
 			},
 			module: "packCatalog",
 		},
@@ -989,25 +989,25 @@ const addonsTab: Bridge.Tab = {
 			layout: BridgeLayout.Detail,
 			id: "pack-health",
 			title: {
-				ar: "فحص الأدونات",
+				ar: "فحص الإضافات",
 				en: "Add-on check",
 			},
 			help: {
-				ar: "نشيّك على أدونات سيرفرك: ملفات رفعتها وما تركّبت، أدونات موجودة بس مو مفعّلة، متطلبات ناقصة، وأدونات تحتاج Beta APIs.",
-				en: "We check your server's add-ons: uploaded files that never installed, packs that are present but not active, missing required packs, and packs that need Beta APIs.",
+				ar: "نفحص إضافات سيرفرك: ملفات رفعتها ولم تُثبَّت، وإضافات موجودة لكنها غير مفعّلة، ومتطلبات ناقصة، وإضافات تتطلب Beta APIs.",
+				en: "We check your server's add-ons: uploaded files that never installed, add-ons that are present but not active, missing required add-ons, and add-ons that need Beta APIs.",
 			},
 			module: "packHealth",
 			actions: [
 				{
 					id: "repair",
 					label: {
-						ar: "صلّح الأدونات",
+						ar: "أصلح الإضافات",
 						en: "Repair add-ons",
 					},
 					confirm: BridgeConfirm.Normal,
 					confirmText: {
-						ar: "نحفظ نسخة استرجاع ونوقف السيرفر، نركّب ملفات الأدونات اللي ما تركّبت، نفعّل الأدونات اللي مو مفعّلة، ونفعّل Beta APIs إذا فيه أدون يحتاجها، وبعدين نرجّع السيرفر شغّال إذا كان شغّال. Beta APIs إذا تفعّلت ما تنقفل بأمان.",
-						en: "We save a recovery backup and stop the server, install the add-on files that never installed, activate the packs that are not active, and turn on Beta APIs if an add-on needs it, then start the server again if it was running. Once Beta APIs is on it cannot be turned off safely.",
+						ar: "نأخذ نسخة احتياطية ونوقف السيرفر، ثم نثبّت ملفات الإضافات غير المثبّتة، ونفعّل الإضافات غير المفعّلة، ونفعّل Beta APIs إذا كانت إحدى الإضافات تتطلبها، ثم نشغّل السيرفر من جديد إذا كان شغّالًا. بعد تفعيل Beta APIs لا يمكن إيقافها بأمان.",
+						en: "We take a backup and stop the server, install the add-on files that never installed, activate the add-ons that aren't active, and turn on Beta APIs if an add-on needs it, then start the server again if it was running. Once Beta APIs is on, it can't be turned off safely.",
 					},
 				},
 			],
@@ -1016,19 +1016,19 @@ const addonsTab: Bridge.Tab = {
 			layout: BridgeLayout.Table,
 			id: "packs",
 			title: {
-				ar: "الأدونات المركّبة",
+				ar: "الإضافات المثبّتة",
 				en: "Installed add-ons",
 			},
 			help: {
-				ar: "أي تغيير يبي سيرفرك واقف. الحذف بس ناخذ له نسخة استرجاع ونرجّع السيرفر شغّال إذا كان شغّال. الترتيب يقرر مين يطلع فوق لو أدونين غيّروا نفس الشي.",
-				en: "Every change needs your server stopped. Only removing an add-on saves a recovery backup and restarts the server if it was running. Order decides which pack wins when two change the same thing.",
+				ar: "أي تغيير يتطلب أن يكون سيرفرك متوقفًا. عند الإزالة فقط نأخذ نسخة احتياطية ونشغّل السيرفر من جديد إذا كان شغّالًا. يحدد الترتيب أي إضافة تتقدم إذا غيّرت إضافتان الشيء نفسه.",
+				en: "Every change needs your server stopped. Only removing an add-on takes a backup first and starts the server again if it was running. The order decides which add-on wins when two change the same thing.",
 			},
 			module: "packs",
 			columns: [
 				{
 					key: "worlds",
 					label: {
-						ar: "المابات اللي تستخدمه",
+						ar: "المابات المستخدِمة لها",
 						en: "Used by worlds",
 					},
 				},
@@ -1042,14 +1042,14 @@ const addonsTab: Bridge.Tab = {
 				{
 					key: "load",
 					label: {
-						ar: "حالة التركيب",
+						ar: "حالة التثبيت",
 						en: "Install state",
 					},
 				},
 				{
 					key: "name",
 					label: {
-						ar: "الأدون",
+						ar: "الإضافة",
 						en: "Add-on",
 					},
 				},
@@ -1063,7 +1063,7 @@ const addonsTab: Bridge.Tab = {
 				{
 					key: "version",
 					label: {
-						ar: "النسخة",
+						ar: "الإصدار",
 						en: "Version",
 					},
 				},
@@ -1084,7 +1084,7 @@ const addonsTab: Bridge.Tab = {
 			],
 			upload: {
 				label: {
-					ar: "ارفع أدون",
+					ar: "ارفع إضافة",
 					en: "Upload an add-on",
 				},
 				extensions: PACK_EXTENSIONS,
@@ -1092,8 +1092,8 @@ const addonsTab: Bridge.Tab = {
 				mode: BridgeUploadMode.File,
 			},
 			empty: {
-				ar: "ما فيه أدونات مركّبة. ارفع ملف mcaddon أو mcpack وبنركّبه لك.",
-				en: "No add-ons installed. Upload a .mcaddon or .mcpack and we install it for you.",
+				ar: "لا توجد إضافات مثبّتة. ارفع ملف mcaddon أو mcpack ونثبّته لك.",
+				en: "No add-ons installed. Upload a .mcaddon or .mcpack and we'll install it for you.",
 			},
 			actions: [
 				{
@@ -1106,34 +1106,34 @@ const addonsTab: Bridge.Tab = {
 				{
 					id: "disable",
 					label: {
-						ar: "عطّله",
+						ar: "وقّفه",
 						en: "Disable",
 					},
 				},
 				{
 					id: "moveUp",
 					label: {
-						ar: "حركه فوق",
+						ar: "انقله للأعلى",
 						en: "Move up",
 					},
 				},
 				{
 					id: "moveDown",
 					label: {
-						ar: "حركه تحت",
+						ar: "انقله للأسفل",
 						en: "Move down",
 					},
 				},
 				{
 					id: "remove",
 					label: {
-						ar: "احذفه",
+						ar: "أزله",
 						en: "Remove",
 					},
 					confirm: BridgeConfirm.Strong,
 					confirmText: {
-						ar: "لو شلت أدون سلوك وماب شغّالة عليه، كل شي جابه الأدون بيختفي من الماب — الوحوش والأشياء اللي أضافها. خذ نسخة احتياطية قبل.",
-						en: "If you remove a behavior pack a world was using, everything it added disappears from that world — the mobs and items it brought. Take a backup first.",
+						ar: "إذا أزلت إضافة سلوك تستخدمها ماب، يختفي من الماب كل ما أضافته الإضافة من وحوش وأغراض. خذ نسخة احتياطية أولًا.",
+						en: "If you remove a behavior pack a world was using, everything it added disappears from that world, including the mobs and items it brought. Take a backup first.",
 					},
 				},
 			],

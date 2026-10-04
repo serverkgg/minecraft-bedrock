@@ -102,7 +102,7 @@ const reportGranted = (context: Bridge.Context, player: string, xuid: string) =>
 	context.activity.report({
 		name: BridgeEventName.AccessGranted,
 		text: {
-			ar: `تمت إضافة ${player} لقائمة الأوبريتر`,
+			ar: `تمت إضافة ${player} إلى قائمة الأوبريتر`,
 			en: `Added ${player} to the operator list`,
 		},
 		subject: player,
@@ -129,8 +129,8 @@ export const operators: Bridge.Collection = {
 
 		if (needle.length === 0) {
 			throw new BridgeUserError({
-				ar: "اكتب اسم اللاعب (الـ Gamertag) الأول.",
-				en: "type the player's gamertag first",
+				ar: "اكتب اسم اللاعب (الـ Gamertag) أولًا.",
+				en: "Enter the player's gamertag first.",
 			});
 		}
 
@@ -151,8 +151,8 @@ export const operators: Bridge.Collection = {
 
 		if (known === null) {
 			throw new BridgeUserError({
-				ar: "ما نقدر نعطيه أوبريتر والسيرفر مطفي، لأننا ما نعرف رقم حسابه (XUID) إلا إذا دخل السيرفر قبل. شغّل السيرفر، خله يدخل مرة وحدة، وبعدها تقدر تعطيه أوبريتر وقت ما تبي.",
-				en: "we cannot make them an operator while the server is off, because we only learn a player's xuid after they have joined once. start the server, let them join once, and after that you can op them any time.",
+				ar: "لا يمكن جعله أوبريتر والسيرفر متوقف، لأن معرّفه (XUID) لا يُعرف إلا بعد دخوله السيرفر مرة واحدة. شغّل السيرفر واطلب منه الدخول مرة واحدة، ثم اجعله أوبريتر متى أردت.",
+				en: "We can't make them an operator while the server is stopped, because we only learn a player's XUID after they join once. Start the server, let them join once, and then you can make them an operator any time.",
 			});
 		}
 

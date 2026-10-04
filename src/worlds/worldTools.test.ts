@@ -1,10 +1,10 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import type { Bridge } from "@serverkgg/bridge";
 import { BridgeEventName } from "@serverkgg/bridge/protocol";
 import { existingWorld, exportWorld, validateWorldFolder, worldTools } from "./worldTools";
 
 describe("safe world tools", () => {
-	test("rejects separators and traversal while keeping existing world names with spaces", () => {
+	it("rejects separators and traversal while keeping existing world names with spaces", () => {
 		for (const name of [
 			"..",
 			"../world",
@@ -16,7 +16,7 @@ describe("safe world tools", () => {
 		}
 		expect(validateWorldFolder("My World")).toBe("My World");
 	});
-	test("resolves rows against real worlds rather than trusting a submitted folder", async () => {
+	it("resolves rows against real worlds rather than trusting a submitted folder", async () => {
 		const context = {
 			exec: async () => ({
 				code: 0,
@@ -30,7 +30,7 @@ describe("safe world tools", () => {
 		await expect(existingWorld(context, "forged")).rejects.toThrow();
 		expect(await existingWorld(context, "real")).toBe("real");
 	});
-	test("creates a world with one property update, preserving the old worlds", async () => {
+	it("creates a world with one property update, preserving the old worlds", async () => {
 		const writes: Record<string, string>[] = [];
 		const reports: Bridge.Activity[] = [];
 		const context = {
@@ -73,8 +73,8 @@ describe("safe world tools", () => {
 			{
 				name: BridgeEventName.WorldCreated,
 				text: {
-					ar: "تم إنشاء ماب New-World وتفعيله، ويتولّد مع التشغيل الجاي",
-					en: "Created and activated world New-World, it generates on the next start",
+					ar: "تم إنشاء ماب New-World وتفعيلها، وتتولد عند التشغيل التالي",
+					en: "Created and activated world New-World, generated on the next start",
 				},
 				subject: "New-World",
 				details: {
@@ -84,7 +84,7 @@ describe("safe world tools", () => {
 			},
 		]);
 	});
-	test("blocks a world change while the old world is still running", async () => {
+	it("blocks a world change while the old world is still running", async () => {
 		const context = {
 			server: {
 				running: true,
@@ -104,7 +104,7 @@ describe("safe world tools", () => {
 			}),
 		).rejects.toThrow();
 	});
-	test("exports a world by listing only its own pack folders and the server pack folders", async () => {
+	it("exports a world by listing only its own pack folders and the server pack folders", async () => {
 		const uuid = "8f3a1b2c-0000-0000-0000-000000000001";
 		const files: Record<string, string> = {
 			"worlds/real/world_behavior_packs.json": JSON.stringify([

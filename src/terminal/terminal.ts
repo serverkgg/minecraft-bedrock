@@ -42,15 +42,15 @@ export const terminal: Bridge.Terminal = {
 		{
 			name: "stop",
 			summary: {
-				ar: "يحفظ الماب ويطفي السيرفر.",
-				en: "Saves the world and shuts the server down.",
+				ar: "يحفظ الماب ويوقف السيرفر.",
+				en: "Saves the world and stops the server.",
 			},
 			danger: true,
 		},
 		{
 			name: "list",
 			summary: {
-				ar: "يعرض اللاعبين الحاضرين.",
+				ar: "يعرض اللاعبين المتصلين.",
 				en: "Shows who is online.",
 			},
 		},
@@ -58,7 +58,7 @@ export const terminal: Bridge.Terminal = {
 			name: "kick",
 			syntax: "kick <player> [reason]",
 			summary: {
-				ar: "يطرد لاعب. يقبل الاسم أو رقم الحساب.",
+				ar: "يطرد لاعبًا، ويقبل الاسم أو معرّف اللاعب.",
 				en: "Kicks a player. Takes a gamertag or an account id.",
 			},
 			danger: true,
@@ -70,8 +70,8 @@ export const terminal: Bridge.Terminal = {
 			name: "allowlist",
 			syntax: "allowlist <on|off|list|reload|add|remove> [player]",
 			summary: {
-				ar: "يتحكم بالقائمة البيضاء — وهذي طريقتك الوحيدة تمنع لاعب في بيدروك.",
-				en: "Controls the allowlist — your only way to keep a player out on Bedrock.",
+				ar: "يتحكم في القائمة البيضاء، وهي الطريقة الوحيدة لمنع لاعب من الدخول في بيدروك.",
+				en: "Controls the allowlist, your only way to keep a player out on Bedrock.",
 			},
 			args: [
 				listed,
@@ -111,16 +111,16 @@ export const terminal: Bridge.Terminal = {
 			name: "save",
 			syntax: "save <hold|query|resume>",
 			summary: {
-				ar: "يوقف الحفظ ويرجّعه — هذا اللي نستخدمه للنسخة الاحتياطية.",
-				en: "Holds and resumes saving — this is what a backup uses.",
+				ar: "يوقف الحفظ ثم يستأنفه، ونستخدمه لأخذ النسخة الاحتياطية.",
+				en: "Holds and resumes saving. This is what a backup uses.",
 			},
 		},
 		{
 			name: "changesetting",
 			syntax: "changesetting <allow-cheats|difficulty> <value>",
 			summary: {
-				ar: "يغيّر إعداد وقت التشغيل بدون إعادة تشغيل، بس ما ينحفظ.",
-				en: "Changes a setting live without a restart, but does not persist it.",
+				ar: "يغيّر إعدادًا أثناء التشغيل دون ريستارت، لكنه لا يُحفظ.",
+				en: "Changes a setting live without a restart, but doesn't save it.",
 			},
 		},
 		{
@@ -154,7 +154,7 @@ export const terminal: Bridge.Terminal = {
 			name: "weather",
 			syntax: "weather <clear|rain|thunder>",
 			summary: {
-				ar: "يغيّر الجو.",
+				ar: "يغيّر الطقس.",
 				en: "Changes the weather.",
 			},
 		},
@@ -170,7 +170,7 @@ export const terminal: Bridge.Terminal = {
 			name: "tellraw",
 			syntax: "tellraw @a <json>",
 			summary: {
-				ar: "يرسل رسالة لكل اللاعبين. بيدروك ما فيه أمر say.",
+				ar: "يرسل رسالة إلى كل اللاعبين، لأن بيدروك لا يحتوي على أمر say.",
 				en: "Sends a message to everyone. Bedrock has no say command.",
 			},
 		},
@@ -178,7 +178,7 @@ export const terminal: Bridge.Terminal = {
 			name: "title",
 			syntax: "title @a title <text>",
 			summary: {
-				ar: "يطلع عنوان كبير على شاشة اللاعبين.",
+				ar: "يعرض عنوانًا كبيرًا على شاشات اللاعبين.",
 				en: "Shows a large title on players' screens.",
 			},
 		},
@@ -186,7 +186,7 @@ export const terminal: Bridge.Terminal = {
 			name: "give",
 			syntax: "give <player> <item> [amount]",
 			summary: {
-				ar: "يعطي لاعب أغراض.",
+				ar: "يعطي لاعبًا أغراضًا.",
 				en: "Gives a player items.",
 			},
 			args: [
@@ -197,7 +197,7 @@ export const terminal: Bridge.Terminal = {
 			name: "clear",
 			syntax: "clear [player]",
 			summary: {
-				ar: "يفضي حقيبة اللاعب.",
+				ar: "يُفرغ حقيبة اللاعب.",
 				en: "Empties a player's inventory.",
 			},
 			danger: true,
@@ -209,7 +209,7 @@ export const terminal: Bridge.Terminal = {
 			name: "effect",
 			syntax: "effect <player> <effect> [seconds] [amplifier]",
 			summary: {
-				ar: "يعطي لاعب تأثير أو يشيله.",
+				ar: "يعطي لاعبًا تأثيرًا أو يزيله.",
 				en: "Gives a player an effect or clears one.",
 			},
 			args: [
@@ -243,7 +243,7 @@ export const terminal: Bridge.Terminal = {
 			name: "tp",
 			syntax: "tp <player> <destination>",
 			summary: {
-				ar: "ينقل لاعب.",
+				ar: "ينقل لاعبًا.",
 				en: "Teleports a player.",
 			},
 			args: [
@@ -262,7 +262,7 @@ export const terminal: Bridge.Terminal = {
 			name: "summon",
 			syntax: "summon <entity> [x y z]",
 			summary: {
-				ar: "يستدعي كائن.",
+				ar: "يستدعي كائنًا.",
 				en: "Summons an entity.",
 			},
 		},
@@ -270,8 +270,8 @@ export const terminal: Bridge.Terminal = {
 			name: "fill",
 			syntax: "fill <from> <to> <block>",
 			summary: {
-				ar: "يعبّي منطقة ببلوك. انتبه، يمسح اللي فيها.",
-				en: "Fills an area with a block, replacing what is there.",
+				ar: "يملأ منطقة ببلوك، ويستبدل ما فيها.",
+				en: "Fills an area with a block, replacing what's there.",
 			},
 			danger: true,
 		},
@@ -279,7 +279,7 @@ export const terminal: Bridge.Terminal = {
 			name: "function",
 			syntax: "function <name>",
 			summary: {
-				ar: "يشغّل فنكشن من أدون السلوك.",
+				ar: "يشغّل فنكشن من إضافة سلوك.",
 				en: "Runs a function from a behavior pack.",
 			},
 		},
@@ -287,7 +287,7 @@ export const terminal: Bridge.Terminal = {
 			name: "scriptevent",
 			syntax: "scriptevent <id> <message>",
 			summary: {
-				ar: "يرسل حدث لسكربت داخل أدون.",
+				ar: "يرسل حدثًا إلى سكربت داخل إضافة.",
 				en: "Sends an event to a script inside an add-on.",
 			},
 		},

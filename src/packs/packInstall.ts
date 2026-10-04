@@ -35,13 +35,13 @@ export const packFolderName = (title: string, uuid: string) => {
 };
 
 export const worldTemplateRejected = new BridgeUserError({
-	ar: "هذا ملف ماب مو أدون. ارفعه من تبويب المابات.",
-	en: "this is a world, not an add-on — upload it from the Worlds tab",
+	ar: "هذا ملف ماب وليس إضافة. ارفعه من تبويب المابات.",
+	en: "This is a world, not an add-on. Upload it from the Worlds tab.",
 });
 
 export const noManifest = new BridgeUserError({
-	ar: "ما لقينا ملف manifest.json داخل الملف. تأكد إنك ترفع أدون أصلي بصيغة .mcaddon أو .mcpack",
-	en: "the archive holds no manifest.json — make sure you are uploading a real .mcaddon or .mcpack",
+	ar: "لا يحتوي الملف على manifest.json. تأكد من أنك ترفع إضافة أصلية بصيغة .mcaddon أو .mcpack",
+	en: "The file has no manifest.json. Make sure you're uploading a real .mcaddon or .mcpack",
 });
 
 export interface PackSource {
@@ -77,8 +77,8 @@ export const installPackSource = async (context: Bridge.Context, source: PackSou
 	const candidateIds = new Set(found.map((pack) => pack.manifest.uuid));
 	if (candidateIds.size !== found.length) {
 		throw new BridgeUserError({
-			ar: "الملف فيه أكثر من أدون بنفس المعرّف. ارفع نسخة وحدة من كل أدون.",
-			en: "The archive contains duplicate pack identities. Include one version of each pack.",
+			ar: "يحتوي الملف على أكثر من إضافة بالمعرّف نفسه. ارفع إصدارًا واحدًا من كل إضافة.",
+			en: "The file has more than one add-on with the same id. Include one version of each add-on.",
 		});
 	}
 	const existing = await Promise.all(
@@ -118,14 +118,14 @@ export const installPackSource = async (context: Bridge.Context, source: PackSou
 			&& (await packWorlds(context, previous)).some((used) => used !== world)
 		) {
 			throw new BridgeUserError({
-				ar: "هذا الأدون مستخدم في ماب ثانية. فك ارتباطه منها قبل تغيير نسخته.",
-				en: "Another world uses this pack. Remove that world’s reference before changing its version.",
+				ar: "هذه الإضافة مستخدمة في ماب أخرى. ألغِ ارتباطها بها قبل تغيير إصدارها.",
+				en: "Another world uses this add-on. Remove that world's reference before changing its version.",
 			});
 		}
 		if (previous !== undefined && previous.kind !== pack.manifest.kind) {
 			throw new BridgeUserError({
-				ar: "نوع الأدون تغيّر بنفس المعرّف. احذف النسخة القديمة بعد مراجعة متطلباتها قبل تركيب النوع الجديد.",
-				en: "This pack changed type under the same identity. Review dependencies and remove the old pack before installing the new type.",
+				ar: "تغيّر نوع الإضافة مع بقاء المعرّف نفسه. راجع متطلبات الإصدار القديم ثم احذفه قبل تثبيت النوع الجديد.",
+				en: "This add-on changed type under the same id. Review its dependencies and delete the old version before installing the new type.",
 			});
 		}
 		const scope = previous?.folder.startsWith("worlds/") ? `worlds/${world}/` : "";

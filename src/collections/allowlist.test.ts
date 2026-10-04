@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import type { Bridge } from "@serverkgg/bridge";
 import { BridgeEventName } from "@serverkgg/bridge/protocol";
 import { allowlist, normalizeAllowlist, withAllowed, withoutAllowed } from "./allowlist";
@@ -59,7 +59,7 @@ const harness = (running: boolean) => {
 };
 
 describe("reading allowlist.json, which is a top-level array the json codec cannot read", () => {
-	test("keeps the entries bedrock writes, including the xuid it fills in on first connect", () => {
+	it("keeps the entries bedrock writes, including the xuid it fills in on first connect", () => {
 		expect(
 			normalizeAllowlist([
 				{
@@ -77,7 +77,7 @@ describe("reading allowlist.json, which is a top-level array the json codec cann
 		]);
 	});
 
-	test("keeps an entry that has no xuid yet, because that is how a new one starts", () => {
+	it("keeps an entry that has no xuid yet, because that is how a new one starts", () => {
 		expect(
 			normalizeAllowlist([
 				{
@@ -92,7 +92,7 @@ describe("reading allowlist.json, which is a top-level array the json codec cann
 		]);
 	});
 
-	test("drops an entry with no name, which bedrock would refuse anyway", () => {
+	it("drops an entry with no name, which bedrock would refuse anyway", () => {
 		expect(
 			normalizeAllowlist([
 				{
@@ -114,7 +114,7 @@ describe("changing the allowlist", () => {
 		},
 	];
 
-	test("adds a player", () => {
+	it("adds a player", () => {
 		expect(
 			withAllowed(listed, {
 				ignoresPlayerLimit: false,
@@ -123,7 +123,7 @@ describe("changing the allowlist", () => {
 		).toHaveLength(2);
 	});
 
-	test("never adds the same gamertag twice, whatever the case", () => {
+	it("never adds the same gamertag twice, whatever the case", () => {
 		expect(
 			withAllowed(listed, {
 				ignoresPlayerLimit: false,
@@ -132,13 +132,13 @@ describe("changing the allowlist", () => {
 		).toHaveLength(1);
 	});
 
-	test("removes by gamertag, whatever the case", () => {
+	it("removes by gamertag, whatever the case", () => {
 		expect(withoutAllowed(listed, "MESLZY")).toHaveLength(0);
 	});
 });
 
 describe("reporting allowlist changes", () => {
-	test("adding a known player while the server is off reports the gamertag and xuid", async () => {
+	it("adding a known player while the server is off reports the gamertag and xuid", async () => {
 		const run = harness(false);
 		await allowlist.add?.(run.context, "Meslzy");
 		expect(JSON.parse(run.files.get("allowlist.json") ?? "[]")).toEqual([
@@ -152,7 +152,7 @@ describe("reporting allowlist changes", () => {
 			{
 				name: BridgeEventName.AccessGranted,
 				text: {
-					ar: "تمت إضافة Meslzy للقائمة البيضاء",
+					ar: "تمت إضافة Meslzy إلى القائمة البيضاء",
 					en: "Added Meslzy to the allowlist",
 				},
 				subject: "Meslzy",
@@ -166,7 +166,7 @@ describe("reporting allowlist changes", () => {
 		expect(JSON.stringify(run.reports)).not.toContain(SECRET);
 	});
 
-	test("adding an unknown player on a running server reports the gamertag alone", async () => {
+	it("adding an unknown player on a running server reports the gamertag alone", async () => {
 		const run = harness(true);
 		await allowlist.add?.(run.context, "Noura");
 		expect(run.commands).toEqual([
@@ -178,7 +178,7 @@ describe("reporting allowlist changes", () => {
 		});
 	});
 
-	test("removing a player reports the revoked access", async () => {
+	it("removing a player reports the revoked access", async () => {
 		const run = harness(true);
 		await allowlist.actions?.remove?.(
 			run.context,
@@ -201,7 +201,7 @@ describe("reporting allowlist changes", () => {
 });
 
 describe("building an allowlist report never fails the change", () => {
-	test("an unreadable player ledger does not fail an add on a running server", async () => {
+	it("an unreadable player ledger does not fail an add on a running server", async () => {
 		const run = harness(true);
 		const failing = {
 			...run.context,

@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import type { Bridge } from "@serverkgg/bridge";
 import { publishFiles, recoverFileTransaction, requireStopped } from "./fileTransaction";
 
@@ -50,7 +50,7 @@ const fixture = (initial: Record<string, string>, failOn?: string) => {
 };
 
 describe("publishing a staged update", () => {
-	test("restores all old files after a failure midway through replacement", async () => {
+	it("restores all old files after a failure midway through replacement", async () => {
 		const { context, files } = fixture(
 			{
 				binary: "old",
@@ -76,7 +76,7 @@ describe("publishing a staged update", () => {
 		expect(files.get("config")).toBe("old-config");
 		expect(files.has(".serverk-transaction.json")).toBe(false);
 	});
-	test("recovers an interrupted operation before publishing another one", async () => {
+	it("recovers an interrupted operation before publishing another one", async () => {
 		const { context, files } = fixture({
 			binary: "half-installed",
 			".serverk-recovery-files/0": "old",
@@ -91,7 +91,7 @@ describe("publishing a staged update", () => {
 		await recoverFileTransaction(context);
 		expect(files.get("binary")).toBe("old");
 	});
-	test("rejects a running server before moving files", async () => {
+	it("rejects a running server before moving files", async () => {
 		const { context, files } = fixture({
 			binary: "old",
 			"stage/binary": "new",
@@ -108,7 +108,7 @@ describe("publishing a staged update", () => {
 		).rejects.toThrow();
 		expect(files.get("binary")).toBe("old");
 	});
-	test("rejects traversal destinations before journaling", async () => {
+	it("rejects traversal destinations before journaling", async () => {
 		const { context, files } = fixture({
 			"stage/binary": "new",
 		});

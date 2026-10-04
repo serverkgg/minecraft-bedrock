@@ -53,8 +53,8 @@ export const unpackArchive = async (
 			reason: error instanceof Error ? error.message : String(error),
 		});
 		throw new BridgeUserError({
-			ar: "ما قدرنا نفك الأدون. تأكد إن الملف سليم وحجمه يناسب مساحة السيرفر.",
-			en: "We could not unpack the add-on. Check the archive and available server space.",
+			ar: "تعذّر فك ضغط الإضافة. تأكد من أن الملف سليم وأن حجمه يناسب مساحة السيرفر.",
+			en: "We couldn't unpack the add-on. Check the file and the free space on your server.",
 		});
 	}
 };

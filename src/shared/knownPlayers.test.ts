@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import {
 	type KnownPlayer,
 	knownPlayerOf,
@@ -11,14 +11,14 @@ import {
 const ledger = () => new Map<string, KnownPlayer>();
 
 describe("remembering the players the server has seen", () => {
-	test("records a player the first time they connect", () => {
+	it("records a player the first time they connect", () => {
 		const players = ledger();
 
 		expect(rememberPlayer(players, "2535", "Meslzy", "2026-09-12T19:00:00Z")).toBe(true);
 		expect(players.get("2535")?.name).toBe("Meslzy");
 	});
 
-	test("reports no change when a known player reconnects under the same name", () => {
+	it("reports no change when a known player reconnects under the same name", () => {
 		const players = ledger();
 
 		rememberPlayer(players, "2535", "Meslzy", "2026-09-12T19:00:00Z");
@@ -27,7 +27,7 @@ describe("remembering the players the server has seen", () => {
 		expect(players.get("2535")?.lastSeen).toBe("2026-09-12T20:00:00Z");
 	});
 
-	test("keeps the old gamertag when a player renames, because the xuid is the identity", () => {
+	it("keeps the old gamertag when a player renames, because the xuid is the identity", () => {
 		const players = ledger();
 
 		rememberPlayer(players, "2535", "Meslzy", "2026-09-12T19:00:00Z");
@@ -46,19 +46,19 @@ describe("resolving a player the operator typed", () => {
 	rememberPlayer(players, "2535", "Meslzy", "2026-09-12T19:00:00Z");
 	rememberPlayer(players, "2535", "MeslzyGG", "2026-09-13T19:00:00Z");
 
-	test("resolves by xuid", () => {
+	it("resolves by xuid", () => {
 		expect(knownPlayerOf(players, "2535")?.name).toBe("MeslzyGG");
 	});
 
-	test("resolves by the current gamertag, whatever the case", () => {
+	it("resolves by the current gamertag, whatever the case", () => {
 		expect(knownPlayerOf(players, "meslzygg")?.xuid).toBe("2535");
 	});
 
-	test("still resolves by a gamertag the player used before, so an old allowlist entry is not orphaned", () => {
+	it("still resolves by a gamertag the player used before, so an old allowlist entry is not orphaned", () => {
 		expect(knownPlayerOf(players, "Meslzy")?.xuid).toBe("2535");
 	});
 
-	test("answers null for someone who has never joined, which is what blocks opping them offline", () => {
+	it("answers null for someone who has never joined, which is what blocks opping them offline", () => {
 		expect(knownPlayerOf(players, "Stranger")).toBeNull();
 	});
 });
@@ -79,11 +79,11 @@ describe("keeping the ledger bounded", () => {
 		return players;
 	};
 
-	test("prunes down to the cap, oldest first", () => {
+	it("prunes down to the cap, oldest first", () => {
 		expect(prunePlayers(filled(), new Set()).size).toBe(LEDGER_LIMIT);
 	});
 
-	test("never prunes a player the allowlist or the operator list still points at", () => {
+	it("never prunes a player the allowlist or the operator list still points at", () => {
 		const players = filled();
 		const oldest = [
 			...players.values(),
@@ -102,7 +102,7 @@ describe("keeping the ledger bounded", () => {
 });
 
 describe("reading a ledger written by an older build", () => {
-	test("drops entries with no xuid rather than throwing", () => {
+	it("drops entries with no xuid rather than throwing", () => {
 		expect(
 			normalizePlayers([
 				{
@@ -116,7 +116,7 @@ describe("reading a ledger written by an older build", () => {
 		).toBe(1);
 	});
 
-	test("answers empty for anything that is not a list", () => {
+	it("answers empty for anything that is not a list", () => {
 		expect(
 			normalizePlayers({
 				xuid: "2535",

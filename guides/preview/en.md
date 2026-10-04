@@ -5,23 +5,23 @@ Preview is where Microsoft tries new things before they reach everyone. You can 
 ## Before you switch
 
 > [!danger]
-> A world opened on preview does not come back to the release build. Preview upgrades your world data to a newer format that the release build cannot read. This is a one-way door.
+> A world opened on preview doesn't come back to the release build. Preview upgrades your world data to a newer format that the release build can't read. This can't be undone.
 
-The version operation creates a recovery backup before switching. To return safely, restore that pre-switch backup with its recorded runtime version. Installing an older build alone cannot undo changes to the world.
+Changing the version takes a backup before switching. To return safely, restore that pre-switch backup with its recorded runtime version. Installing an older build alone can't undo changes to the world.
 
 ## Players need the same build
 
-Only players who have the Minecraft Preview app installed can join a preview server. The normal game cannot.
+Only players who have the Minecraft Preview app installed can join a preview server. The normal game can't.
 
 So if you switch, all of your friends have to switch with you.
 
 ## When to use it
 
 - You want to try a new feature before it ships.
-- You are building an add-on and want to test it against the new format.
+- You're building an add-on and want to test it against the new format.
 
-If neither is true, stay on the release build. It is the steadier one, and it is the one all of your friends can already join.
+If neither is true, stay on the release build. It's the steadier one, and it's the one all of your friends can already join.
 
 ## Updates are explicit
 
-**Keep installed build** picks the latest build only at first installation. Ordinary restarts keep that concrete version. To update, choose a new version number in **Version**. Recovery backups also preserve the installed build metadata; an unavailable requested build fails visibly instead of silently substituting another one.
+**Keep installed build** picks the latest build only on the first install. Ordinary restarts keep that exact version. To update, choose a new version number in **Version**. Backups also keep the installed build details. If the requested build isn't available, the operation stops and tells you, instead of quietly installing another one.

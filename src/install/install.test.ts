@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import { type Bridge, BridgeUserError } from "@serverkgg/bridge";
 import { BridgeEventName } from "@serverkgg/bridge/protocol";
 import { install } from "./install";
@@ -147,14 +147,14 @@ const fixture = (
 };
 
 describe("restoring exact Bedrock builds", () => {
-	test("ordinary automatic-selection restart does not look up or download latest", async () => {
+	it("ordinary automatic-selection restart does not look up or download latest", async () => {
 		const run = fixture(true, null);
 		await install.run(run.context);
 		expect(run.lookups()).toBe(0);
 		expect(run.downloads).toEqual([]);
 		expect(run.files.get("bedrock_server")).toBe("old binary");
 	});
-	test("a restored stamp with no runtime reinstalls that concrete build", async () => {
+	it("a restored stamp with no runtime reinstalls that concrete build", async () => {
 		const run = fixture(false, null);
 		await install.run(run.context);
 		expect(run.downloads).toEqual([
@@ -162,23 +162,23 @@ describe("restoring exact Bedrock builds", () => {
 		]);
 		expect(JSON.parse(run.files.get(".serverk-install.json") ?? "{}").version).toBe("1.26.45.1");
 	});
-	test("an unavailable explicitly selected build fails without deleting the working runtime", async () => {
+	it("an unavailable explicitly selected build fails without deleting the working runtime", async () => {
 		const run = fixture(true, "1.26.90.1", true);
-		await expect(install.run(run.context)).rejects.toThrow("We could not download Bedrock 1.26.90.1. Try again.");
+		await expect(install.run(run.context)).rejects.toThrow("We couldn't download Bedrock 1.26.90.1. Try again.");
 		expect(run.files.get("bedrock_server")).toBe("old binary");
 		expect(JSON.parse(run.files.get(".serverk-install.json") ?? "{}").version).toBe("1.26.45.1");
 	});
 });
 
 describe("telling the owner what the install did", () => {
-	test("reports the first install with its channel and build", async () => {
+	it("reports the first install with its channel and build", async () => {
 		const run = fixture(false, null, false, false);
 		await install.run(run.context);
 		expect(run.reports).toEqual([
 			{
 				name: BridgeEventName.GameInstalled,
 				text: {
-					ar: "تم تثبيت سيرفر بيدروك 1.26.99.1 على قناة النسخة العادية",
+					ar: "تم تثبيت سيرفر بيدروك 1.26.99.1 على قناة الإصدار العادي",
 					en: "Installed Bedrock server 1.26.99.1 on the Release channel",
 				},
 				subject: "1.26.99.1",
@@ -191,7 +191,7 @@ describe("telling the owner what the install did", () => {
 		expect(JSON.stringify(run.reports)).not.toContain(SECRET);
 	});
 
-	test("keeps the ServerUpdated event and reports the update with the channel and both builds", async () => {
+	it("keeps the ServerUpdated event and reports the update with the channel and both builds", async () => {
 		const run = fixture(true, "1.26.99.1");
 		await install.run(run.context);
 		expect(run.emitted).toEqual([
@@ -201,7 +201,7 @@ describe("telling the owner what the install did", () => {
 			{
 				name: BridgeEventName.ServerUpdated,
 				text: {
-					ar: "تم تحديث سيرفر بيدروك من 1.26.45.1 إلى 1.26.99.1 على قناة النسخة العادية",
+					ar: "تم تحديث سيرفر بيدروك من 1.26.45.1 إلى 1.26.99.1 على قناة الإصدار العادي",
 					en: "Updated Bedrock server from 1.26.45.1 to 1.26.99.1 on the Release channel",
 				},
 				subject: "1.26.99.1",
@@ -214,7 +214,7 @@ describe("telling the owner what the install did", () => {
 		]);
 	});
 
-	test("reports a channel change with both channels and both builds, and keeps main's plain event behaviour", async () => {
+	it("reports a channel change with both channels and both builds, and keeps main's plain event behaviour", async () => {
 		const run = fixture(true, null, false, true, "preview");
 		await install.run(run.context);
 		expect(JSON.parse(run.files.get(".serverk-install.json") ?? "{}")).toMatchObject({
@@ -226,7 +226,7 @@ describe("telling the owner what the install did", () => {
 			{
 				name: BridgeEventName.ServerUpdated,
 				text: {
-					ar: "تم تحديث سيرفر بيدروك من 1.26.45.1 على قناة النسخة العادية إلى 1.26.60.28 على قناة بريفيو",
+					ar: "تم تحديث سيرفر بيدروك من 1.26.45.1 على قناة الإصدار العادي إلى 1.26.60.28 على قناة بريفيو",
 					en: "Updated Bedrock server from 1.26.45.1 on the Release channel to 1.26.60.28 on the Preview channel",
 				},
 				subject: "1.26.60.28",
@@ -241,13 +241,13 @@ describe("telling the owner what the install did", () => {
 		expect(JSON.stringify(run.reports)).not.toContain(SECRET);
 	});
 
-	test("reports nothing when the installed build is kept", async () => {
+	it("reports nothing when the installed build is kept", async () => {
 		const run = fixture(true, null);
 		await install.run(run.context);
 		expect(run.reports).toEqual([]);
 	});
 
-	test("turns a failed download into localized text and keeps the raw reason as the cause", async () => {
+	it("turns a failed download into localized text and keeps the raw reason as the cause", async () => {
 		const run = fixture(false, null, true, false);
 		const failure = await install.run(run.context).then(
 			() => null,
@@ -255,7 +255,7 @@ describe("telling the owner what the install did", () => {
 		);
 		expect(failure).toBeInstanceOf(BridgeUserError);
 		expect(failure instanceof BridgeUserError ? failure.text.ar : "").toBe(
-			"ما قدرنا ننزّل Bedrock 1.26.99.1. جرّب مرة ثانية.",
+			"تعذّر تنزيل Bedrock 1.26.99.1، جرب مرة ثانية.",
 		);
 		expect(failure instanceof Error && failure.cause instanceof Error ? failure.cause.message : "").toBe(
 			"download unavailable",

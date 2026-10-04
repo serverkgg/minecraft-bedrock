@@ -77,8 +77,8 @@ export const setPacksEnabled = async (
 		const manifests = await Promise.all(ordered.map((pack) => manifestFor(context, pack)));
 		if (manifests.some((manifest) => manifest === null)) {
 			throw new BridgeUserError({
-				ar: "ملفات أحد المتطلبات ناقصة. ركّب الأدون مرة ثانية.",
-				en: "A required pack has missing files. Install it again.",
+				ar: "ملفات أحد المتطلبات ناقصة. ثبّت الإضافة مرة ثانية.",
+				en: "A required add-on has missing files. Install it again.",
 			});
 		}
 		await assertCompatible(

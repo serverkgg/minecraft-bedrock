@@ -114,7 +114,7 @@ export const players: Bridge.Collection = {
 			context.activity.report({
 				name: BridgeEventName.AccessGranted,
 				text: {
-					ar: `تمت إضافة ${player} لقائمة الأوبريتر`,
+					ar: `تمت إضافة ${player} إلى قائمة الأوبريتر`,
 					en: `Added ${player} to the operator list`,
 				},
 				subject: player,

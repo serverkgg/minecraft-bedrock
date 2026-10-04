@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import type { Bridge } from "@serverkgg/bridge";
 import { inventoryPacks, listPackManifests } from "./packDiscovery";
 
@@ -72,7 +72,7 @@ const contextWith = (files: Record<string, string>, level: string) => {
 };
 
 describe("finding installed packs", () => {
-	test("walks only the pack folders of the server and the active world, never the whole server", async () => {
+	it("walks only the pack folders of the server and the active world, never the whole server", async () => {
 		const { context, listed } = contextWith(
 			{
 				"behavior_packs/Cool/manifest.json": manifest("8f3a1b2c-0000-0000-0000-000000000001", "data"),
@@ -103,7 +103,7 @@ describe("finding installed packs", () => {
 		]);
 	});
 
-	test("skips the world folders when the level name is one the file listing would refuse", async () => {
+	it("skips the world folders when the level name is one the file listing would refuse", async () => {
 		const { context, listed } = contextWith(
 			{
 				"behavior_packs/Cool/manifest.json": manifest("8f3a1b2c-0000-0000-0000-000000000001", "data"),
@@ -122,7 +122,7 @@ describe("finding installed packs", () => {
 		]);
 	});
 
-	test("returns manifests in the order the directories were given", async () => {
+	it("returns manifests in the order the directories were given", async () => {
 		const { context } = contextWith(
 			{
 				"behavior_packs/Cool/manifest.json": manifest("8f3a1b2c-0000-0000-0000-000000000001", "data"),

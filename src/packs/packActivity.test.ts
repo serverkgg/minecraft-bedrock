@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import { BridgeEventName } from "@serverkgg/bridge/protocol";
 import {
 	BetaApisRepair,
@@ -40,7 +40,7 @@ const BEHAVIOR = record("a", "Dragons BP", PackKind.Behavior);
 const RESOURCE = record("b", "Dragons RP", PackKind.Resource);
 
 describe("reporting add-on changes", () => {
-	test("an install names the add-on, its version, size and provider", () => {
+	it("an install names the add-on, its version, size and provider", () => {
 		expect(
 			packInstalledActivity(
 				{
@@ -58,7 +58,7 @@ describe("reporting add-on changes", () => {
 		).toEqual({
 			name: BridgeEventName.ModInstalled,
 			text: {
-				ar: "تم تثبيت أدون Dragons BP (1.2.0)",
+				ar: "تم تثبيت إضافة Dragons BP (1.2.0)",
 				en: "Installed add-on Dragons BP (1.2.0)",
 			},
 			subject: "Dragons BP",
@@ -71,7 +71,7 @@ describe("reporting add-on changes", () => {
 		});
 	});
 
-	test("an install of several packs is named after the bundle and notes Beta APIs being off", () => {
+	it("an install of several packs is named after the bundle and notes Beta APIs being off", () => {
 		const entry = packInstalledActivity(
 			{
 				packs: [
@@ -94,7 +94,7 @@ describe("reporting add-on changes", () => {
 		});
 	});
 
-	test("enable, disable and remove name the pack and list the linked ones", () => {
+	it("enable, disable and remove name the pack and list the linked ones", () => {
 		expect(
 			packsToggledActivity(
 				[
@@ -107,7 +107,7 @@ describe("reporting add-on changes", () => {
 		).toEqual({
 			name: BridgeEventName.ModEnabled,
 			text: {
-				ar: "تم تفعيل أدون Dragons BP",
+				ar: "تم تفعيل إضافة Dragons BP",
 				en: "Enabled add-on Dragons BP",
 			},
 			subject: "Dragons BP",
@@ -141,11 +141,11 @@ describe("reporting add-on changes", () => {
 		});
 	});
 
-	test("a reorder is a settings change on the pack order", () => {
+	it("a reorder is a settings change on the pack order", () => {
 		expect(packMovedActivity("Dragons BP", PackMove.Up, 1)).toEqual({
 			name: BridgeEventName.SettingsApplied,
 			text: {
-				ar: "تم نقل أدون Dragons BP لفوق في ترتيب التحميل، وصار رقم 1",
+				ar: "تم نقل إضافة Dragons BP إلى الأعلى في ترتيب التحميل، وأصبحت رقم 1",
 				en: "Moved add-on Dragons BP up the load order, now number 1",
 			},
 			subject: "Dragons BP",
@@ -158,7 +158,7 @@ describe("reporting add-on changes", () => {
 		});
 	});
 
-	test("a repair reports each outcome it counted", () => {
+	it("a repair reports each outcome it counted", () => {
 		expect(
 			packRepairActivity({
 				activated: 2,
@@ -170,7 +170,7 @@ describe("reporting add-on changes", () => {
 		).toEqual({
 			name: BridgeEventName.SettingsApplied,
 			text: {
-				ar: "تم إصلاح الأدونات وتفعيل Beta APIs (مثبّتة 1، مفعّلة 2، ما انصلحت 1)",
+				ar: "تم إصلاح الإضافات وتفعيل Beta APIs (مثبّتة 1، مفعّلة 2، تعذّر إصلاح 1)",
 				en: "Repaired the add-ons and enabled Beta APIs (1 installed, 2 enabled, 1 not fixed)",
 			},
 			details: {
@@ -191,7 +191,7 @@ describe("reporting add-on changes", () => {
 				betaApis: BetaApisRepair.NotNeeded,
 			}).text,
 		).toEqual({
-			ar: "تم إصلاح الأدونات (مثبّتة 3، مفعّلة 0)",
+			ar: "تم إصلاح الإضافات (مثبّتة 3، مفعّلة 0)",
 			en: "Repaired the add-ons (3 installed, 0 enabled)",
 		});
 	});

@@ -23,8 +23,8 @@ export const backup: Bridge.Backup = {
 			});
 
 			throw new BridgeUserError({
-				ar: "السيرفر ما ردّ علينا وهو يحضّر الماب للنسخ. جرّب مرة ثانية، ولو تكرر أوقف السيرفر وخذ النسخة وهو مطفي.",
-				en: "the server did not answer while it was preparing the world for copying. try again, and if it keeps happening stop the server and take the backup with it off.",
+				ar: "لم يستجب السيرفر أثناء تجهيز الماب للنسخ، جرب مرة ثانية. وإذا تكرر ذلك، وقّف السيرفر وخذ النسخة الاحتياطية وهو متوقف.",
+				en: "The server didn't respond while it was preparing the world for the backup. Try again, and if it keeps happening, stop the server and take the backup while it's stopped.",
 			});
 		}
 	},

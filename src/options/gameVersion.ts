@@ -18,12 +18,12 @@ export const gameVersion: Bridge.Options = {
 			{
 				value: "",
 				label: {
-					ar: "احتفظ بالنسخة المركّبة",
+					ar: "احتفظ بالإصدار المثبّت",
 					en: "Keep installed build",
 				},
 				help: {
-					ar: "نختار الأحدث عند أول تركيب بس. للتحديث اختر رقم النسخة الجديدة من القائمة.",
-					en: "Latest is chosen only on first installation. To update, select the new build number.",
+					ar: "نختار الأحدث عند التثبيت الأول فقط. للتحديث، اختر رقم الإصدار الجديد من القائمة.",
+					en: "We pick the latest only on the first install. To update, pick the new build number from the list.",
 				},
 			},
 		];

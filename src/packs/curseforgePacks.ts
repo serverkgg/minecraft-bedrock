@@ -59,14 +59,14 @@ export const packCatalog: Bridge.Catalog = {
 			{
 				value: "addons",
 				label: {
-					ar: "أدونات",
+					ar: "الإضافات",
 					en: "Add-ons",
 				},
 			},
 			{
 				value: "texture-packs",
 				label: {
-					ar: "أدونات المظهر",
+					ar: "إضافات المظهر",
 					en: "Texture packs",
 				},
 			},
@@ -82,13 +82,13 @@ export const packCatalog: Bridge.Catalog = {
 					{
 						id: PROVIDER,
 						label: {
-							ar: "كيرس فورج",
+							ar: "CurseForge",
 							en: "CurseForge",
 						},
 						ready: false,
 						note: {
-							ar: "ما فيه مفتاح CurseForge مضاف للمنصة، فالكتالوج مقفل. تقدر ترفع أدوناتك بنفسك من تحت.",
-							en: "no CurseForge key is set on the platform, so the catalog is off — you can still upload your own add-ons below",
+							ar: "لم يُضف مفتاح CurseForge إلى المنصة، لذلك الكتالوج غير متاح. ارفع إضافاتك بنفسك من الأسفل.",
+							en: "No CurseForge key is set on the platform, so the catalog is off. You can still upload your own add-ons below.",
 						},
 					},
 				],
@@ -124,7 +124,7 @@ export const packCatalog: Bridge.Catalog = {
 				{
 					id: PROVIDER,
 					label: {
-						ar: "كيرس فورج",
+						ar: "CurseForge",
 						en: "CurseForge",
 					},
 					ready: true,
@@ -175,8 +175,8 @@ export const packCatalog: Bridge.Catalog = {
 
 		if (project === null) {
 			throw new BridgeUserError({
-				ar: "ما عرفنا هذا الأدون من وين ننزّله.",
-				en: "we could not tell where to download this add-on from",
+				ar: "تعذّر تحديد مصدر تنزيل هذه الإضافة.",
+				en: "We couldn't tell where to download this add-on from.",
 			});
 		}
 
@@ -191,8 +191,8 @@ export const packCatalog: Bridge.Catalog = {
 
 		if (file === undefined) {
 			throw new BridgeUserError({
-				ar: `"${mod.name}" ما عنده أي ملف ننزّله.`,
-				en: `"${mod.name}" has no downloadable file`,
+				ar: `لا يوجد لدى «${mod.name}» أي ملف قابل للتنزيل.`,
+				en: `"${mod.name}" has no downloadable file.`,
 			});
 		}
 
@@ -200,8 +200,8 @@ export const packCatalog: Bridge.Catalog = {
 
 		if (url === null) {
 			throw new BridgeUserError({
-				ar: `صاحب "${mod.name}" ما يسمح بالتحميل إلا من كيرس فورج. افتح صفحته، نزّل الملف، وارفعه من زر "رفع أدون" تحت.`,
-				en: `the author of "${mod.name}" allows downloads only from CurseForge — open its page, download the file, and upload it with the button below`,
+				ar: `صاحب «${mod.name}» لا يسمح بالتنزيل إلا من CurseForge. افتح صفحته، ونزّل الملف، ثم ارفعه من زر «ارفع إضافة» في الأسفل.`,
+				en: `The author of "${mod.name}" allows downloads only from CurseForge. Open its page, download the file, and upload it with the button below.`,
 			});
 		}
 

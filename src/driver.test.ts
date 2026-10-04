@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import type { BridgeSection, BridgeSectionAction } from "@serverkgg/bridge";
 import { BridgeLayout, BridgeSetupStepKind } from "@serverkgg/bridge";
 import { BRIDGE_EVENT_NAMES } from "@serverkgg/bridge/protocol";
@@ -49,7 +49,7 @@ const RESERVED_MODULE_IDS = [
 const ROOT = new URL("..", import.meta.url).pathname;
 
 describe("validating the driver the way the platform does", () => {
-	test("passes the same validateDriver run that happens at publish and at boot", () => {
+	it("passes the same validateDriver run that happens at publish and at boot", () => {
 		const result = Bun.spawnSync(
 			[
 				`${ROOT}node_modules/.bin/serverk-bridge`,
@@ -68,12 +68,12 @@ describe("validating the driver the way the platform does", () => {
 });
 
 describe("assembling the bedrock driver", () => {
-	test("declares the two capabilities the platform cannot boot without", () => {
+	it("declares the two capabilities the platform cannot boot without", () => {
 		expect(driver.install).toBeDefined();
 		expect(driver.lifecycle).toBeDefined();
 	});
 
-	test("keeps every panel section bound to a module the driver actually registers", () => {
+	it("keeps every panel section bound to a module the driver actually registers", () => {
 		for (const section of sections) {
 			const module = section.module;
 
@@ -85,13 +85,13 @@ describe("assembling the bedrock driver", () => {
 		}
 	});
 
-	test("never registers a module id the runtime reserves for a top-level capability", () => {
+	it("never registers a module id the runtime reserves for a top-level capability", () => {
 		for (const id of RESERVED_MODULE_IDS) {
 			expect(Object.keys(modules)).not.toContain(id);
 		}
 	});
 
-	test("emits only event names the platform taxonomy carries", () => {
+	it("emits only event names the platform taxonomy carries", () => {
 		const emitted = [
 			...(driver.events?.patterns ?? []).map((pattern) => pattern.emit),
 			...(driver.events?.emits ?? []),
@@ -104,7 +104,7 @@ describe("assembling the bedrock driver", () => {
 });
 
 describe("refusing to promise what bedrock cannot do", () => {
-	test("raises no ban, death or advancement event, because BDS reports none of them", () => {
+	it("raises no ban, death or advancement event, because BDS reports none of them", () => {
 		const emitted = [
 			...(driver.events?.patterns ?? []).map((pattern) => pattern.emit),
 			...(driver.events?.emits ?? []),
@@ -115,7 +115,7 @@ describe("refusing to promise what bedrock cannot do", () => {
 		expect(emitted).not.toContain("player-advanced");
 	});
 
-	test("offers no ban action and no per-dimension reset, because bedrock has neither", () => {
+	it("offers no ban action and no per-dimension reset, because bedrock has neither", () => {
 		const actionIds = sections.flatMap((section) => actionsOf(section).map((action) => action.id));
 
 		expect(actionIds).not.toContain("ban");
@@ -123,13 +123,13 @@ describe("refusing to promise what bedrock cannot do", () => {
 		expect(actionIds).not.toContain("resetEnd");
 	});
 
-	test("declares no pending module, because nothing about bedrock waits on a companion upload", () => {
+	it("declares no pending module, because nothing about bedrock waits on a companion upload", () => {
 		expect(driver.pending).toBeUndefined();
 	});
 });
 
 describe("wiring the console the panel offers", () => {
-	test("binds every command argument to a table column that is really rendered", () => {
+	it("binds every command argument to a table column that is really rendered", () => {
 		for (const command of commands) {
 			for (const arg of command.args ?? []) {
 				if (arg.module === undefined || arg.column === undefined) {
@@ -142,20 +142,20 @@ describe("wiring the console the panel offers", () => {
 		}
 	});
 
-	test("names every command once", () => {
+	it("names every command once", () => {
 		const names = commands.map((command) => command.name);
 
 		expect(new Set(names).size).toBe(names.length);
 	});
 
-	test("writes every summary in both languages, because the console is customer-facing", () => {
+	it("writes every summary in both languages, because the console is customer-facing", () => {
 		for (const command of commands) {
 			expect(command.summary.ar.length).toBeGreaterThan(0);
 			expect(command.summary.en.length).toBeGreaterThan(0);
 		}
 	});
 
-	test("flags the commands that stop the server or destroy something", () => {
+	it("flags the commands that stop the server or destroy something", () => {
 		for (const name of [
 			"stop",
 			"kick",
@@ -167,13 +167,13 @@ describe("wiring the console the panel offers", () => {
 		}
 	});
 
-	test("offers no say command, because bedrock has none — tellraw is the one that works", () => {
+	it("offers no say command, because bedrock has none — tellraw is the one that works", () => {
 		expect(commands.map((command) => command.name)).not.toContain("say");
 	});
 });
 
 describe("wiring the first-run setup", () => {
-	test("points every form step at a form section this panel really declares", () => {
+	it("points every form step at a form section this panel really declares", () => {
 		for (const step of driver.setup?.steps ?? []) {
 			if (step.kind !== BridgeSetupStepKind.Form) {
 				continue;
@@ -191,13 +191,13 @@ describe("wiring the first-run setup", () => {
 		}
 	});
 
-	test("leaves every step optional, because a fresh bedrock server already runs", () => {
+	it("leaves every step optional, because a fresh bedrock server already runs", () => {
 		for (const step of driver.setup?.steps ?? []) {
 			expect(step.required).toBe(false);
 		}
 	});
 
-	test("declares no driver step, so the flow needs no submit handler", () => {
+	it("declares no driver step, so the flow needs no submit handler", () => {
 		expect(driver.setup?.submit).toBeUndefined();
 	});
 });

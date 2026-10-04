@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import type { Bridge } from "@serverkgg/bridge";
 import { BridgeEventName } from "@serverkgg/bridge/protocol";
 import { broadcast } from "./broadcast";
@@ -39,7 +39,7 @@ const harness = () => {
 };
 
 describe("reporting a broadcast", () => {
-	test("a chat message reports its text", async () => {
+	it("a chat message reports its text", async () => {
 		const run = harness();
 		await broadcast.actions.say?.(run.context, {
 			message: "restart in 5 minutes",
@@ -48,7 +48,7 @@ describe("reporting a broadcast", () => {
 			{
 				name: BridgeEventName.BroadcastSent,
 				text: {
-					ar: "تم إرسال رسالة للاعبين: «restart in 5 minutes»",
+					ar: "تم إرسال رسالة إلى اللاعبين: «restart in 5 minutes»",
 					en: 'Sent a message to players: "restart in 5 minutes"',
 				},
 				details: {
@@ -59,7 +59,7 @@ describe("reporting a broadcast", () => {
 		expect(JSON.stringify(run.reports)).not.toContain(SECRET);
 	});
 
-	test("a long title is cut to an 80 character excerpt", async () => {
+	it("a long title is cut to an 80 character excerpt", async () => {
 		const run = harness();
 		const message = "event ".repeat(40);
 		await broadcast.actions.title?.(run.context, {

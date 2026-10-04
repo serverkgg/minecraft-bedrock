@@ -1,9 +1,9 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import { ReleaseChannel } from "./channel";
 import { normalizeStamp } from "./installStamp";
 
 describe("reading the install stamp back", () => {
-	test("keeps what a previous install recorded", () => {
+	it("keeps what a previous install recorded", () => {
 		const stamp = normalizeStamp({
 			channel: "preview",
 			version: "1.26.60.23",
@@ -31,7 +31,7 @@ describe("reading the install stamp back", () => {
 		});
 	});
 
-	test("answers null for a stamp with no version, so a garbage file reinstalls instead of throwing", () => {
+	it("answers null for a stamp with no version, so a garbage file reinstalls instead of throwing", () => {
 		expect(normalizeStamp(null)).toBeNull();
 		expect(normalizeStamp({})).toBeNull();
 		expect(
@@ -46,7 +46,7 @@ describe("reading the install stamp back", () => {
 		).toBeNull();
 	});
 
-	test("falls back to the release channel when the stamp names one that no longer exists", () => {
+	it("falls back to the release channel when the stamp names one that no longer exists", () => {
 		expect(
 			normalizeStamp({
 				version: "1.26.45.1",
@@ -55,7 +55,7 @@ describe("reading the install stamp back", () => {
 		).toBe(ReleaseChannel.Release);
 	});
 
-	test("falls back to the version when no label was recorded", () => {
+	it("falls back to the version when no label was recorded", () => {
 		expect(
 			normalizeStamp({
 				version: "1.26.45.1",
@@ -63,7 +63,7 @@ describe("reading the install stamp back", () => {
 		).toBe("1.26.45.1");
 	});
 
-	test("drops non-strings out of the file list, because that list drives what an upgrade deletes", () => {
+	it("drops non-strings out of the file list, because that list drives what an upgrade deletes", () => {
 		expect(
 			normalizeStamp({
 				version: "1.26.45.1",
@@ -80,7 +80,7 @@ describe("reading the install stamp back", () => {
 });
 
 describe("resolving the installed build after restart or restore", () => {
-	test("keeps an exact installed version when the selection is automatic", async () => {
+	it("keeps an exact installed version when the selection is automatic", async () => {
 		const { selectedInstallVersion } = await import("./install");
 		const stamp = normalizeStamp({
 			channel: "release",
@@ -88,7 +88,7 @@ describe("resolving the installed build after restart or restore", () => {
 		});
 		expect(selectedInstallVersion(null, ReleaseChannel.Release, stamp)).toBe("1.26.45.1");
 	});
-	test("only chooses latest for first install or a different channel", async () => {
+	it("only chooses latest for first install or a different channel", async () => {
 		const { selectedInstallVersion } = await import("./install");
 		const stamp = normalizeStamp({
 			channel: "release",

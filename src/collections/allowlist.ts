@@ -103,8 +103,8 @@ export const allowlist: Bridge.Collection = {
 
 		if (name.length === 0) {
 			throw new BridgeUserError({
-				ar: "اكتب اسم اللاعب (الـ Gamertag) الأول.",
-				en: "type the player's gamertag first",
+				ar: "اكتب اسم اللاعب (الـ Gamertag) أولًا.",
+				en: "Enter the player's gamertag first.",
 			});
 		}
 
@@ -135,7 +135,7 @@ export const allowlist: Bridge.Collection = {
 		context.activity.report({
 			name: BridgeEventName.AccessGranted,
 			text: {
-				ar: `تمت إضافة ${name} للقائمة البيضاء`,
+				ar: `تمت إضافة ${name} إلى القائمة البيضاء`,
 				en: `Added ${name} to the allowlist`,
 			},
 			subject: name,

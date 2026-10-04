@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import { PackKind, packKindOf, parsePackManifest, parsePackVersion } from "./packManifest";
 
 const manifest = (
@@ -21,7 +21,7 @@ const manifest = (
 	});
 
 describe("telling a behavior pack from a resource pack", () => {
-	test("reads a plain behavior pack", () => {
+	it("reads a plain behavior pack", () => {
 		expect(
 			parsePackManifest(
 				manifest([
@@ -31,7 +31,7 @@ describe("telling a behavior pack from a resource pack", () => {
 		).toBe(PackKind.Behavior);
 	});
 
-	test("reads a scripting pack, which carries no data module at all", () => {
+	it("reads a scripting pack, which carries no data module at all", () => {
 		expect(
 			parsePackManifest(
 				manifest([
@@ -41,7 +41,7 @@ describe("telling a behavior pack from a resource pack", () => {
 		).toBe(PackKind.Behavior);
 	});
 
-	test("reads a behavior pack that also ships a client_data module", () => {
+	it("reads a behavior pack that also ships a client_data module", () => {
 		expect(
 			packKindOf([
 				"data",
@@ -50,7 +50,7 @@ describe("telling a behavior pack from a resource pack", () => {
 		).toBe(PackKind.Behavior);
 	});
 
-	test("reads a resource pack", () => {
+	it("reads a resource pack", () => {
 		expect(
 			parsePackManifest(
 				manifest([
@@ -60,7 +60,7 @@ describe("telling a behavior pack from a resource pack", () => {
 		).toBe(PackKind.Resource);
 	});
 
-	test("calls a world template what it is, so the packs tab can send it to the worlds tab", () => {
+	it("calls a world template what it is, so the packs tab can send it to the worlds tab", () => {
 		expect(
 			parsePackManifest(
 				manifest([
@@ -70,13 +70,13 @@ describe("telling a behavior pack from a resource pack", () => {
 		).toBe(PackKind.WorldTemplate);
 	});
 
-	test("answers null for a manifest with no module we can place", () => {
+	it("answers null for a manifest with no module we can place", () => {
 		expect(parsePackManifest(manifest([]))).toBeNull();
 	});
 });
 
 describe("reading a pack version", () => {
-	test("reads the array form every shipping pack uses", () => {
+	it("reads the array form every shipping pack uses", () => {
 		expect(
 			parsePackVersion([
 				1,
@@ -93,7 +93,7 @@ describe("reading a pack version", () => {
 		});
 	});
 
-	test("reads the semver string newer manifests are allowed to use", () => {
+	it("reads the semver string newer manifests are allowed to use", () => {
 		expect(parsePackVersion("1.2.3")).toEqual({
 			parts: [
 				1,
@@ -104,7 +104,7 @@ describe("reading a pack version", () => {
 		});
 	});
 
-	test("keeps a prerelease tag for display while still giving the triple the world file needs", () => {
+	it("keeps a prerelease tag for display while still giving the triple the world file needs", () => {
 		expect(parsePackVersion("1.2.3-beta.4")).toEqual({
 			parts: [
 				1,
@@ -115,14 +115,14 @@ describe("reading a pack version", () => {
 		});
 	});
 
-	test("answers null for a version it cannot read, rather than guessing zero", () => {
+	it("answers null for a version it cannot read, rather than guessing zero", () => {
 		expect(parsePackVersion("latest")).toBeNull();
 		expect(parsePackVersion(undefined)).toBeNull();
 	});
 });
 
 describe("reading a manifest the way the game does", () => {
-	test("accepts comments and trailing commas, which community add-ons ship and the game allows", () => {
+	it("accepts comments and trailing commas, which community add-ons ship and the game allows", () => {
 		const parsed = parsePackManifest(`/*
 	Credits header left by the add-on author
 */
@@ -148,11 +148,11 @@ describe("reading a manifest the way the game does", () => {
 });
 
 describe("refusing a manifest that cannot be trusted", () => {
-	test("answers null for unparsable json", () => {
+	it("answers null for unparsable json", () => {
 		expect(parsePackManifest("{not json")).toBeNull();
 	});
 
-	test("answers null when the uuid is missing, because the world file is keyed by it", () => {
+	it("answers null when the uuid is missing, because the world file is keyed by it", () => {
 		expect(
 			parsePackManifest(
 				JSON.stringify({

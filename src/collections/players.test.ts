@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import type { Bridge } from "@serverkgg/bridge";
 import { BridgeEventName } from "@serverkgg/bridge/protocol";
 import { roster } from "../shared";
@@ -55,7 +55,7 @@ const ROW: Bridge.Row = {
 };
 
 describe("reporting what the owner did to an online player", () => {
-	test("a kick keeps its event and reports the player and the reason given", async () => {
+	it("a kick keeps its event and reports the player and the reason given", async () => {
 		const run = harness();
 		await players.actions?.kick?.(run.context, ROW, {
 			reason: "griefing the spawn",
@@ -81,14 +81,14 @@ describe("reporting what the owner did to an online player", () => {
 		expect(JSON.stringify(run.reports)).not.toContain(SECRET);
 	});
 
-	test("a kick with no reason reports no reason", async () => {
+	it("a kick with no reason reports no reason", async () => {
 		const run = harness();
 		await players.actions?.kick?.(run.context, ROW, {});
 		expect(run.reports.at(0)?.text.en).toBe("Kicked Meslzy");
 		expect(run.reports.at(0)?.details?.reason).toBeUndefined();
 	});
 
-	test("op and deop report access to the operators list", async () => {
+	it("op and deop report access to the operators list", async () => {
 		const run = harness();
 		await players.actions?.op?.(run.context, ROW, {});
 		await players.actions?.deop?.(run.context, ROW, {});
@@ -112,7 +112,7 @@ describe("reporting what the owner did to an online player", () => {
 		]);
 	});
 
-	test("a game mode change keeps its event and reports the mode by its label", async () => {
+	it("a game mode change keeps its event and reports the mode by its label", async () => {
 		const run = harness();
 		await players.actions?.gamemode?.(run.context, ROW, {
 			mode: "creative",
@@ -130,7 +130,7 @@ describe("reporting what the owner did to an online player", () => {
 		});
 	});
 
-	test("a kill reports the player it changed", async () => {
+	it("a kill reports the player it changed", async () => {
 		const run = harness();
 		await players.actions?.kill?.(run.context, ROW, {});
 		expect(run.commands).toEqual([
@@ -144,7 +144,7 @@ describe("reporting what the owner did to an online player", () => {
 });
 
 describe("reporting only what the game could apply", () => {
-	test("a selector command on a player the roster does not hold is still sent but reports nothing", async () => {
+	it("a selector command on a player the roster does not hold is still sent but reports nothing", async () => {
 		for (const action of [
 			"op",
 			"deop",
@@ -159,7 +159,7 @@ describe("reporting only what the game could apply", () => {
 		}
 	});
 
-	test("a kick keeps its event even when it reports nothing", async () => {
+	it("a kick keeps its event even when it reports nothing", async () => {
 		const run = harness(false);
 		await players.actions?.kick?.(run.context, ROW, {});
 		expect(run.emitted).toEqual([

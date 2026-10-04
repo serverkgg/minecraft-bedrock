@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import type { Bridge } from "@serverkgg/bridge";
 import { BridgeEventName } from "@serverkgg/bridge/protocol";
 import { roster } from "../shared";
@@ -64,7 +64,7 @@ const harness = (running: boolean, online = true) => {
 };
 
 describe("reading permissions.json, which bedrock keys by xuid and never by name", () => {
-	test("keeps each level bedrock understands", () => {
+	it("keeps each level bedrock understands", () => {
 		expect(
 			normalizePermissions([
 				{
@@ -88,7 +88,7 @@ describe("reading permissions.json, which bedrock keys by xuid and never by name
 		]);
 	});
 
-	test("falls back to member for a level bedrock does not know", () => {
+	it("falls back to member for a level bedrock does not know", () => {
 		expect(
 			normalizePermissions([
 				{
@@ -99,7 +99,7 @@ describe("reading permissions.json, which bedrock keys by xuid and never by name
 		).toBe(PermissionLevel.Member);
 	});
 
-	test("drops an entry with no xuid, because there is nothing to key it by", () => {
+	it("drops an entry with no xuid, because there is nothing to key it by", () => {
 		expect(
 			normalizePermissions([
 				{
@@ -118,31 +118,31 @@ describe("changing permissions", () => {
 		},
 	];
 
-	test("replaces a level rather than adding a second row for the same account", () => {
+	it("replaces a level rather than adding a second row for the same account", () => {
 		const changed = withPermission(entries, "1", PermissionLevel.Visitor);
 
 		expect(changed).toHaveLength(1);
 		expect(changed[0]?.permission).toBe(PermissionLevel.Visitor);
 	});
 
-	test("adds an account that was not listed", () => {
+	it("adds an account that was not listed", () => {
 		expect(withPermission(entries, "2", PermissionLevel.Operator)).toHaveLength(2);
 	});
 
-	test("removes by xuid", () => {
+	it("removes by xuid", () => {
 		expect(withoutPermission(entries, "1")).toEqual([]);
 	});
 });
 
 describe("reporting operator changes", () => {
-	test("adding a known player while the server is off reports the operator level", async () => {
+	it("adding a known player while the server is off reports the operator level", async () => {
 		const run = harness(false);
 		await operators.add?.(run.context, "Meslzy");
 		expect(run.reports).toEqual([
 			{
 				name: BridgeEventName.AccessGranted,
 				text: {
-					ar: "تمت إضافة Meslzy لقائمة الأوبريتر",
+					ar: "تمت إضافة Meslzy إلى قائمة الأوبريتر",
 					en: "Added Meslzy to the operator list",
 				},
 				subject: "Meslzy",
@@ -156,7 +156,7 @@ describe("reporting operator changes", () => {
 		expect(JSON.stringify(run.reports)).not.toContain(SECRET);
 	});
 
-	test("changing a permission reports the new level by its label", async () => {
+	it("changing a permission reports the new level by its label", async () => {
 		const run = harness(false);
 		await operators.actions?.setPermission?.(
 			run.context,
@@ -183,7 +183,7 @@ describe("reporting operator changes", () => {
 		});
 	});
 
-	test("removing an operator reports the level they had", async () => {
+	it("removing an operator reports the level they had", async () => {
 		const run = harness(true);
 		await operators.actions?.remove?.(
 			run.context,
@@ -210,7 +210,7 @@ describe("reporting operator changes", () => {
 });
 
 describe("reporting only what the game could apply", () => {
-	test("op on a running server reports the player the roster holds, with their xuid", async () => {
+	it("op on a running server reports the player the roster holds, with their xuid", async () => {
 		const run = harness(true);
 		await operators.add?.(run.context, "meslzy");
 		expect(run.commands).toEqual([
@@ -226,7 +226,7 @@ describe("reporting only what the game could apply", () => {
 		});
 	});
 
-	test("op on a gamertag that is not online is still sent but reports nothing", async () => {
+	it("op on a gamertag that is not online is still sent but reports nothing", async () => {
 		const run = harness(true, false);
 		await operators.add?.(run.context, "Noura");
 		expect(run.commands).toEqual([
@@ -235,7 +235,7 @@ describe("reporting only what the game could apply", () => {
 		expect(run.reports).toEqual([]);
 	});
 
-	test("deop on a running server reports nothing when the player is not online", async () => {
+	it("deop on a running server reports nothing when the player is not online", async () => {
 		const run = harness(true, false);
 		await operators.actions?.remove?.(
 			run.context,
@@ -253,7 +253,7 @@ describe("reporting only what the game could apply", () => {
 		expect(run.reports).toEqual([]);
 	});
 
-	test("changing a permission writes the file and reports whoever is online", async () => {
+	it("changing a permission writes the file and reports whoever is online", async () => {
 		const run = harness(true, false);
 		await operators.actions?.setPermission?.(
 			run.context,

@@ -1,4 +1,4 @@
-import { afterAll, beforeEach, describe, expect, test } from "bun:test";
+import { afterAll, beforeEach, describe, expect, it } from "bun:test";
 import type { Bridge } from "@serverkgg/bridge";
 import { BedrockTransport, PROPERTY_KEYS, roster, stopWatchingRoster } from "../shared";
 import { createQuery } from "./query";
@@ -108,7 +108,7 @@ beforeEach(() => {
 });
 
 describe("sampling a nethernet server", () => {
-	test("probes the join endpoint on loopback and counts the roster off the log", async () => {
+	it("probes the join endpoint on loopback and counts the roster off the log", async () => {
 		const { context, pings, warnings } = harness({
 			[PROPERTY_KEYS.transport]: BedrockTransport.NetherNet,
 			[PROPERTY_KEYS.maxPlayers]: "20",
@@ -128,7 +128,7 @@ describe("sampling a nethernet server", () => {
 		});
 	});
 
-	test("treats a file without a transport as nethernet, the transport seedConfig writes", async () => {
+	it("treats a file without a transport as nethernet, the transport seedConfig writes", async () => {
 		const { context, pings } = harness({});
 
 		const sample = await createQuery().sample(context);
@@ -138,7 +138,7 @@ describe("sampling a nethernet server", () => {
 		expect(sample.max).toBeNull();
 	});
 
-	test("reconciles the roster with list every third sample, dropping a player the log never saw leave", async () => {
+	it("reconciles the roster with list every third sample, dropping a player the log never saw leave", async () => {
 		const { context, commands } = harness(
 			{
 				[PROPERTY_KEYS.maxPlayers]: "10",
@@ -158,7 +158,7 @@ describe("sampling a nethernet server", () => {
 		]);
 	});
 
-	test("warns once while the probe keeps failing, and still answers from the roster", async () => {
+	it("warns once while the probe keeps failing, and still answers from the roster", async () => {
 		answering = false;
 		const { context, warnings, commands } = harness({
 			[PROPERTY_KEYS.maxPlayers]: "10",
@@ -178,7 +178,7 @@ describe("sampling a nethernet server", () => {
 		expect(commands).toEqual([]);
 	});
 
-	test("warns again after the probe recovered and failed a second time", async () => {
+	it("warns again after the probe recovered and failed a second time", async () => {
 		const { context, warnings } = harness({});
 		context.probe.raknetPing = unreachable;
 		const query = createQuery();
@@ -195,7 +195,7 @@ describe("sampling a nethernet server", () => {
 });
 
 describe("reconciling the roster with list", () => {
-	test("never runs list while the roster is empty, so an idle console stays quiet", async () => {
+	it("never runs list while the roster is empty, so an idle console stays quiet", async () => {
 		const { context, commands } = harness({});
 		const query = createQuery();
 
@@ -206,7 +206,7 @@ describe("reconciling the roster with list", () => {
 		expect(commands).toEqual([]);
 	});
 
-	test("keeps the sample when list fails, answering from the roster", async () => {
+	it("keeps the sample when list fails, answering from the roster", async () => {
 		const { context, warnings } = harness({
 			[PROPERTY_KEYS.maxPlayers]: "10",
 		});
@@ -228,7 +228,7 @@ describe("reconciling the roster with list", () => {
 });
 
 describe("a nethernet server that does not answer on nethernet", () => {
-	test("tries the raknet ping, because a build pinned before nethernet runs raknet whatever the file says", async () => {
+	it("tries the raknet ping, because a build pinned before nethernet runs raknet whatever the file says", async () => {
 		answering = false;
 		const { context, pings, warnings } = harness({
 			[PROPERTY_KEYS.transport]: BedrockTransport.NetherNet,
@@ -249,7 +249,7 @@ describe("a nethernet server that does not answer on nethernet", () => {
 });
 
 describe("sampling a raknet server", () => {
-	test("keeps the raknet ping and takes the counts from the pong", async () => {
+	it("keeps the raknet ping and takes the counts from the pong", async () => {
 		const { context, pings } = harness({
 			[PROPERTY_KEYS.transport]: BedrockTransport.RakNet,
 			[PROPERTY_KEYS.maxPlayers]: "10",
@@ -267,7 +267,7 @@ describe("sampling a raknet server", () => {
 		});
 	});
 
-	test("falls back to the roster and max-players when the ping fails, warning once", async () => {
+	it("falls back to the roster and max-players when the ping fails, warning once", async () => {
 		const { context, warnings } = harness({
 			[PROPERTY_KEYS.transport]: BedrockTransport.RakNet,
 			[PROPERTY_KEYS.maxPlayers]: "10",

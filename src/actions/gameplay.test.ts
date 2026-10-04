@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import type { Bridge } from "@serverkgg/bridge";
 import { BridgeEventName } from "@serverkgg/bridge/protocol";
 import { gameplay } from "./gameplay";
@@ -39,7 +39,7 @@ const harness = () => {
 };
 
 describe("reporting live gameplay changes", () => {
-	test("every action reports what it changed and to what", async () => {
+	it("every action reports what it changed and to what", async () => {
 		const run = harness();
 		for (const action of [
 			"timeDay",
@@ -105,7 +105,7 @@ describe("reporting live gameplay changes", () => {
 		expect(JSON.stringify(run.reports)).not.toContain(SECRET);
 	});
 
-	test("a difficulty change reports the difficulty by its label", async () => {
+	it("a difficulty change reports the difficulty by its label", async () => {
 		const run = harness();
 		await gameplay.actions.difficulty?.(run.context, {
 			difficulty: "hard",
@@ -128,7 +128,7 @@ describe("reporting live gameplay changes", () => {
 		]);
 	});
 
-	test("a refused difficulty sends nothing and reports nothing", async () => {
+	it("a refused difficulty sends nothing and reports nothing", async () => {
 		const run = harness();
 		await expect(
 			gameplay.actions.difficulty?.(run.context, {

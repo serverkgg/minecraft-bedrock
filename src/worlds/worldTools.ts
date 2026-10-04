@@ -11,8 +11,8 @@ import { discoverWorlds, safeWorldFolder } from "./world";
 export const validateWorldFolder = (folder: string) => {
 	if (folder.length === 0 || folder === "." || folder === ".." || /[\\/\r\n\0]/.test(folder)) {
 		throw new BridgeUserError({
-			ar: "اسم الماب مو صالح. اختر الماب من القائمة.",
-			en: "Invalid world name. Select a world from the list.",
+			ar: "اسم الماب غير صحيح. اختر الماب من القائمة.",
+			en: "That world name isn't valid. Pick a world from the list.",
 		});
 	}
 	return folder;
@@ -22,8 +22,8 @@ export const existingWorld = async (context: Bridge.Context, folder: string) => 
 	validateWorldFolder(folder);
 	if (!(await discoverWorlds(context)).includes(folder)) {
 		throw new BridgeUserError({
-			ar: "ما لقينا الماب. حدّث القائمة وجرّب مرة ثانية.",
-			en: "World not found. Refresh the list and try again.",
+			ar: "تعذّر العثور على الماب. حدّث القائمة وجرب مرة ثانية.",
+			en: "We couldn't find that world. Refresh the list and try again.",
 		});
 	}
 	return folder;
@@ -34,7 +34,7 @@ const newWorld = async (context: Bridge.Context, name: string) => {
 	validateWorldFolder(folder);
 	if (await context.files.exists(worldPath(folder))) {
 		throw new BridgeUserError({
-			ar: "عندك ماب بنفس الاسم. اختر اسم ثاني.",
+			ar: "توجد ماب بالاسم نفسه. اختر اسمًا آخر.",
 			en: "A world with that name already exists. Choose another name.",
 		});
 	}
@@ -141,8 +141,8 @@ export const exportWorld = async (context: Bridge.Context, source: string) => {
 				}
 				if (!found) {
 					throw new BridgeUserError({
-						ar: `ما قدرنا نصدّر الماب لأن الأدون ${reference.pack_id} مو موجود بنسخته المطلوبة.`,
-						en: `Cannot export: pack ${reference.pack_id} is missing at the required version.`,
+						ar: `تعذّر تصدير الماب لأن الإضافة ${reference.pack_id} غير موجودة بالإصدار المطلوب.`,
+						en: `We couldn't export the world because add-on ${reference.pack_id} is missing at the required version.`,
 					});
 				}
 			}
@@ -187,7 +187,7 @@ export const worldTools: Bridge.Actions = {
 			const seed = String(args.seed ?? "").trim();
 			if (seed.length > 64 || /[\r\n\0]/.test(seed)) {
 				throw new BridgeUserError({
-					ar: "السييد طويل أو فيه رموز مو صالحة.",
+					ar: "السيد طويل أو يحتوي على رموز غير صالحة.",
 					en: "The seed is too long or contains invalid characters.",
 				});
 			}
@@ -201,8 +201,8 @@ export const worldTools: Bridge.Actions = {
 			context.activity.report({
 				name: BridgeEventName.WorldCreated,
 				text: {
-					ar: `تم إنشاء ماب ${folder} وتفعيله، ويتولّد مع التشغيل الجاي`,
-					en: `Created and activated world ${folder}, it generates on the next start`,
+					ar: `تم إنشاء ماب ${folder} وتفعيلها، وتتولد عند التشغيل التالي`,
+					en: `Created and activated world ${folder}, generated on the next start`,
 				},
 				subject: folder,
 				details:

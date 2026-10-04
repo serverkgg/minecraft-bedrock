@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import { installableListing, packLoadState, repairable, repairRefusal, strayArchives } from "./packHealth";
 import { PackKind, parsePackManifest } from "./packManifest";
 import type { PackRecord } from "./packSidecar";
@@ -46,7 +46,7 @@ const record = (uuid: string): PackRecord => ({
 });
 
 describe("finding add-on files that never installed", () => {
-	test("keeps archives sitting at the top of either packs folder, whatever the case of the extension", () => {
+	it("keeps archives sitting at the top of either packs folder, whatever the case of the extension", () => {
 		const output = [
 			"behavior_packs/Advanced Machines Add-On (addon)_2.mcaddon",
 			"resource_packs/warplanesrp (1).MCPACK",
@@ -61,7 +61,7 @@ describe("finding add-on files that never installed", () => {
 		]);
 	});
 
-	test("ignores files that are not archives and anything outside the packs folders", () => {
+	it("ignores files that are not archives and anything outside the packs folders", () => {
 		const output = [
 			"behavior_packs/readme.txt",
 			"behavior_packs/Teams-7a8094b9/manifest.json",
@@ -75,14 +75,14 @@ describe("finding add-on files that never installed", () => {
 });
 
 describe("telling an add-on archive from any other zip", () => {
-	test("accepts an archive with a manifest at any depth or a nested pack", () => {
+	it("accepts an archive with a manifest at any depth or a nested pack", () => {
 		expect(installableListing("./manifest.json\n./scripts/main.js")).toBe(true);
 		expect(installableListing("Probe BP/manifest.json\nProbe RP/manifest.json")).toBe(true);
 		expect(installableListing("inner.mcaddon")).toBe(true);
 		expect(installableListing("packs/warplanes.MCPACK")).toBe(true);
 	});
 
-	test("rejects a zip that holds no add-on, so the repair is not offered for it forever", () => {
+	it("rejects a zip that holds no add-on, so the repair is not offered for it forever", () => {
 		expect(installableListing("readme.txt")).toBe(false);
 		expect(installableListing("notmanifest.json.bak\nworld/level.dat")).toBe(false);
 		expect(installableListing("")).toBe(false);
@@ -90,7 +90,7 @@ describe("telling an add-on archive from any other zip", () => {
 });
 
 describe("marking add-ons that need beta apis", () => {
-	test("recognises versioned and bare beta script modules", () => {
+	it("recognises versioned and bare beta script modules", () => {
 		expect(
 			manifest([
 				{
@@ -113,7 +113,7 @@ describe("marking add-ons that need beta apis", () => {
 		]);
 	});
 
-	test("leaves stable script modules and pack dependencies alone", () => {
+	it("leaves stable script modules and pack dependencies alone", () => {
 		expect(
 			manifest([
 				{
@@ -132,7 +132,7 @@ describe("marking add-ons that need beta apis", () => {
 		).toEqual([]);
 	});
 
-	test("says why a beta add-on will not load, and stays quiet once beta apis is on", () => {
+	it("says why a beta add-on will not load, and stays quiet once beta apis is on", () => {
 		const beta = manifest([
 			{
 				module_name: "@minecraft/server",
@@ -141,18 +141,18 @@ describe("marking add-ons that need beta apis", () => {
 		]);
 
 		expect(packLoadState(beta, false).en).toContain("off on this world");
-		expect(packLoadState(beta, false).ar).toContain("مقفلة على الماب");
+		expect(packLoadState(beta, false).ar).toContain("موقوفة في الماب");
 		expect(packLoadState(beta, null).en).toContain("Needs Beta APIs");
-		expect(packLoadState(beta, null).ar).toContain("يحتاج Beta APIs");
+		expect(packLoadState(beta, null).ar).toContain("يتطلب Beta APIs");
 		expect(packLoadState(beta, true).en).toContain("Installed");
-		expect(packLoadState(beta, true).ar).toContain("مركّب");
+		expect(packLoadState(beta, true).ar).toContain("مثبّت");
 		expect(packLoadState(null, true).en).toContain("Missing files");
 		expect(packLoadState(null, true).ar).toContain("ملفات ناقصة");
 	});
 });
 
 describe("offering the repair", () => {
-	test("offers it only when there is a file to install, a pack to activate or beta apis to turn on", () => {
+	it("offers it only when there is a file to install, a pack to activate or beta apis to turn on", () => {
 		const clean = {
 			world: "world",
 			archives: [],
@@ -210,7 +210,7 @@ describe("saying why the repair is not offered", () => {
 		betaApis: true,
 	};
 
-	test("says nothing while there is something to repair", () => {
+	it("says nothing while there is something to repair", () => {
 		expect(
 			repairRefusal({
 				...healthy,
@@ -221,12 +221,12 @@ describe("saying why the repair is not offered", () => {
 		).toBeNull();
 	});
 
-	test("says there is nothing to repair when nothing needs it", () => {
-		expect(repairRefusal(healthy)?.en).toBe("There is nothing to repair here.");
+	it("says there is nothing to repair when nothing needs it", () => {
+		expect(repairRefusal(healthy)?.en).toBe("There's nothing to repair here.");
 	});
 
-	test("points to the details when what is wrong is beyond the repair", () => {
-		const beyond = "This cannot be repaired automatically. Open the Add-on check in the Add-ons tab for the details.";
+	it("points to the details when what is wrong is beyond the repair", () => {
+		const beyond = "This can't be repaired automatically. Open the Add-on check in the Add-ons tab for the details.";
 
 		expect(
 			repairRefusal({

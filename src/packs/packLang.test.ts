@@ -1,30 +1,30 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import { looksLocalized, parseLang } from "./packLang";
 
 describe("reading a pack's .lang file", () => {
-	test("reads key=value lines", () => {
+	it("reads key=value lines", () => {
 		expect(parseLang("pack.name=Cool Addon").get("pack.name")).toBe("Cool Addon");
 	});
 
-	test("keeps an equals sign inside the value, splitting only on the first one", () => {
+	it("keeps an equals sign inside the value, splitting only on the first one", () => {
 		expect(parseLang("pack.name=a=b").get("pack.name")).toBe("a=b");
 	});
 
-	test("drops the trailing ## comment bedrock allows", () => {
+	it("drops the trailing ## comment bedrock allows", () => {
 		expect(parseLang("pack.name=Cool Addon ##the title").get("pack.name")).toBe("Cool Addon");
 	});
 
-	test("ignores comment and blank lines", () => {
+	it("ignores comment and blank lines", () => {
 		expect(parseLang("#comment\n\npack.name=X").size).toBe(1);
 	});
 });
 
 describe("deciding whether a header name needs resolving at all", () => {
-	test("treats a dotted token as a localization key", () => {
+	it("treats a dotted token as a localization key", () => {
 		expect(looksLocalized("pack.name")).toBe(true);
 	});
 
-	test("treats a written-out name as the name itself, which is the common case", () => {
+	it("treats a written-out name as the name itself, which is the common case", () => {
 		expect(looksLocalized("My Cool Addon")).toBe(false);
 		expect(looksLocalized("CoolAddon")).toBe(false);
 	});

@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import { PRESERVE_ON_UPDATE, topLevelOf, vanillaPacksOf } from "./installGame";
 
 const ENTRIES = [
@@ -13,7 +13,7 @@ const ENTRIES = [
 ];
 
 describe("reading the archive inventory before unpacking it", () => {
-	test("collects the top-level names, which is what a later upgrade deletes", () => {
+	it("collects the top-level names, which is what a later upgrade deletes", () => {
 		expect(topLevelOf(ENTRIES)).toEqual([
 			"bedrock_server",
 			"behavior_packs",
@@ -25,7 +25,7 @@ describe("reading the archive inventory before unpacking it", () => {
 		]);
 	});
 
-	test("collects the vanilla pack folders this build ships, so a later build can sweep the stale ones", () => {
+	it("collects the vanilla pack folders this build ships, so a later build can sweep the stale ones", () => {
 		expect(vanillaPacksOf(ENTRIES)).toEqual([
 			"behavior_packs/vanilla",
 			"behavior_packs/vanilla_1.21.40",
@@ -35,7 +35,7 @@ describe("reading the archive inventory before unpacking it", () => {
 });
 
 describe("protecting what the player owns", () => {
-	test("never deletes the world, the config or the player lists on an upgrade", () => {
+	it("never deletes the world, the config or the player lists on an upgrade", () => {
 		for (const name of [
 			"worlds",
 			"server.properties",
@@ -46,7 +46,7 @@ describe("protecting what the player owns", () => {
 		}
 	});
 
-	test("never deletes an installed add-on on an upgrade", () => {
+	it("never deletes an installed add-on on an upgrade", () => {
 		expect(PRESERVE_ON_UPDATE).toContain("behavior_packs");
 		expect(PRESERVE_ON_UPDATE).toContain("resource_packs");
 	});

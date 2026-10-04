@@ -7,8 +7,8 @@ const messageOf = (args: Bridge.Values) => {
 
 	if (typeof value !== "string" || value.trim().length === 0) {
 		throw new BridgeUserError({
-			ar: "اكتب الرسالة الأول.",
-			en: "type the message first",
+			ar: "اكتب الرسالة أولًا.",
+			en: "Write the message first.",
 		});
 	}
 
@@ -30,7 +30,7 @@ export const broadcast: Bridge.Actions = {
 			context.activity.report({
 				name: BridgeEventName.BroadcastSent,
 				text: {
-					ar: `تم إرسال رسالة للاعبين: «${excerpt}»`,
+					ar: `تم إرسال رسالة إلى اللاعبين: «${excerpt}»`,
 					en: `Sent a message to players: "${excerpt}"`,
 				},
 				details: {

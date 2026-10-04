@@ -428,8 +428,8 @@ export const enableBetaApis = async (context: Bridge.Context, world: string) => 
 	const level = bytes === null ? null : parseLevel(bytes);
 	if (level === null) {
 		throw new BridgeUserError({
-			ar: "ما قدرنا نقرأ ملف الماب level.dat، فما فعّلنا Beta APIs. استرجع نسخة احتياطية أو فعّلها من جهازك.",
-			en: "We could not read the world's level.dat, so Beta APIs was not turned on. Restore a backup or turn it on from your device.",
+			ar: "تعذّرت قراءة ملف الماب level.dat، لذلك لم يتم تفعيل Beta APIs. رجّع نسخة احتياطية أو فعّلها من جهازك.",
+			en: "We couldn't read the world's level.dat, so Beta APIs wasn't turned on. Restore a backup or turn it on from your device.",
 		});
 	}
 	if (betaApisEnabled(levelExperiments(level))) {

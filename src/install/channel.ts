@@ -20,7 +20,7 @@ export const CHANNEL_TEXT: Record<ReleaseChannel, Bridge.Text> = {
 		en: "Preview",
 	},
 	[ReleaseChannel.Release]: {
-		ar: "النسخة العادية",
+		ar: "الإصدار العادي",
 		en: "Release",
 	},
 };

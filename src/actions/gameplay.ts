@@ -7,8 +7,8 @@ const choiceOf = (args: Bridge.Values, key: string, allowed: string[]) => {
 
 	if (typeof value !== "string" || !allowed.includes(value)) {
 		throw new BridgeUserError({
-			ar: "الخيار اللي اخترته مو مدعوم.",
-			en: "that choice is not one the server accepts",
+			ar: "الخيار المحدد غير مدعوم.",
+			en: "The server doesn't accept that choice.",
 		});
 	}
 
@@ -35,7 +35,7 @@ export const gameplay: Bridge.Actions = {
 			await send(context, "time set day");
 
 			reportChange(context, "time", "day", {
-				ar: "تم تحويل الوقت لنهار",
+				ar: "تم تحويل الوقت إلى النهار",
 				en: "Set the time to day",
 			});
 		},
@@ -44,7 +44,7 @@ export const gameplay: Bridge.Actions = {
 			await send(context, "time set night");
 
 			reportChange(context, "time", "night", {
-				ar: "تم تحويل الوقت لليل",
+				ar: "تم تحويل الوقت إلى الليل",
 				en: "Set the time to night",
 			});
 		},
@@ -53,7 +53,7 @@ export const gameplay: Bridge.Actions = {
 			await send(context, "weather clear");
 
 			reportChange(context, "weather", "clear", {
-				ar: "تم تغيير الجو لصافي",
+				ar: "تم تغيير الطقس إلى صافٍ",
 				en: "Set the weather to clear",
 			});
 		},
@@ -62,7 +62,7 @@ export const gameplay: Bridge.Actions = {
 			await send(context, "weather rain");
 
 			reportChange(context, "weather", "rain", {
-				ar: "تم تغيير الجو لمطر",
+				ar: "تم تغيير الطقس إلى مطر",
 				en: "Set the weather to rain",
 			});
 		},
@@ -71,7 +71,7 @@ export const gameplay: Bridge.Actions = {
 			await send(context, "weather thunder");
 
 			reportChange(context, "weather", "thunder", {
-				ar: "تم تغيير الجو لرعد وبرق",
+				ar: "تم تغيير الطقس إلى رعد وبرق",
 				en: "Set the weather to thunder",
 			});
 		},

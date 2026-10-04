@@ -77,7 +77,7 @@ export const assertCompatible = async (
 	const problems = candidates.flatMap((manifest) => packProblems(manifest, versions, engine));
 	if (problems.length > 0) {
 		throw new BridgeUserError({
-			ar: `الأدون يحتاج ملفات أو نسخة مختلفة: ${problems.join(", ")}. ركّب المتطلبات أول.`,
+			ar: `الإضافة تتطلب ملفات أو إصدارًا مختلفًا: ${problems.join(", ")}. ثبّت المتطلبات أولًا.`,
 			en: `This add-on needs different files or an engine version: ${problems.join(", ")}. Install the requirements first.`,
 		});
 	}
@@ -143,8 +143,8 @@ export const removalRefusal = async (
 				...dependents.map((entry) => entry.title),
 			].join(", ");
 			return {
-				ar: `الأدون مستخدم في مابات أو أدونات ثانية: ${users}. فك ارتباطه أول.`,
-				en: `This pack is used by other worlds or add-ons: ${users}. Remove those references first.`,
+				ar: `الإضافة مستخدمة في مابات أو إضافات أخرى: ${users}. ألغِ ارتباطها أولًا.`,
+				en: `This add-on is used by other worlds or add-ons: ${users}. Remove those references first.`,
 			};
 		}
 	}
@@ -203,7 +203,7 @@ export const activationOrder = (ids: string[], packs: Record<string, PackRecord>
 		const pack = packs[id];
 		if (pack === undefined) {
 			throw new BridgeUserError({
-				ar: `الأدون يحتاج ملف مفقود: ${id}`,
+				ar: `الإضافة تتطلب ملفًا مفقودًا: ${id}`,
 				en: `Missing add-on dependency: ${id}`,
 			});
 		}
@@ -233,8 +233,8 @@ export const assertCanDisable = async (
 		}
 		if ((await readWorldPacks(context, world, candidate.kind)).some((entry) => entry.pack_id === candidate.uuid)) {
 			throw new BridgeUserError({
-				ar: `عطّل "${candidate.title}" أول، لأنه يحتاج هذا الأدون.`,
-				en: `Disable "${candidate.title}" first; it needs this pack.`,
+				ar: `أوقف «${candidate.title}» أولًا، لأنها تتطلب هذه الإضافة.`,
+				en: `Disable "${candidate.title}" first. It needs this add-on.`,
 			});
 		}
 	}

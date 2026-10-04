@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import { activationOrder, compareVersion, linkedPacks, packProblems, safePackFolder } from "./packCompatibility";
 import { parsePackManifest, parsePackVersion } from "./packManifest";
 import { parsePackSidecar } from "./packSidecar";
@@ -44,13 +44,13 @@ const fixture = () =>
 	);
 
 describe("pack compatibility", () => {
-	test("retains minimum engine, dependency versions and script API requirements", () => {
+	it("retains minimum engine, dependency versions and script API requirements", () => {
 		const manifest = fixture();
 		expect(manifest?.scripted).toBe(true);
 		expect(manifest?.minEngineVersion?.text).toBe("1.21.100");
 		expect(manifest?.requirements[1]?.module).toBe("@minecraft/server");
 	});
-	test("rejects missing dependencies, wrong versions and an older engine", () => {
+	it("rejects missing dependencies, wrong versions and an older engine", () => {
 		const manifest = fixture();
 		if (manifest === null) {
 			throw new Error("invalid fixture");
@@ -77,7 +77,7 @@ describe("pack compatibility", () => {
 			),
 		).toHaveLength(1);
 	});
-	test("compares build components numerically", () => {
+	it("compares build components numerically", () => {
 		expect(
 			compareVersion(
 				[
@@ -94,7 +94,7 @@ describe("pack compatibility", () => {
 			),
 		).toBe(1);
 	});
-	test("does not silently accept invalid JSON or partial version strings", () => {
+	it("does not silently accept invalid JSON or partial version strings", () => {
 		expect(parsePackManifest("null")).toBeNull();
 		expect(parsePackVersion("1.2garbage.3")).toBeNull();
 		expect(
@@ -112,7 +112,7 @@ describe("pack compatibility", () => {
 			]),
 		).toBeNull();
 	});
-	test("activates dependencies first, accepts two halves that require each other, and refuses a missing one", () => {
+	it("activates dependencies first, accepts two halves that require each other, and refuses a missing one", () => {
 		const packs = parsePackSidecar(
 			JSON.stringify({
 				packs: {
@@ -172,7 +172,7 @@ describe("pack compatibility", () => {
 			),
 		).toThrow("Missing add-on dependency: missing");
 	});
-	test("groups the halves of an add-on that require each other, and nothing that only depends one way", () => {
+	it("groups the halves of an add-on that require each other, and nothing that only depends one way", () => {
 		const packs = parsePackSidecar(
 			JSON.stringify({
 				packs: {
@@ -222,7 +222,7 @@ describe("pack compatibility", () => {
 			"c",
 		]);
 	});
-	test("only permits pack folders in supported world or global roots", () => {
+	it("only permits pack folders in supported world or global roots", () => {
 		expect(safePackFolder("worlds/Survival/behavior_packs/addon")).toBe(true);
 		expect(safePackFolder("behavior_packs/..")).toBe(false);
 		expect(safePackFolder("worlds/../../settings")).toBe(false);
@@ -230,7 +230,7 @@ describe("pack compatibility", () => {
 	});
 });
 
-test("shared packs cannot be removed from another world's registry", async () => {
+it("shared packs cannot be removed from another world's registry", async () => {
 	const { assertRemovable } = await import("./packCompatibility");
 	type Context = import("@serverkgg/bridge").Bridge.Context;
 	const packs = parsePackSidecar(

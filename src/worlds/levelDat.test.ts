@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import { readFileSync } from "node:fs";
 import {
 	betaApisEnabled,
@@ -166,7 +166,7 @@ const withoutExperiments = (file: LevelFile) =>
 	});
 
 describe("reading experiments from level.dat", () => {
-	test("finds beta apis past every other kind of tag", () => {
+	it("finds beta apis past every other kind of tag", () => {
 		const experiments = parseLevelExperiments(
 			experimentsLevel([
 				...byte("gametest", 1),
@@ -181,18 +181,18 @@ describe("reading experiments from level.dat", () => {
 		expect(betaApisEnabled(experiments)).toBe(true);
 	});
 
-	test("reports beta apis off when the world never had experiments", () => {
+	it("reports beta apis off when the world never had experiments", () => {
 		const experiments = parseLevelExperiments(level(noise));
 
 		expect(experiments).toEqual({});
 		expect(betaApisEnabled(experiments)).toBe(false);
 	});
 
-	test("reports beta apis off when the flag is present but zero", () => {
+	it("reports beta apis off when the flag is present but zero", () => {
 		expect(betaApisEnabled(parseLevelExperiments(experimentsLevel(byte("gametest", 0))))).toBe(false);
 	});
 
-	test("answers unknown rather than guessing for a truncated or foreign file", () => {
+	it("answers unknown rather than guessing for a truncated or foreign file", () => {
 		const whole = experimentsLevel(byte("gametest", 1));
 
 		expect(parseLevelExperiments(whole.slice(0, 30))).toBeNull();
@@ -200,7 +200,7 @@ describe("reading experiments from level.dat", () => {
 		expect(betaApisEnabled(null)).toBeNull();
 	});
 
-	test("reads the level file a real 1.26.45 server generated", () => {
+	it("reads the level file a real 1.26.45 server generated", () => {
 		expect(parseLevelExperiments(fixture())).toEqual({
 			experiments_ever_used: 0,
 			saved_with_toggled_experiments: 0,
@@ -209,19 +209,19 @@ describe("reading experiments from level.dat", () => {
 });
 
 describe("writing level.dat back", () => {
-	test("writes a real server's level file back byte for byte", () => {
+	it("writes a real server's level file back byte for byte", () => {
 		const bytes = fixture();
 
 		expect(serializeLevel(parsed(bytes))).toEqual(bytes);
 	});
 
-	test("writes every tag type back byte for byte, including longs, floats, arrays and nested lists", () => {
+	it("writes every tag type back byte for byte, including longs, floats, arrays and nested lists", () => {
 		const bytes = experimentsLevel(byte("gametest", 0));
 
 		expect(serializeLevel(parsed(bytes))).toEqual(bytes);
 	});
 
-	test("turns beta apis on in a real level file and leaves every other tag exactly as it was", () => {
+	it("turns beta apis on in a real level file and leaves every other tag exactly as it was", () => {
 		const original = parsed(fixture());
 		const written = serializeLevel(withExperiment(original, "gametest", 1));
 		const reread = parsed(written);
@@ -236,7 +236,7 @@ describe("writing level.dat back", () => {
 		expect(new DataView(written.buffer).getInt32(4, true)).toBe(written.length - 8);
 	});
 
-	test("adds the experiments compound to a world that never had one", () => {
+	it("adds the experiments compound to a world that never had one", () => {
 		const written = serializeLevel(withExperiment(parsed(level(noise)), "gametest", 1));
 
 		expect(parseLevelExperiments(written)).toEqual({
@@ -245,7 +245,7 @@ describe("writing level.dat back", () => {
 		expect(withoutExperiments(parsed(written))).toEqual(serializeLevel(parsed(level(noise))));
 	});
 
-	test("flips a flag that is present but off, without duplicating it", () => {
+	it("flips a flag that is present but off, without duplicating it", () => {
 		const written = serializeLevel(withExperiment(parsed(experimentsLevel(byte("gametest", 0))), "gametest", 1));
 
 		expect(parseLevelExperiments(written)).toEqual({
@@ -254,7 +254,7 @@ describe("writing level.dat back", () => {
 		expect(written.length).toBe(experimentsLevel(byte("gametest", 0)).length);
 	});
 
-	test("changes nothing when beta apis is already on", () => {
+	it("changes nothing when beta apis is already on", () => {
 		const bytes = experimentsLevel(byte("gametest", 1));
 
 		expect(serializeLevel(withExperiment(parsed(bytes), "gametest", 1))).toEqual(bytes);
