@@ -103,7 +103,7 @@ const versionTab: Bridge.Tab = {
 			},
 			target: BridgeFormTarget.Variables,
 			reinstall: true,
-			confirm: BridgeConfirm.Strong,
+			confirm: BridgeConfirm.Normal,
 			confirmText: {
 				ar: "نأخذ نسخة احتياطية قبل تثبيت الإصدار الجديد. الرجوع من البريفيو يتطلب ماب محفوظة قبل التبديل، وليس مجرد تغيير رقم الإصدار.",
 				en: "We take a backup before installing the new build. Returning from preview requires a world saved before the switch, not just a different build number.",
@@ -481,7 +481,7 @@ const playersTab: Bridge.Tab = {
 						ar: "اجعله أوبريتر",
 						en: "Make operator",
 					},
-					confirm: BridgeConfirm.Strong,
+					confirm: BridgeConfirm.Normal,
 					confirmText: {
 						ar: "يستطيع الأوبريتر استخدام كل أوامر الإدارة داخل اللعبة، وتغيير الماب كما يشاء.",
 						en: "An operator can run every admin command in game and change the world however they like.",
@@ -1130,7 +1130,7 @@ const addonsTab: Bridge.Tab = {
 						ar: "أزله",
 						en: "Remove",
 					},
-					confirm: BridgeConfirm.Strong,
+					confirm: BridgeConfirm.Normal,
 					confirmText: {
 						ar: "إذا أزلت إضافة سلوك تستخدمها ماب، يختفي من الماب كل ما أضافته الإضافة من وحوش وأغراض. خذ نسخة احتياطية أولًا.",
 						en: "If you remove a behavior pack a world was using, everything it added disappears from that world, including the mobs and items it brought. Take a backup first.",
