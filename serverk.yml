@@ -136,23 +136,12 @@ files:
     - .serverk-world-clone/**
     - .serverk-world-export/**
     - .serverk-level/**
-    - bedrock_server
-    - "*.so"
-    - libMinecraft.Server.Lib.a
-    - config
-    - data
-    - definitions
-    - minecraftpe
-    - treatments
-    - premium_cache
-    - packetlimitconfig.json
-    - profanity_filter.wlist
-    - valid_known_packs.json
+    - .serverk-download/**
+    - .serverk-worlds/**
+    - .serverk-packs/**
     - .serverk-install.json
     - .serverk-packs.json
     - .serverk-players.json
-    - "worlds/*/db/**"
-    - "worlds/*/level.dat"
   notable:
     - match: server.properties
       label:
