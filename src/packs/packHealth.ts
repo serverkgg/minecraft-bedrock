@@ -294,7 +294,7 @@ const betaAdvice = (diagnosis: PackDiagnosis) => {
 				en: "Some of your add-ons need Beta APIs, which is off for this world. Press Repair add-ons and we'll turn it on.",
 			}
 		: {
-				ar: "بعض إضافاتك تتطلب Beta APIs، وتعذّرت قراءة إعدادات الماب. افتح الماب على جهازك، وفعّل Beta APIs من Experiments، ثم صدّر الماب وارفعها من تبويب المابات.",
+				ar: "بعض إضافاتك تتطلب Beta APIs، وتعذّرت قراءة إعدادات الماب. افتح الماب على جهازك، وفعّل Beta APIs من Experiments، ثم صدّر الماب وارفعه من تبويب المابات.",
 				en: "Some of your add-ons need Beta APIs, and we couldn't read this world's settings. Open the world on your device, turn on Beta APIs under Experiments, export the world and upload it from the Worlds tab.",
 			};
 };
@@ -452,7 +452,7 @@ export const packHealth: Bridge.Detail = {
 				en: "Add-on check",
 			},
 			subtitle: {
-				ar: `الماب المفعّلة: ${diagnosis.world}`,
+				ar: `الماب المفعّل: ${diagnosis.world}`,
 				en: `Active world: ${diagnosis.world}`,
 			},
 			description: betaAdvice(diagnosis),

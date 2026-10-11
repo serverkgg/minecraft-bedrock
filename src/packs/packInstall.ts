@@ -118,7 +118,7 @@ export const installPackSource = async (context: Bridge.Context, source: PackSou
 			&& (await packWorlds(context, previous)).some((used) => used !== world)
 		) {
 			throw new BridgeUserError({
-				ar: "هذه الإضافة مستخدمة في ماب أخرى. ألغِ ارتباطها بها قبل تغيير إصدارها.",
+				ar: "هذه الإضافة مستخدمة في ماب آخر. ألغِ ارتباطها به قبل تغيير إصدارها.",
 				en: "Another world uses this add-on. Remove that world's reference before changing its version.",
 			});
 		}

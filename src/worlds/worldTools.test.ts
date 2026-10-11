@@ -73,7 +73,7 @@ describe("safe world tools", () => {
 			{
 				name: BridgeEventName.WorldCreated,
 				text: {
-					ar: "تم إنشاء ماب New-World وتفعيلها، وتتولد عند التشغيل التالي",
+					ar: "تم إنشاء ماب New-World وتفعيله، ويتولد عند التشغيل التالي",
 					en: "Created and activated world New-World, generated on the next start",
 				},
 				subject: "New-World",

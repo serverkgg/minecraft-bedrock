@@ -34,7 +34,7 @@ const newWorld = async (context: Bridge.Context, name: string) => {
 	validateWorldFolder(folder);
 	if (await context.files.exists(worldPath(folder))) {
 		throw new BridgeUserError({
-			ar: "توجد ماب بالاسم نفسه. اختر اسمًا آخر.",
+			ar: "يوجد ماب بالاسم نفسه. اختر اسمًا آخر.",
 			en: "A world with that name already exists. Choose another name.",
 		});
 	}
@@ -201,7 +201,7 @@ export const worldTools: Bridge.Actions = {
 			context.activity.report({
 				name: BridgeEventName.WorldCreated,
 				text: {
-					ar: `تم إنشاء ماب ${folder} وتفعيلها، وتتولد عند التشغيل التالي`,
+					ar: `تم إنشاء ماب ${folder} وتفعيله، ويتولد عند التشغيل التالي`,
 					en: `Created and activated world ${folder}, generated on the next start`,
 				},
 				subject: folder,

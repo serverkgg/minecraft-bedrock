@@ -8,7 +8,7 @@ metadata:
     ar: ماينكرافت بيدروك
     en: Minecraft Bedrock
   description:
-    ar: سيرفر ماينكرافت بيدروك أصلي يجمع الجوال والكونسول وويندوز في الماب نفسها، ويشتغل فورًا دون أي إعداد.
+    ar: سيرفر ماينكرافت بيدروك أصلي يجمع الجوال والكونسول وويندوز في الماب نفسه، ويشتغل فورًا دون أي إعداد.
     en: A native Minecraft Bedrock server with phone, console and Windows players in one world, running the moment your order completes.
   tagline:
     ar: العب مع أصحابك من أي جهاز، وسيرفرك جاهز خلال دقيقة
@@ -160,7 +160,7 @@ files:
       icon: map
       color: "#4a8fd4"
       note:
-        ar: كل ماباتك هنا، ولكل ماب مجلد خاص بها. لا تحذف أي شيء إلا إذا كنت متأكدًا، وخذ نسخة احتياطية قبل أي تعديل.
+        ar: كل ماباتك هنا، ولكل ماب مجلد خاص به. لا تحذف أي شيء إلا إذا كنت متأكدًا، وخذ نسخة احتياطية قبل أي تعديل.
         en: All your worlds live here, one folder each. Don't delete anything unless you're sure, and take a backup before you change anything.
     - match: "worlds/**"
       label:

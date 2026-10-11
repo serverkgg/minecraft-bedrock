@@ -30,7 +30,7 @@ const notAWorld = new BridgeUserError({
 });
 
 const notABedrockWorld = new BridgeUserError({
-	ar: "هذه ماب جافا وليست ماب بيدروك، ولا يمكن تحويلها. يلزم استخدام ماب مُصدَّرة من ماينكرافت بيدروك.",
+	ar: "هذا ماب جافا وليس ماب بيدروك، ولا يمكن تحويله. يلزم استخدام ماب مُصدَّر من ماينكرافت بيدروك.",
 	en: "This is a Java world, not a Bedrock one, and we can't convert it. You need a world exported from Minecraft Bedrock.",
 });
 
@@ -42,12 +42,12 @@ const multipleWorlds = new BridgeUserError({
 const ACTIVE_MARK = "✓";
 
 const ACTIVE_WORLD_DELETE: Bridge.Text = {
-	ar: "لا يمكن حذف الماب المفعّلة. فعّل ماب أخرى أولًا.",
+	ar: "لا يمكن حذف الماب المفعّل. فعّل مابًا آخر أولًا.",
 	en: "You can't delete the active world. Activate another one first.",
 };
 
 const ACTIVE_WORLD_ACTIVATE: Bridge.Text = {
-	ar: "هذه الماب مفعّلة مسبقًا.",
+	ar: "هذا الماب مفعّل مسبقًا.",
 	en: "This world is already the active one.",
 };
 
@@ -130,7 +130,7 @@ export const worlds: Bridge.Collection = {
 
 		if (await context.files.exists(destination)) {
 			throw new BridgeUserError({
-				ar: `توجد ماب بالاسم نفسه «${folder}»، غيّر اسم الملف وارفعه مرة ثانية.`,
+				ar: `يوجد ماب بالاسم نفسه «${folder}»، غيّر اسم الملف وارفعه مرة ثانية.`,
 				en: `A world named "${folder}" is already here. Rename the file and upload it again.`,
 			});
 		}

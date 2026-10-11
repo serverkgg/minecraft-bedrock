@@ -105,7 +105,7 @@ const versionTab: Bridge.Tab = {
 			reinstall: true,
 			confirm: BridgeConfirm.Normal,
 			confirmText: {
-				ar: "نأخذ نسخة احتياطية قبل تثبيت الإصدار الجديد. الرجوع من البريفيو يتطلب ماب محفوظة قبل التبديل، وليس مجرد تغيير رقم الإصدار.",
+				ar: "نأخذ نسخة احتياطية قبل تثبيت الإصدار الجديد. الرجوع من البريفيو يتطلب مابًا محفوظًا قبل التبديل، وليس مجرد تغيير رقم الإصدار.",
 				en: "We take a backup before installing the new build. Returning from preview requires a world saved before the switch, not just a different build number.",
 			},
 			fields: [
@@ -197,7 +197,7 @@ const settingsTab: Bridge.Tab = {
 						en: "Seed",
 					},
 					help: {
-						ar: "يُستخدم فقط لماب جديدة لم تتولد بعد.",
+						ar: "يُستخدم فقط لماب جديد لم يتولد بعد.",
 						en: "Only used for a world that doesn't exist yet.",
 					},
 					maxLength: 64,
@@ -814,7 +814,7 @@ const worldsTab: Bridge.Tab = {
 			layout: BridgeLayout.Actions,
 			id: "new-world",
 			title: {
-				ar: "ماب جديدة",
+				ar: "ماب جديد",
 				en: "New world",
 			},
 			module: "worldTools",
@@ -822,7 +822,7 @@ const worldsTab: Bridge.Tab = {
 				{
 					id: "create",
 					label: {
-						ar: "أنشئ ماب وفعّلها",
+						ar: "أنشئ ماب وفعّله",
 						en: "Create and activate world",
 					},
 					confirm: BridgeConfirm.Normal,
@@ -886,7 +886,7 @@ const worldsTab: Bridge.Tab = {
 				{
 					key: "active",
 					label: {
-						ar: "مفعّلة",
+						ar: "مفعّل",
 						en: "Active",
 					},
 				},
@@ -916,7 +916,7 @@ const worldsTab: Bridge.Tab = {
 							key: "name",
 							control: BridgeControl.Text,
 							label: {
-								ar: "اسم الماب الجديدة",
+								ar: "اسم الماب الجديد",
 								en: "New world name",
 							},
 							maxLength: 64,
@@ -943,7 +943,7 @@ const worldsTab: Bridge.Tab = {
 					},
 					confirm: BridgeConfirm.Normal,
 					confirmText: {
-						ar: "نبدّل الماب المفعّلة، ويلزم أن يكون سيرفرك متوقفًا. شغّله بعد ذلك لتُفتح الماب الجديدة.",
+						ar: "نبدّل الماب المفعّل، ويلزم أن يكون سيرفرك متوقفًا. شغّله بعد ذلك ليُفتح الماب الجديد.",
 						en: "We switch the active world, and your server must be stopped. Start it again afterwards to open the new world.",
 					},
 				},
@@ -1132,7 +1132,7 @@ const addonsTab: Bridge.Tab = {
 					},
 					confirm: BridgeConfirm.Normal,
 					confirmText: {
-						ar: "إذا أزلت إضافة سلوك تستخدمها ماب، يختفي من الماب كل ما أضافته الإضافة من وحوش وأغراض. خذ نسخة احتياطية أولًا.",
+						ar: "إذا أزلت إضافة سلوك يستخدمها ماب، يختفي من الماب كل ما أضافته الإضافة من وحوش وأغراض. خذ نسخة احتياطية أولًا.",
 						en: "If you remove a behavior pack a world was using, everything it added disappears from that world, including the mobs and items it brought. Take a backup first.",
 					},
 				},
