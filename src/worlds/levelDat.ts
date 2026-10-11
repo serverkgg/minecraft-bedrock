@@ -8,6 +8,8 @@ const MAX_DEPTH = 64;
 
 const EXPERIMENTS_TAG = "experiments";
 
+const HARDCORE_TAG = "IsHardcore";
+
 const LEVEL_STAGING = ".serverk-level";
 
 export const BETA_APIS_EXPERIMENT = "gametest";
@@ -340,34 +342,16 @@ export const levelExperiments = (level: LevelFile) => {
 	return flags;
 };
 
-export const withExperiment = (level: LevelFile, key: string, value: number): LevelFile => {
-	const flag: NbtEntry = {
-		name: encoder.encode(key),
-		payload: {
-			tag: NbtTag.Byte,
-			value,
-		},
-	};
-	const existing = experimentsOf(level);
-	const children = [
-		...(existing?.entries ?? []),
+const withRootEntry = (level: LevelFile, entry: NbtEntry): LevelFile => {
+	const key = textOf(entry.name);
+	const entries = [
+		...level.root.entries,
 	];
-	const at = children.findIndex((entry) => textOf(entry.name) === key);
+	const at = entries.findIndex((candidate) => textOf(candidate.name) === key);
 	if (at < 0) {
-		children.push(flag);
+		entries.push(entry);
 	} else {
-		children[at] = flag;
-	}
-	const experiments: NbtEntry = {
-		name: encoder.encode(EXPERIMENTS_TAG),
-		payload: {
-			tag: NbtTag.Compound,
-			entries: children,
-		},
-	};
-	const entries = level.root.entries.map((entry) => (entry.payload === existing ? experiments : entry));
-	if (existing === null) {
-		entries.push(experiments);
+		entries[at] = entry;
 	}
 	return {
 		version: level.version,
@@ -377,6 +361,55 @@ export const withExperiment = (level: LevelFile, key: string, value: number): Le
 			entries,
 		},
 	};
+};
+
+export const levelByte = (level: LevelFile, key: string) => {
+	const payload = level.root.entries.find((entry) => textOf(entry.name) === key)?.payload;
+	return payload?.tag === NbtTag.Byte ? payload.value : null;
+};
+
+export const withByte = (level: LevelFile, key: string, value: number) => {
+	return withRootEntry(level, {
+		name: encoder.encode(key),
+		payload: {
+			tag: NbtTag.Byte,
+			value,
+		},
+	});
+};
+
+export const withExperiment = (level: LevelFile, key: string, value: number): LevelFile => {
+	const flag: NbtEntry = {
+		name: encoder.encode(key),
+		payload: {
+			tag: NbtTag.Byte,
+			value,
+		},
+	};
+	const children = [
+		...(experimentsOf(level)?.entries ?? []),
+	];
+	const at = children.findIndex((entry) => textOf(entry.name) === key);
+	if (at < 0) {
+		children.push(flag);
+	} else {
+		children[at] = flag;
+	}
+	return withRootEntry(level, {
+		name: encoder.encode(EXPERIMENTS_TAG),
+		payload: {
+			tag: NbtTag.Compound,
+			entries: children,
+		},
+	});
+};
+
+export const levelHardcore = (level: LevelFile) => {
+	return (levelByte(level, HARDCORE_TAG) ?? 0) !== 0;
+};
+
+export const withHardcore = (level: LevelFile, enabled: boolean) => {
+	return withByte(level, HARDCORE_TAG, enabled ? 1 : 0);
 };
 
 export const parseLevelExperiments = (bytes: Uint8Array): Record<string, number> | null => {
@@ -416,26 +449,12 @@ const readLevelBytes = async (context: Bridge.Context, path: string) => {
 	return new Uint8Array(Buffer.from(result.stdout.trim(), "base64"));
 };
 
-export const readLevelExperiments = async (context: Bridge.Context, world: string) => {
-	const bytes = await readLevelBytes(context, levelPath(world));
-	return bytes === null ? null : parseLevelExperiments(bytes);
+const readLevel = async (context: Bridge.Context, path: string) => {
+	const bytes = await readLevelBytes(context, path);
+	return bytes === null ? null : parseLevel(bytes);
 };
 
-export const enableBetaApis = async (context: Bridge.Context, world: string) => {
-	requireStopped(context);
-	const path = levelPath(world);
-	const bytes = await readLevelBytes(context, path);
-	const level = bytes === null ? null : parseLevel(bytes);
-	if (level === null) {
-		throw new BridgeUserError({
-			ar: "تعذّرت قراءة ملف الماب level.dat، لذلك لم يتم تفعيل Beta APIs. رجّع نسخة احتياطية أو فعّلها من جهازك.",
-			en: "We couldn't read the world's level.dat, so Beta APIs wasn't turned on. Restore a backup or turn it on from your device.",
-		});
-	}
-	if (betaApisEnabled(levelExperiments(level))) {
-		return false;
-	}
-	const next = serializeLevel(withExperiment(level, BETA_APIS_EXPERIMENT, 1));
+const writeLevel = async (context: Bridge.Context, path: string, next: Uint8Array) => {
 	const encoded = `${LEVEL_STAGING}/${LEVEL_FILE}.b64`;
 	const staged = `${LEVEL_STAGING}/${LEVEL_FILE}`;
 	await context.files.remove(LEVEL_STAGING);
@@ -471,7 +490,53 @@ export const enableBetaApis = async (context: Bridge.Context, world: string) => 
 	} finally {
 		await context.files.remove(LEVEL_STAGING);
 	}
+};
+
+export const readLevelExperiments = async (context: Bridge.Context, world: string) => {
+	const bytes = await readLevelBytes(context, levelPath(world));
+	return bytes === null ? null : parseLevelExperiments(bytes);
+};
+
+export const readLevelHardcore = async (context: Bridge.Context, world: string): Promise<boolean | null> => {
+	const level = await readLevel(context, levelPath(world));
+	return level === null ? null : levelHardcore(level);
+};
+
+export const enableBetaApis = async (context: Bridge.Context, world: string) => {
+	requireStopped(context);
+	const path = levelPath(world);
+	const level = await readLevel(context, path);
+	if (level === null) {
+		throw new BridgeUserError({
+			ar: "تعذّرت قراءة ملف الماب level.dat، لذلك لم يتم تفعيل Beta APIs. رجّع نسخة احتياطية أو فعّلها من جهازك.",
+			en: "We couldn't read the world's level.dat, so Beta APIs wasn't turned on. Restore a backup or turn it on from your device.",
+		});
+	}
+	if (betaApisEnabled(levelExperiments(level))) {
+		return false;
+	}
+	await writeLevel(context, path, serializeLevel(withExperiment(level, BETA_APIS_EXPERIMENT, 1)));
 	context.log("turned on Beta APIs for the world", {
+		world,
+	});
+	return true;
+};
+
+export const setLevelHardcore = async (context: Bridge.Context, world: string, enabled: boolean) => {
+	requireStopped(context);
+	const path = levelPath(world);
+	const level = await readLevel(context, path);
+	if (level === null) {
+		throw new BridgeUserError({
+			ar: "تعذّرت قراءة ملف الماب level.dat، لذلك لم يتغيّر الهاردكور. رجّع نسخة احتياطية وجرب مرة ثانية.",
+			en: "We couldn't read the world's level.dat, so hardcore wasn't changed. Restore a backup and try again.",
+		});
+	}
+	if (levelHardcore(level) === enabled) {
+		return false;
+	}
+	await writeLevel(context, path, serializeLevel(withHardcore(level, enabled)));
+	context.log(enabled ? "turned on hardcore for the world" : "turned off hardcore for the world", {
 		world,
 	});
 	return true;

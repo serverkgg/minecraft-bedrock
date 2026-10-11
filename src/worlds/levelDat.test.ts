@@ -3,12 +3,16 @@ import { readFileSync } from "node:fs";
 import {
 	betaApisEnabled,
 	type LevelFile,
+	levelByte,
 	levelExperiments,
+	levelHardcore,
 	NbtTag,
 	parseLevel,
 	parseLevelExperiments,
 	serializeLevel,
+	withByte,
 	withExperiment,
+	withHardcore,
 } from "./levelDat";
 
 const name = (text: string) => {
@@ -156,6 +160,11 @@ const parsed = (bytes: Uint8Array): LevelFile => {
 	return file;
 };
 
+const without = (file: LevelFile, keys: string[]) =>
+	file.root.entries.filter((entry) => !keys.includes(new TextDecoder().decode(entry.name)));
+
+const rootKeys = (file: LevelFile) => file.root.entries.map((entry) => new TextDecoder().decode(entry.name));
+
 const withoutExperiments = (file: LevelFile) =>
 	serializeLevel({
 		...file,
@@ -258,5 +267,67 @@ describe("writing level.dat back", () => {
 		const bytes = experimentsLevel(byte("gametest", 1));
 
 		expect(serializeLevel(withExperiment(parsed(bytes), "gametest", 1))).toEqual(bytes);
+	});
+});
+
+describe("reading and writing a root byte in level.dat", () => {
+	it("reads a real server's hardcore byte, and answers null for a missing key or a tag that is not a byte", () => {
+		const file = parsed(fixture());
+
+		expect(levelByte(file, "IsHardcore")).toBe(0);
+		expect(levelByte(file, "Difficulty")).toBeNull();
+		expect(levelByte(file, "NoSuchTag")).toBeNull();
+		expect(levelHardcore(file)).toBe(false);
+	});
+
+	it("replaces a root byte where it stands, without duplicating it or touching any other tag", () => {
+		const bytes = fixture();
+		const original = parsed(bytes);
+		const written = serializeLevel(withByte(original, "IsHardcore", 1));
+		const reread = parsed(written);
+
+		expect(levelByte(reread, "IsHardcore")).toBe(1);
+		expect(rootKeys(reread)).toEqual(rootKeys(original));
+		expect(
+			without(reread, [
+				"IsHardcore",
+			]),
+		).toEqual(
+			without(original, [
+				"IsHardcore",
+			]),
+		);
+		expect(written.length).toBe(bytes.length);
+	});
+
+	it("appends a root byte the level never had, after every existing tag", () => {
+		const original = parsed(level(noise));
+		const written = serializeLevel(withByte(original, "IsHardcore", 1));
+		const reread = parsed(written);
+
+		expect(rootKeys(reread)).toEqual([
+			...rootKeys(original),
+			"IsHardcore",
+		]);
+		expect(levelByte(reread, "IsHardcore")).toBe(1);
+		expect(
+			without(reread, [
+				"IsHardcore",
+			]),
+		).toEqual(original.root.entries);
+		expect(new DataView(written.buffer).getInt32(4, true)).toBe(written.length - 8);
+	});
+});
+
+describe("switching hardcore in level.dat", () => {
+	it("turns hardcore on and off in a real level file and changes only that byte", () => {
+		const bytes = fixture();
+		const on = serializeLevel(withHardcore(parsed(bytes), true));
+		const off = serializeLevel(withHardcore(parsed(on), false));
+
+		expect(levelHardcore(parsed(on))).toBe(true);
+		expect(levelHardcore(parsed(off))).toBe(false);
+		expect(on.filter((value, index) => value !== bytes[index]).length).toBe(1);
+		expect(off).toEqual(bytes);
 	});
 });

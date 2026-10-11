@@ -20,6 +20,18 @@ The export includes the world's files, embedded packs and the exact shared pack 
 
 Serverk doesn't convert Java worlds into Bedrock worlds. Upload a Bedrock export. Archives with unsafe paths, unsupported links or excessive expanded size are rejected before installation.
 
+## Turn on hardcore for a world
+
+In hardcore, each player has one life, and a player who dies can't respawn. On Bedrock, hardcore belongs to the world itself, not to the server settings, so you set it for each world.
+
+Hardcore doesn't change the difficulty on a Bedrock server. The server takes it from the **Difficulty** field in **Settings** every time it starts, so pick Hard there for the full hardcore experience.
+
+1. Stop your server.
+2. Open **Worlds**, choose **Set hardcore** on the world, then turn the switch on or off.
+3. Start your server.
+
+A ✓ in the **Hardcore** column marks each world that has it on. You can turn it off again from the same place at any time.
+
 ## Protect your progress
 
 The Overworld, Nether and End share one LevelDB database. The panel doesn't reset individual Bedrock dimensions. Never edit the `db` directory by hand.

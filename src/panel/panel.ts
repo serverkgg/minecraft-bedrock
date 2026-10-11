@@ -890,6 +890,13 @@ const worldsTab: Bridge.Tab = {
 						en: "Active",
 					},
 				},
+				{
+					key: "hardcore",
+					label: {
+						ar: "الهاردكور",
+						en: "Hardcore",
+					},
+				},
 			],
 			upload: {
 				label: {
@@ -946,6 +953,28 @@ const worldsTab: Bridge.Tab = {
 						ar: "نبدّل الماب المفعّل، ويلزم أن يكون سيرفرك متوقفًا. شغّله بعد ذلك ليُفتح الماب الجديد.",
 						en: "We switch the active world, and your server must be stopped. Start it again afterwards to open the new world.",
 					},
+				},
+				{
+					id: "hardcore",
+					label: {
+						ar: "اضبط الهاردكور",
+						en: "Set hardcore",
+					},
+					confirm: BridgeConfirm.Normal,
+					confirmText: {
+						ar: "حياة واحدة لكل لاعب، ومن يموت لا يمكنه العودة إلى اللعب. يستخدم السيرفر الصعوبة المحددة في الإعدادات، فاخترها «صعب» لتجربة هاردكور كاملة. يلزم أن يكون سيرفرك متوقفًا، وإيقاف الهاردكور متاح من هنا في أي وقت.",
+						en: "One life per player, and a player who dies can't respawn. The server uses the difficulty set in Settings, so pick Hard there for the full hardcore experience. Your server must be stopped, and you can turn hardcore off again from here at any time.",
+					},
+					fields: [
+						{
+							key: "enabled",
+							control: BridgeControl.Boolean,
+							label: {
+								ar: "تفعيل الهاردكور",
+								en: "Turn on hardcore",
+							},
+						},
+					],
 				},
 				{
 					id: "delete",

@@ -12,6 +12,7 @@ import {
 	withoutExtension,
 	worldPath,
 } from "../shared";
+import { readLevelHardcore, setLevelHardcore } from "./levelDat";
 import {
 	activeWorld,
 	discoverWorlds,
@@ -22,7 +23,6 @@ import {
 	worldDisplayName,
 	worldSize,
 } from "./world";
-
 import { cloneWorld, existingWorld, exportWorld } from "./worldTools";
 
 const notAWorld = new BridgeUserError({
@@ -50,6 +50,16 @@ const ACTIVE_WORLD_DELETE: Bridge.Text = {
 const ACTIVE_WORLD_ACTIVATE: Bridge.Text = {
 	ar: "هذا الماب مفعّل مسبقًا.",
 	en: "This world is already the active one.",
+};
+
+const HARDCORE_ALREADY_ON: Bridge.Text = {
+	ar: "الهاردكور مفعّل مسبقًا في هذا الماب.",
+	en: "Hardcore is already on for this world.",
+};
+
+const HARDCORE_ALREADY_OFF: Bridge.Text = {
+	ar: "الهاردكور موقوف مسبقًا في هذا الماب.",
+	en: "Hardcore is already off for this world.",
 };
 
 const unpack = async (context: Bridge.Context, archive: string, destination: string) => {
@@ -89,6 +99,7 @@ export const worlds: Bridge.Collection = {
 				folder,
 				size: formatByteSize(await worldSize(context, folder)),
 				active: folder === active ? ACTIVE_MARK : "",
+				hardcore: (await readLevelHardcore(context, folder)) === true ? ACTIVE_MARK : "",
 			});
 		}
 
@@ -213,6 +224,34 @@ export const worlds: Bridge.Collection = {
 				details: {
 					folder,
 					previous,
+				},
+			});
+		},
+
+		async hardcore(context, row, args) {
+			const folder = await existingWorld(context, String(row.id));
+			const enabled = args.enabled === true;
+
+			if (!(await setLevelHardcore(context, folder, enabled))) {
+				throw new BridgeUserError(enabled ? HARDCORE_ALREADY_ON : HARDCORE_ALREADY_OFF);
+			}
+
+			context.activity.report({
+				name: BridgeEventName.GameplayChanged,
+				text: enabled
+					? {
+							ar: `تم تفعيل الهاردكور في ماب ${folder}`,
+							en: `Turned on hardcore for world ${folder}`,
+						}
+					: {
+							ar: `تم إيقاف الهاردكور في ماب ${folder}`,
+							en: `Turned off hardcore for world ${folder}`,
+						},
+				subject: folder,
+				details: {
+					what: "hardcore",
+					value: enabled ? "on" : "off",
+					folder,
 				},
 			});
 		},
