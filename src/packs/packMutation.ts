@@ -1,5 +1,5 @@
 import { type Bridge, BridgeUserError } from "@serverkgg/bridge";
-import { PACK_SIDECAR_FILE, PACK_STAGING, publishFiles, recoverFileTransaction, requireStopped } from "../shared";
+import { PACK_SCRATCH, PACK_SIDECAR_FILE, publishFiles, recoverFileTransaction, requireStopped } from "../shared";
 import { activeWorld } from "../worlds";
 import {
 	activationOrder,
@@ -29,8 +29,8 @@ const commitState = async (
 	registries: Map<PackKind, WorldPackEntry[]>,
 	removed: string[] = [],
 ) => {
-	await context.files.ensure(PACK_STAGING);
-	const staged = `${PACK_STAGING}/mutation-sidecar.json`;
+	await context.files.ensure(PACK_SCRATCH);
+	const staged = `${PACK_SCRATCH}/mutation-sidecar.json`;
 	await context.files.write(staged, JSON.stringify(sidecar));
 	const replacements = [
 		{
@@ -39,7 +39,7 @@ const commitState = async (
 		},
 	];
 	for (const [kind, entries] of registries) {
-		const source = `${PACK_STAGING}/mutation-${kind}.json`;
+		const source = `${PACK_SCRATCH}/mutation-${kind}.json`;
 		await context.files.write(source, JSON.stringify(entries));
 		replacements.push({
 			source,
@@ -47,7 +47,7 @@ const commitState = async (
 		});
 	}
 	await publishFiles(context, replacements, removed);
-	await context.files.remove(PACK_STAGING);
+	await context.files.remove(PACK_SCRATCH);
 };
 
 const worldRegistries = async (context: Bridge.Context, world: string) => {

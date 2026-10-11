@@ -7,6 +7,7 @@ import {
 	relativeUploadPath,
 	requireStopped,
 	sizeForReport,
+	WORLD_SCRATCH,
 	WORLD_STAGING,
 	withoutExtension,
 	worldPath,
@@ -105,8 +106,10 @@ export const worlds: Bridge.Collection = {
 			});
 		}
 
-		const unpacked = `${WORLD_STAGING}/unpacked`;
+		const unpacked = `${WORLD_SCRATCH}/unpacked`;
 
+		await context.files.remove(WORLD_SCRATCH);
+		await context.files.ensure(WORLD_SCRATCH);
 		await unpack(context, relative, unpacked);
 
 		const found = await findLevelDirectories(context, unpacked);
@@ -138,7 +141,8 @@ export const worlds: Bridge.Collection = {
 		const sizeBytes = await sizeForReport(context, relative);
 
 		await context.files.move(directory, destination);
-		await context.files.remove(WORLD_STAGING);
+		await context.files.remove(WORLD_SCRATCH);
+		await context.files.remove(relative);
 
 		context.log("imported a world", {
 			folder,

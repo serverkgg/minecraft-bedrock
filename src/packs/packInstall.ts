@@ -1,8 +1,8 @@
 import { type Bridge, BridgeUserError } from "@serverkgg/bridge";
 import {
 	BEHAVIOR_PACKS_DIRECTORY,
+	PACK_SCRATCH,
 	PACK_SIDECAR_FILE,
-	PACK_STAGING,
 	publishFiles,
 	RESOURCE_PACKS_DIRECTORY,
 	recoverFileTransaction,
@@ -57,7 +57,7 @@ export interface PackSource {
 export const installPackSource = async (context: Bridge.Context, source: PackSource): Promise<PackInstallResult> => {
 	requireStopped(context);
 	await recoverFileTransaction(context);
-	const unpacked = `${PACK_STAGING}/unpacked`;
+	const unpacked = `${PACK_SCRATCH}/unpacked`;
 
 	await unpackArchive(context, source.archive, unpacked);
 
@@ -169,7 +169,7 @@ export const installPackSource = async (context: Bridge.Context, source: PackSou
 	if (installed.length === 0) {
 		throw noManifest;
 	}
-	const sidecarStage = `${PACK_STAGING}/next-sidecar.json`;
+	const sidecarStage = `${PACK_SCRATCH}/next-sidecar.json`;
 	await context.files.write(sidecarStage, JSON.stringify(sidecar));
 	replacements.push({
 		source: sidecarStage,
@@ -206,7 +206,7 @@ export const installPackSource = async (context: Bridge.Context, source: PackSou
 				index < 0 ? undefined : index,
 			);
 		}
-		const stage = `${PACK_STAGING}/next-${kind}.json`;
+		const stage = `${PACK_SCRATCH}/next-${kind}.json`;
 		await context.files.write(stage, JSON.stringify(entries));
 		replacements.push({
 			source: stage,
@@ -215,7 +215,7 @@ export const installPackSource = async (context: Bridge.Context, source: PackSou
 	}
 	await publishFiles(context, replacements, removed);
 
-	await context.files.remove(PACK_STAGING);
+	await context.files.remove(PACK_SCRATCH);
 
 	context.log("installed an add-on", {
 		packs: installed.length,

@@ -24,9 +24,13 @@ export const PACK_SIDECAR_FILE = ".serverk-packs.json";
 
 export const DOWNLOAD_STAGING = ".serverk-download";
 
-export const WORLD_STAGING = ".serverk-worlds";
+export const WORLD_STAGING = ".serverk-uploads/worlds";
 
-export const PACK_STAGING = ".serverk-packs";
+export const PACK_STAGING = ".serverk-uploads/packs";
+
+export const WORLD_SCRATCH = ".serverk-staging/world";
+
+export const PACK_SCRATCH = ".serverk-staging/pack";
 
 export const WORLD_EXTENSIONS = [
 	"mcworld",

@@ -137,8 +137,7 @@ files:
     - .serverk-world-export/**
     - .serverk-level/**
     - .serverk-download/**
-    - .serverk-worlds/**
-    - .serverk-packs/**
+    - .serverk-staging/**
     - .serverk-install.json
     - .serverk-packs.json
     - .serverk-players.json

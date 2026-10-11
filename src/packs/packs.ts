@@ -120,6 +120,8 @@ export const packs: Bridge.Collection = {
 			bundle,
 		});
 
+		await context.files.remove(relative);
+
 		context.activity.report(
 			packInstalledActivity(result, {
 				bundle,

@@ -4,7 +4,7 @@ import {
 	extensionOf,
 	nameOf,
 	PACK_EXTENSIONS,
-	PACK_STAGING,
+	PACK_SCRATCH,
 	RESOURCE_PACKS_DIRECTORY,
 	requireStopped,
 	withoutExtension,
@@ -224,9 +224,9 @@ export const repairPacks = async (context: Bridge.Context): Promise<PackRepairSu
 		}
 	}
 	for (const archive of diagnosis.archives) {
-		const staged = `${PACK_STAGING}/${nameOf(archive)}`;
-		await context.files.remove(PACK_STAGING);
-		await context.files.ensure(PACK_STAGING);
+		const staged = `${PACK_SCRATCH}/${nameOf(archive)}`;
+		await context.files.remove(PACK_SCRATCH);
+		await context.files.ensure(PACK_SCRATCH);
 		await context.files.move(archive, staged);
 		try {
 			const result = await installPackSource(context, {
@@ -243,7 +243,7 @@ export const repairPacks = async (context: Bridge.Context): Promise<PackRepairSu
 			if (await context.files.exists(staged)) {
 				await context.files.move(staged, archive);
 			}
-			await context.files.remove(PACK_STAGING);
+			await context.files.remove(PACK_SCRATCH);
 			context.log.warn("repair could not install an add-on file and left it where it was", {
 				file: archive,
 				reason: reasonOf(error),

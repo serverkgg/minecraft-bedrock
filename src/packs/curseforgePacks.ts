@@ -6,7 +6,7 @@ import {
 	curseforgeDownloadUrl,
 	curseforgeSha1,
 } from "@serverkgg/bridge/catalogs";
-import { PACK_STAGING, requireStopped } from "../shared";
+import { PACK_SCRATCH, requireStopped } from "../shared";
 import { activeWorld } from "../worlds";
 import { packInstalledActivity, packsRemovedActivity, packsTitle, packsToggledActivity } from "./packActivity";
 import { inventoryPacks } from "./packDiscovery";
@@ -206,10 +206,10 @@ export const packCatalog: Bridge.Catalog = {
 		}
 
 		const digest = curseforgeSha1(file);
-		const archive = `${PACK_STAGING}/${file.id}-${file.fileName}`;
+		const archive = `${PACK_SCRATCH}/${file.id}-${file.fileName}`;
 
-		await context.files.remove(PACK_STAGING);
-		await context.files.ensure(PACK_STAGING);
+		await context.files.remove(PACK_SCRATCH);
+		await context.files.ensure(PACK_SCRATCH);
 		await context.files.download(archive, url, {
 			timeoutMs: DOWNLOAD_TIMEOUT_MS,
 			...(digest === null

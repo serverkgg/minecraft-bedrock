@@ -25,8 +25,8 @@ describe("discovering bedrock worlds", () => {
 	});
 
 	it("also takes a world someone zipped as a folder instead of exporting it", () => {
-		expect(levelDirectories(".serverk-worlds/upload/My World/level.dat")).toEqual([
-			".serverk-worlds/upload/My World",
+		expect(levelDirectories(".serverk-staging/world/unpacked/My World/level.dat")).toEqual([
+			".serverk-staging/world/unpacked/My World",
 		]);
 	});
 });
