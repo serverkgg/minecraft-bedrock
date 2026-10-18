@@ -1,7 +1,9 @@
 ## Two kinds of add-on
 
 - **Behavior packs**: change mobs, items and game rules. They run on the server, and players download nothing.
-- **Resource packs**: change textures and sounds. Every player downloads them when they join.
+- **Resource packs**: change textures and sounds. Players are offered the download when they join.
+
+A player can decline the resource pack download and still join, without its textures and sounds. To make it required, turn on **Require the resource pack** in **Settings**, under **Access and chat**. A player who declines is then disconnected.
 
 ## Installing one
 
@@ -15,6 +17,14 @@ Install with your server stopped, because an add-on can't go in while the game r
 > [!note]
 > A single `.mcaddon` file can hold more than one add-on, usually a behavior pack and a resource pack together. We unpack it and install all of them.
 
+## What the catalog installs
+
+The catalog installs the add-on's newest file made for your server's Minecraft version, or its newest file when none is marked for that version. Some authors publish the behavior pack and the resource pack as two separate files. When the chosen file needs a pack it doesn't include, we look through the project's other recent files, those for the same Minecraft version first, download up to four of them, and install the file that holds the missing pack along with the chosen one.
+
+If a required pack is still missing after that, the install stops and names the add-on that needs it. Install the missing pack first, from the catalog or as an upload, then install the add-on again.
+
+Some authors allow downloads only from CurseForge itself. The catalog then tells you to open the add-on's page, download the file there, and upload it with **Upload an add-on**.
+
 ## Order matters
 
 If several resource packs change the same thing, the order decides which one wins. You can move them up and down in the list.
@@ -26,7 +36,7 @@ If several resource packs change the same thing, the order decides which one win
 
 The installed list includes discovered packs from the active world and server folders. It shows which worlds use each pack and its declared dependencies, including Script API modules. These declarations help diagnose compatibility, but they don't prove that a script loaded successfully.
 
-Installing or enabling a pack checks required pack versions and its declared minimum Minecraft version. Required packs are activated first. Missing dependencies and dependency cycles stop activation. Disable dependent add-ons before disabling a pack they need.
+Installing or enabling a pack checks that every pack it requires is installed at the declared version or newer, and checks its declared minimum Minecraft version. Required packs are activated first. Missing dependencies and dependency cycles stop activation. Disable dependent add-ons before disabling a pack they need.
 
 A pack used by another world can't be removed or switched to a different version until those references are removed. This prevents fixing one world from breaking another. Pack changes need a stopped server, and only removing a pack takes a backup first. If an install fails, the previous files come back.
 

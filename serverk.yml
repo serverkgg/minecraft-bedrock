@@ -207,8 +207,8 @@ files:
       color: "#c77dff"
       restart: true
       note:
-        ar: إضافات المظهر للأشكال والأصوات، ويُنزّلها كل لاعب عند دخوله السيرفر. ارفع الإضافات من تبويب الإضافات، فالملف الذي تضعه هنا لا يُثبَّت إلا عند الضغط على «أصلح الإضافات».
-        en: Resource packs change textures and sounds. Every player downloads them when they join. Upload add-ons from the Add-ons tab. A file dropped here isn't installed until you press Repair add-ons.
+        ar: إضافات المظهر للأشكال والأصوات. يُعرض على كل لاعب تنزيلها عند دخوله السيرفر، ويستطيع رفض التنزيل، أما إذا فعّلت «إلزام إضافة المظهر» فيُطرد من يرفض. ارفع الإضافات من تبويب الإضافات، فالملف الذي تضعه هنا لا يُثبَّت إلا عند الضغط على «أصلح الإضافات».
+        en: Resource packs change textures and sounds. Each player is offered the download on joining and can decline it. With Require the resource pack on, a player who declines is disconnected. Upload add-ons from the Add-ons tab. A file dropped here isn't installed until you press Repair add-ons.
     - match: valid_known_packs.json
       label:
         ar: فهرس الإضافات

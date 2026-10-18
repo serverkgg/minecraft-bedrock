@@ -25,3 +25,5 @@ If neither is true, stay on the release build. It's the steadier one, and it's t
 ## Updates are explicit
 
 **Keep installed build** picks the latest build only on the first install. Ordinary restarts keep that exact version. To update, choose a new version number in **Version**. Backups also keep the installed build details. If the requested build isn't available, the operation stops and tells you, instead of quietly installing another one.
+
+Your players' games usually update on their own, so after each new build players see **Outdated Server** until you update your server. Preview builds come out often, and Microsoft advises checking for upgrades frequently when you run a preview server. An update can also break add-ons that use Beta APIs, so open the **Add-on check** on the **Add-ons** tab before you update to see which add-ons need them. The details are in [Getting started](/games/minecraft-bedrock/guides/getting-started#updates).

@@ -16,14 +16,11 @@ mistake rather than a technical one.
 
 ## Still to measure
 
-- **Memory under real load.** 234 MiB is the idle floor with one fresh world and nobody connected. Chunk
-  loading and players move it, and that has not been measured, so `playersPerMemoryGb` (10) and
-  `maxRecommendedPlayers` (100) are still estimates.
-- `resources.minDiskMb` (5120) — deliberately left alone. The install is a measured 365 MB and the archive
-  adds 104 MB transiently, but world growth over months is the term that actually decides this and it has
-  not been observed. Lowering it on the strength of a 1 MB fresh world would swap one guess for another.
-- `resources.minDiskMb` (5120) — a measured 365 MB install plus the 104 MB archive held transiently during
-  the unpack, plus world growth. The only unmeasured part left is how fast a real world grows.
+- **Memory under real load.** 234 MiB is the idle floor with one fresh world and nobody connected. Chunks and
+  players move it unmeasured, so `playersPerMemoryGb` (10) is an estimate. `maxRecommendedPlayers` (64) is the
+  `max-players` cap the UDP port block sets (NetherNet section).
+- `resources.minDiskMb` (5120): a measured 365 MB install, the 104 MB archive held during the unpack, and world
+  growth, which decides it and has not been observed. A 1 MB fresh world is no ground to lower it.
 - `container.runtime.installBudgetMinutes` (10) — a measured cold install. This is the number the
   provisioning screen shows the customer, so an optimistic value fails real provisions. The download alone is
   104 MB and took minutes on this machine, so 10 may be tight on a slow link.
@@ -78,11 +75,48 @@ not in any `.env`), so none of this is inferred:
   every project sampled — so the digest-pinned download works and the "searches but cannot install"
   risk this was deferred over does not exist for Bedrock.
 
+Add-ons whose manifests do not match what they ship:
+
+- **A uuid dependency is met by a pack at the declared version or newer** (`dependencySatisfied`). A dependency with no
+  version is met by presence, and an older pack is refused. The game loads these add-ons, and Mojang's Creator Tools
+  validator has no rule for a dependency version. Rejected: an exact version match, which refused the projects below
+  on catalog install, upload and repair.
+- Bean's Armed Forces (project 1325803) v4.2 ships BP `1540965b-552e-4304-8175-c914e756821b` 4.0.2 and RP
+  `01cf9f1a-ff90-41b5-b844-77251387d9ef` 4.0.2 in one `.mcaddon`, and the BP declares the RP at 4.0.1. In v4.3 both
+  are 4.0.3, the BP still declares 4.0.1, and the RP lists its own uuid at 4.0.2.
+- Vanilla Hammers (project 1198067) publishes BP `2dc25948-6598-43a4-b138-7e117a82c1f1` and RP
+  `394c213a-0a76-4208-8ba2-a305c575e919`, both 3.1.0, as two files that require each other. AdminUtils (project
+  1262779) publishes BP `9bf627d5-d1e0-4195-b581-897a2a34f372` 1.1.23 beside two alternative resource packs, RP Dark
+  (`7477870a-d721-44a1-beb6-5b39f9049e27` 1.1.23) and RP Light. The newest file alone lacks its other half.
+- **The catalog completes an add-on from the project's other files.** `install` reads the newest ten files and, while
+  a uuid requirement is unmet, downloads at most four more in the order `pickCurseforgeFiles` hands it
+  (`PARTNER_FILE_LIMIT`). It keeps a file only when it meets an unmet requirement without repeating a pack it already
+  holds (`keepsPartner`). Anything still unmet ends in the refusal that names the pack needing it.
+
+Picking a file for the server's build:
+
+- CurseForge tags Bedrock files `1.21.50` to `1.21.100` before the year versions and `26.10` to `26.50` after. Hotfix
+  tags appear only where the author adds them: Verity (project 1575941) tags its 26.10 file `26.10` to `26.13`, its
+  26.40 file only `26.40`.
+- **The catalog installs the file tagged for the server's build** (`pickCurseforgeFiles`). It tries the build's own
+  tag (`1.26.45.1` gives `26.45`), then its update (`26.40`), because hotfix tags are optional, then the newest file.
+  The partner walk gets the rest, files sharing a tag with the pick first.
+- Unverified since 2026-10-17: that the API's `gameVersions` strings equal the CurseForge widget's `versions`.
+
 ## Still to verify against a real BDS
 
-- `PORT_BIND_FAILED` and `WORLD_CORRUPT` in `src/events/events.ts` are informed guesses. Reproduce them
-  (hold the port; corrupt a `db/`) and fix the patterns — or **delete them rather than ship regexes that
-  never fire**.
+- BDS reports a taken port at `ERROR` as `Port [19132] may be in use by another process. Free up port and re-run
+  program or adjust server.properties file to use alternate ports for server`, once per port (v4 then v6), then
+  `Exiting program` and a segfault (Mojira BDS-18775, BDS 1.20.30 and 1.20.32.03). The first line can lack the space
+  after the full stop.
+- `PORT_BIND_FAILED` in `src/events/events.ts` matches `Port \[\d+\] may be in use by another process`, and the
+  segfault also raises `ServerCrashed` through `SERVER_CRASHED`.
+- Unverified since 2026-10-17: the same port lines on the current build. Hold the port to confirm.
+- `WORLD_CORRUPT` in `src/events/events.ts` is still a guess. Corrupt a `db/` and fix the pattern, or delete it rather
+  than ship a regex that never fires.
+- Unverified since 2026-10-17: the `[Scripting]` script-error shape the console rules warn on (`SCRIPT_ERROR` in
+  `src/terminal/terminal.ts`), assumed from QuickJS wording; no real BDS line was found. The stamp and level of the
+  two pack-load lines are unrecorded.
 - `kick <xuid>` — the shipped manual says kick takes a name or an xuid; `players.kick` relies on it.
 - Whether `op <gamertag>` needs quoting for a gamertag containing a space.
 - Whether `permission reload` picks up a `visitor` downgrade without a rejoin.
@@ -112,7 +146,20 @@ Measured on a throwaway container and on the dev stack (`c72mrym8dv` on `riyadh-
 - `server-portv6` stays forced to the game port + 1 on purpose: NetherNet ignores it, but under the legacy `raknet` setting a
   mirrored game port of 19133 would otherwise collide with the BDS default v6 port.
 - One-way door: a per-server rollback to a pre-NetherNet bundle leaves BDS listening on TCP with only UDP published. Set
-  `transport=raknet` in Settings or in `server.properties` before reverting a Bedrock server.
+  `transport=raknet` in Settings or in `server.properties` before reverting a Bedrock server. On 1.26.60 or newer there
+  is no RakNet to fall back to.
+- RakNet ends at 1.26.60. Aternos: "Minecraft 26.60 removes the old protocol entirely";
+  `https://minecraft.wiki/w/Bedrock_Edition_26.60` calls 26.60 "also known as 1.26.60".
+- **On 1.26.60 or newer the transport is NetherNet.** `seedValues` writes `transport=nethernet` on every boot whatever the
+  file held, and logs once when it moved a `raknet` value; `settings.write` refuses `raknet`. The panel still lists
+  RakNet, because a static field cannot depend on the build without a new options module.
+- Unverified since 2026-10-17: whether 1.26.60 preview builds already lack RakNet. They count as 1.26.60 or newer.
+- iPhone and iPad clients fail to join over NetherNet from outside the server's network on 1.26.52.3 with
+  `InitialConnection-13`, while Windows and Android join (`https://github.com/itzg/docker-minecraft-bedrock-server/issues/680`,
+  `https://mojira.dev/BDS-23125`). The transport help in `src/panel/panel.ts` and `guides/getting-started` name RakNet as
+  the workaround until 1.26.60.
+- Unverified since 2026-10-17: an iPhone join against a Serverk server on either transport. Verify it on the dev stack
+  before the release.
 
 ## Deferred, on purpose
 
@@ -124,13 +171,24 @@ Measured on a throwaway container and on the dev stack (`c72mrym8dv` on `riyadh-
   array (`codecs/json.ts:14`), and `allowlist.json`, `permissions.json` and both `world_*_packs.json` are all
   top-level arrays. `src/shared/jsonList.ts` works around it here; a second package hitting the same wall is
   the moment to push it up.
-- **`ModCrashed` / `MissingDependency` events.** Most pack load failures only surface in the content log, which
-  `seedConfig` forces off because it is enormous. Turning it on behind a variable, learning the real lines
-  and adding the patterns is the follow-up. Two lines do reach the console with the content log off, seen on
-  BDS 1.26.45.1 on 2026-09-13: `[Scripting] Plugin [<name> - <version>] - requesting dependency on beta APIs
-  [@minecraft/server - 2.10.0-beta], but the Beta APIs experiment is not enabled.` at `ERROR`, and
-  `The following issues were found when loading packs:` followed by `Unable to find manifest in pack.` for a
-  zip left in `resource_packs`. Server status already picks up both.
+- **`ModCrashed` / `MissingDependency` events.** Most pack load failures surface only in the content log. `seedConfig`
+  sends it to the console by default (`content-log-console-output-enabled=true` when the key is absent) and forces
+  `content-log-file-enabled=false` on every boot, because the file is enormous. Learning the real lines and adding the
+  event patterns is the follow-up.
+- Seen in the console on BDS 1.26.45.1: `[Scripting] Plugin [<name> - <version>] - requesting dependency on beta APIs
+  [@minecraft/server - 2.10.0-beta], but the Beta APIs experiment is not enabled.` at `ERROR`, and `The following
+  issues were found when loading packs:` followed by `Unable to find manifest in pack.` for a zip left in
+  `resource_packs`.
+- The console rules in `src/terminal/terminal.ts` warn on both pack-load lines and on a `[Scripting]` line carrying
+  `SyntaxError`, `ReferenceError` or `TypeError`.
+- **The listing keeps the console claim** ("phone, console and Windows players in one world", `description` in
+  `serverk.yml`). Why: the claim rests on BedrockConnect, a third-party DNS service Serverk does not run, untested
+  against its servers, and `guides/getting-started` says so.
+- BedrockConnect's public DNS addresses in `guides/getting-started` can change on the project's side, so a guide check
+  reads the README at `https://github.com/Pugmatt/BedrockConnect` first.
+- Unverified since 2026-10-17: the DNS addresses in the guide, and a BedrockConnect join against a Serverk server.
+- `development_skin_packs` survives an update (`PRESERVE_ON_UPDATE` in `src/install/installGame.ts`) but is not in
+  `backup.only` in `serverk.yml`, so no backup carries it. Low risk, left as is.
 
 ## Notes for whoever runs the first real install
 

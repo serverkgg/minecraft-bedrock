@@ -296,8 +296,8 @@ const settingsTab: Bridge.Tab = {
 						en: "Allowlist",
 					},
 					help: {
-						ar: "عند تفعيلها، لا يدخل إلا اللاعبون الموجودون في القائمة، وهي الطريقة الوحيدة لمنع أي لاعب من الدخول.",
-						en: "With it on, only players on the list can join. It's your only way to keep someone out.",
+						ar: "عند تفعيلها، لا يدخل إلا اللاعبون الموجودون في القائمة، وهي الطريقة الوحيدة لمنع أي لاعب من الدخول. وإذا كانت القائمة فارغة فلن يدخل أحد، لذلك أضف اللاعبين أولًا.",
+						en: "With it on, only players on the list can join. It's your only way to keep someone out. With the list empty, nobody can join, so add your players first.",
 					},
 				},
 				{
@@ -308,12 +308,12 @@ const settingsTab: Bridge.Tab = {
 						en: "Connection transport",
 					},
 					help: {
-						ar: "اتركه على NetherNet، فهي الطريقة التي تدخل بها إصدارات بيدروك الحالية.",
-						en: "Keep it on NetherNet. It's how current Bedrock clients join.",
+						ar: "اتركه على NetherNet، فهي الطريقة التي تدخل بها إصدارات بيدروك الحالية. إذا ظهر الخطأ InitialConnection-13 للاعبي iPhone و iPad بينما يدخل لاعبو ويندوز و Android، فاختر RakNet حتى إصدار ماينكرافت 26.60، فهذا خلل من Mojang في بدء الاتصال عبر NetherNet.",
+						en: "Keep it on NetherNet, the way current Bedrock clients join. If iPhone and iPad players get InitialConnection-13 while Windows and Android players join, choose RakNet until Minecraft 26.60. It's a Mojang bug in NetherNet signaling.",
 					},
 					warning: {
-						ar: "تزيل Mojang طريقة RakNet في الإصدار 1.26.60، ولن يتمكن اللاعبون على الإصدارات الأحدث من الدخول بها.",
-						en: "Mojang removes RakNet in 1.26.60, and players on newer clients can't join over it.",
+						ar: "يزيل إصدار ماينكرافت 26.60 طريقة RakNet من اللعبة والسيرفر معًا. عند تحديث سيرفرك إلى 26.60، نبدّلها إلى NetherNet تلقائيًا عند تشغيله.",
+						en: "Minecraft 26.60 removes RakNet from both the game and the server. When you update your server to 26.60, we switch it back to NetherNet as it starts.",
 					},
 					options: TRANSPORTS,
 				},
