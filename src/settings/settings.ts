@@ -1,12 +1,16 @@
-import { type Bridge, BridgeKind } from "@serverkgg/bridge";
+import { type Bridge, BridgeKind, BridgeUserError } from "@serverkgg/bridge";
+import { type InstallStamp, readInstallStamp } from "../install";
 import {
+	BedrockTransport,
 	BOOLEAN_KEYS,
 	booleanOf,
 	flagOf,
 	mergeProperties,
 	NUMBER_KEYS,
 	PROPERTY_KEYS,
+	raknetRemoved,
 	readProperties,
+	transportFrom,
 } from "../shared";
 
 export const SETTINGS_KEYS: string[] = [
@@ -81,6 +85,22 @@ export const writeSettings = (values: Bridge.Values): Record<string, string> => 
 	return properties;
 };
 
+export const refuseRemovedTransport = (properties: Record<string, string>, stamp: InstallStamp | null) => {
+	if (
+		stamp === null
+		|| !Object.hasOwn(properties, PROPERTY_KEYS.transport)
+		|| transportFrom(properties[PROPERTY_KEYS.transport]) !== BedrockTransport.RakNet
+		|| !raknetRemoved(stamp.version)
+	) {
+		return;
+	}
+
+	throw new BridgeUserError({
+		ar: `أزالت Mojang طريقة RakNet في الإصدار 1.26.60، وسيرفرك على الإصدار ${stamp.label}. اترك طريقة الاتصال على NetherNet.`,
+		en: `Mojang removed RakNet in 1.26.60, and your server is on ${stamp.label}. Keep the connection transport on NetherNet.`,
+	});
+};
+
 export const settings: Bridge.Settings = {
 	kind: BridgeKind.Settings,
 
@@ -89,6 +109,10 @@ export const settings: Bridge.Settings = {
 	},
 
 	async write(context, values) {
-		await mergeProperties(context, writeSettings(values));
+		const properties = writeSettings(values);
+
+		refuseRemovedTransport(properties, await readInstallStamp(context));
+
+		await mergeProperties(context, properties);
 	},
 };

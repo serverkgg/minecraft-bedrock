@@ -1,6 +1,20 @@
 import { describe, expect, it } from "bun:test";
+import { type Bridge, BridgeUserError } from "@serverkgg/bridge";
+import { type InstallStamp, ReleaseChannel } from "../install";
 import { BedrockTransport, PROPERTY_KEYS } from "../shared";
-import { readSettings, SETTINGS_KEYS, writeSettings } from "./settings";
+import { readSettings, refuseRemovedTransport, SETTINGS_KEYS, settings, writeSettings } from "./settings";
+
+const stampOf = (version: string): InstallStamp => ({
+	channel: ReleaseChannel.Release,
+	version,
+	label: version,
+	files: [],
+	packs: [],
+});
+
+const raknet = {
+	[PROPERTY_KEYS.transport]: BedrockTransport.RakNet,
+};
 
 describe("reading the settings form out of server.properties", () => {
 	it("answers every declared key even for a file that carries none of them", () => {
@@ -84,5 +98,63 @@ describe("writing the settings form back", () => {
 				[PROPERTY_KEYS.transport]: BedrockTransport.NetherNet,
 			})[PROPERTY_KEYS.transport],
 		).toBe(BedrockTransport.NetherNet);
+	});
+});
+
+describe("refusing raknet on a build that removed it", () => {
+	it("lets a 1.26.52 server switch to raknet, which it still speaks", () => {
+		expect(() => refuseRemovedTransport(raknet, stampOf("1.26.52.3"))).not.toThrow();
+	});
+
+	it("refuses raknet on a 1.26.60 server and names the build it runs", () => {
+		expect(() => refuseRemovedTransport(raknet, stampOf("1.26.60.1"))).toThrow(BridgeUserError);
+		expect(() => refuseRemovedTransport(raknet, stampOf("1.26.60.1"))).toThrow(/1\.26\.60\.1/);
+	});
+
+	it("refuses raknet on a build past 1.26.60 that a string compare would call older", () => {
+		expect(() => refuseRemovedTransport(raknet, stampOf("1.26.100.2"))).toThrow(BridgeUserError);
+	});
+
+	it("lets a 1.26.60 server save nethernet or a form that leaves the transport out", () => {
+		expect(() =>
+			refuseRemovedTransport(
+				{
+					[PROPERTY_KEYS.transport]: BedrockTransport.NetherNet,
+				},
+				stampOf("1.26.60.1"),
+			),
+		).not.toThrow();
+		expect(() =>
+			refuseRemovedTransport(
+				{
+					[PROPERTY_KEYS.maxPlayers]: "20",
+				},
+				stampOf("1.26.60.1"),
+			),
+		).not.toThrow();
+	});
+
+	it("does not refuse before a build is installed, when there is no build to judge", () => {
+		expect(() => refuseRemovedTransport(raknet, null)).not.toThrow();
+	});
+
+	it("writes nothing when the form asks a 1.26.60 server for raknet", async () => {
+		const merged: Record<string, string>[] = [];
+		const context = {
+			files: {
+				exists: async () => true,
+				read: async () => JSON.stringify(stampOf("1.26.60.1")),
+			},
+			codec: {
+				properties: {
+					merge: async (_file: string, values: Record<string, string>) => {
+						merged.push(values);
+					},
+				},
+			},
+		} as unknown as Bridge.Context;
+
+		await expect(settings.write?.(context, raknet)).rejects.toThrow(BridgeUserError);
+		expect(merged).toEqual([]);
 	});
 });

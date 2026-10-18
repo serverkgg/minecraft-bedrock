@@ -35,6 +35,10 @@ const operator: Bridge.TerminalArg = {
 
 const STAMP = String.raw`\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}:\d{3}`;
 
+const PACK_LOAD_ISSUES = /The following issues were found when loading packs:|Unable to find manifest in pack\./;
+
+const SCRIPT_ERROR = /\[Scripting\].*\b(?:SyntaxError|ReferenceError|TypeError)\b/;
+
 export const terminal: Bridge.Terminal = {
 	kind: BridgeKind.Terminal,
 
@@ -301,6 +305,14 @@ export const terminal: Bridge.Terminal = {
 		{
 			match: /Player (?:connected|disconnected|Spawned):/,
 			level: BridgeTerminalLevel.Info,
+		},
+		{
+			match: PACK_LOAD_ISSUES,
+			level: BridgeTerminalLevel.Warn,
+		},
+		{
+			match: SCRIPT_ERROR,
+			level: BridgeTerminalLevel.Warn,
 		},
 		{
 			match: new RegExp(`^${STAMP} ERROR\\]`),

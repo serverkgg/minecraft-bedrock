@@ -1,6 +1,7 @@
 import { describe, expect, it } from "bun:test";
+import type { Bridge } from "@serverkgg/bridge";
 import { BedrockTransport, PROPERTY_KEYS } from "../shared";
-import { DEFAULT_LEVEL_NAME, seedValues } from "./seedConfig";
+import { DEFAULT_LEVEL_NAME, seedConfig, seedValues } from "./seedConfig";
 
 const BLOCK = {
 	first: 20_000,
@@ -8,6 +9,52 @@ const BLOCK = {
 };
 
 const ADDRESS = "203.0.113.7";
+
+const seeding = (properties: Record<string, string>, version: string) => {
+	const logs: string[] = [];
+	const merged: Record<string, string>[] = [];
+	const remember = (message: string) => {
+		logs.push(message);
+	};
+	const context = {
+		files: {
+			ensure: async () => {},
+			exists: async () => true,
+			write: async () => {},
+			read: async () =>
+				JSON.stringify({
+					channel: "release",
+					version,
+					label: version,
+					files: [],
+					packs: [],
+				}),
+		},
+		codec: {
+			properties: {
+				read: async () => properties,
+				merge: async (_file: string, values: Record<string, string>) => {
+					merged.push(values);
+				},
+			},
+		},
+		port: () => 19_132,
+		portBlock: () => BLOCK,
+		server: {
+			publicAddress: ADDRESS,
+		},
+		log: Object.assign(remember, {
+			warn: remember,
+			error: remember,
+		}),
+	} as unknown as Bridge.Context;
+
+	return {
+		context,
+		logs,
+		merged,
+	};
+};
 
 describe("seeding server.properties", () => {
 	it("forces the port onto whatever the platform allocated, overwriting what is already there", () => {
@@ -186,5 +233,61 @@ describe("seeding the nethernet transport", () => {
 
 	it("leaves the address empty for an ipv6 address, which the colon-separated property cannot carry", () => {
 		expect(seedValues({}, 19_132, BLOCK, "2001:db8::1")[PROPERTY_KEYS.serverUdpPorts]).toBe(":20000-20063:20000-20063");
+	});
+});
+
+describe("ending raknet at 1.26.60, which removed it", () => {
+	const raknet = {
+		[PROPERTY_KEYS.transport]: BedrockTransport.RakNet,
+	};
+
+	it("keeps raknet on a 1.26.52 build, which still speaks it", () => {
+		expect(seedValues(raknet, 19_132, BLOCK, ADDRESS, "1.26.52.3")[PROPERTY_KEYS.transport]).toBeUndefined();
+	});
+
+	it("rewrites raknet to nethernet on a 1.26.60 build", () => {
+		expect(seedValues(raknet, 19_132, BLOCK, ADDRESS, "1.26.60.1")[PROPERTY_KEYS.transport]).toBe(
+			BedrockTransport.NetherNet,
+		);
+	});
+
+	it("compares the build by number, so 1.26.100 counts as newer than 1.26.60", () => {
+		expect(seedValues(raknet, 19_132, BLOCK, ADDRESS, "1.26.100.2")[PROPERTY_KEYS.transport]).toBe(
+			BedrockTransport.NetherNet,
+		);
+	});
+
+	it("logs one line when a boot moves a raknet server onto nethernet", async () => {
+		const run = seeding(raknet, "1.26.60.1");
+
+		await seedConfig(run.context);
+
+		expect(run.merged.at(0)?.[PROPERTY_KEYS.transport]).toBe(BedrockTransport.NetherNet);
+		expect(run.logs).toEqual([
+			"moved the transport from raknet to nethernet, because minecraft removed raknet in 1.26.60",
+		]);
+	});
+
+	it("logs nothing for a server already on nethernet", async () => {
+		const run = seeding(
+			{
+				[PROPERTY_KEYS.transport]: BedrockTransport.NetherNet,
+			},
+			"1.26.60.1",
+		);
+
+		await seedConfig(run.context);
+
+		expect(run.merged.at(0)?.[PROPERTY_KEYS.transport]).toBe(BedrockTransport.NetherNet);
+		expect(run.logs).toEqual([]);
+	});
+
+	it("leaves a raknet server alone on a 1.26.52 build and logs nothing", async () => {
+		const run = seeding(raknet, "1.26.52.3");
+
+		await seedConfig(run.context);
+
+		expect(run.merged.at(0)?.[PROPERTY_KEYS.transport]).toBeUndefined();
+		expect(run.logs).toEqual([]);
 	});
 });

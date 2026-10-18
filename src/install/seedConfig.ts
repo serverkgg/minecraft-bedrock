@@ -7,9 +7,12 @@ import {
 	PERMISSIONS_FILE,
 	PROPERTY_KEYS,
 	RESOURCE_PACKS_DIRECTORY,
+	raknetRemoved,
 	readProperties,
+	transportFrom,
 	WORLDS_DIRECTORY,
 } from "../shared";
+import { readInstallStamp } from "./installStamp";
 
 export const DEFAULT_LEVEL_NAME = "world";
 
@@ -67,6 +70,7 @@ export const seedValues = (
 	port: number,
 	block: BridgePortBlock,
 	publicAddress: string | null,
+	build: string | null = null,
 ) => {
 	const values: Record<string, string> = {
 		[PROPERTY_KEYS.contentLogFileEnabled]: "false",
@@ -76,7 +80,7 @@ export const seedValues = (
 		[PROPERTY_KEYS.serverUdpPorts]: udpPortsOf(block, publicAddress),
 	};
 
-	if ((current[PROPERTY_KEYS.transport] ?? "").trim().length === 0) {
+	if (raknetRemoved(build) || (current[PROPERTY_KEYS.transport] ?? "").trim().length === 0) {
 		values[PROPERTY_KEYS.transport] = BedrockTransport.NetherNet;
 	}
 
@@ -101,13 +105,24 @@ export const seedConfig = async (context: Bridge.Context) => {
 		}
 	}
 
-	await mergeProperties(
-		context,
-		seedValues(
-			await readProperties(context),
-			context.port("game"),
-			context.portBlock("media"),
-			context.server.publicAddress,
-		),
+	const current = await readProperties(context);
+	const build = (await readInstallStamp(context))?.version ?? null;
+	const values = seedValues(
+		current,
+		context.port("game"),
+		context.portBlock("media"),
+		context.server.publicAddress,
+		build,
 	);
+
+	if (
+		transportFrom(current[PROPERTY_KEYS.transport]) === BedrockTransport.RakNet
+		&& values[PROPERTY_KEYS.transport] === BedrockTransport.NetherNet
+	) {
+		context.log("moved the transport from raknet to nethernet, because minecraft removed raknet in 1.26.60", {
+			build,
+		});
+	}
+
+	await mergeProperties(context, values);
 };
