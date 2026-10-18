@@ -9,3 +9,4 @@ export * from "./knownPlayers";
 export * from "./paths";
 export * from "./serverProperties";
 export * from "./transport";
+export * from "./version";

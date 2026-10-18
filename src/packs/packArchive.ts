@@ -5,6 +5,10 @@ const FIND_TIMEOUT_MS = 60_000;
 
 const MANIFEST_FILE = "manifest.json";
 
+const NESTED_ARCHIVE_DEPTH = 3;
+
+const MANIFEST_DEPTH = 5;
+
 export interface DiscoveredPack {
 	directory: string;
 	manifest: PackManifest;
@@ -65,7 +69,7 @@ const unpackNested = async (context: Bridge.Context, root: string) => {
 			"find",
 			root,
 			"-maxdepth",
-			"3",
+			String(NESTED_ARCHIVE_DEPTH),
 			"(",
 			"-iname",
 			"*.mcpack",
@@ -110,7 +114,7 @@ export const discoverPacks = async (context: Bridge.Context, root: string): Prom
 			"find",
 			root,
 			"-maxdepth",
-			"4",
+			String(MANIFEST_DEPTH),
 			"-name",
 			MANIFEST_FILE,
 		],

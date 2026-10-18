@@ -11,7 +11,7 @@ import {
 import { activeWorld, betaApisEnabled, readLevelExperiments } from "../worlds";
 import type { PackInstallResult } from "./packActivity";
 import { discoverPacks, unpackArchive } from "./packArchive";
-import { activationOrder, assertCompatible, manifestFor, packWorlds, safePackFolder } from "./packCompatibility";
+import { activationOrder, assertCompatible, packWorlds, recordedCandidates, safePackFolder } from "./packCompatibility";
 import { inventoryPacks } from "./packDiscovery";
 import { resolvePackText } from "./packLang";
 import { PackKind } from "./packManifest";
@@ -44,53 +44,81 @@ export const noManifest = new BridgeUserError({
 	en: "The file has no manifest.json. Make sure you're uploading a real .mcaddon or .mcpack",
 });
 
-export interface PackSource {
-	archive: string;
+export interface PackOrigin {
 	bundle: string;
 	provider?: string | null;
 	project?: string | null;
 	file?: string | null;
+	fileByDirectory?: Record<string, string>;
 	icon?: string | null;
 	pageUrl?: string | null;
 }
 
+export interface PackSource extends PackOrigin {
+	archive: string;
+}
+
+export const packFileOf = (origin: PackOrigin, directory: string) => {
+	const match = Object.entries(origin.fileByDirectory ?? {}).find(
+		([root]) => directory === root || directory.startsWith(`${root}/`),
+	);
+	return match?.[1] ?? origin.file ?? null;
+};
+
 export const installPackSource = async (context: Bridge.Context, source: PackSource): Promise<PackInstallResult> => {
 	requireStopped(context);
-	await recoverFileTransaction(context);
 	const unpacked = `${PACK_SCRATCH}/unpacked`;
 
 	await unpackArchive(context, source.archive, unpacked);
 
-	const found = await discoverPacks(context, unpacked);
+	return await installUnpacked(context, unpacked, source);
+};
 
-	if (found.length === 0) {
+export const installUnpacked = async (
+	context: Bridge.Context,
+	root: string,
+	source: PackOrigin,
+): Promise<PackInstallResult> => {
+	requireStopped(context);
+	await recoverFileTransaction(context);
+
+	const discovered = await discoverPacks(context, root);
+
+	if (discovered.length === 0) {
 		throw noManifest;
 	}
 
-	if (found.every((pack) => pack.manifest.kind === PackKind.WorldTemplate)) {
+	if (discovered.every((pack) => pack.manifest.kind === PackKind.WorldTemplate)) {
 		throw worldTemplateRejected;
 	}
 
 	const sidecar = await inventoryPacks(context);
 	const world = await activeWorld(context);
 	const installed: PackRecord[] = [];
-	const candidateIds = new Set(found.map((pack) => pack.manifest.uuid));
-	if (candidateIds.size !== found.length) {
+	const candidateIds = new Set(discovered.map((pack) => pack.manifest.uuid));
+	if (candidateIds.size !== discovered.length) {
 		throw new BridgeUserError({
 			ar: "يحتوي الملف على أكثر من إضافة بالمعرّف نفسه. ارفع إصدارًا واحدًا من كل إضافة.",
 			en: "The file has more than one add-on with the same id. Include one version of each add-on.",
 		});
 	}
-	const existing = await Promise.all(
-		Object.values(sidecar.packs)
-			.filter((pack) => !candidateIds.has(pack.uuid) && pack.dependencies.some((id) => candidateIds.has(id)))
-			.map((pack) => manifestFor(context, pack)),
+	const found = await Promise.all(
+		discovered.map(async (pack) => ({
+			...pack,
+			title: await resolvePackText(context, pack.directory, pack.manifest.nameKey, source.bundle),
+		})),
+	);
+	const existing = await recordedCandidates(
+		context,
+		Object.values(sidecar.packs).filter(
+			(pack) => !candidateIds.has(pack.uuid) && pack.dependencies.some((id) => candidateIds.has(id)),
+		),
 	);
 	await assertCompatible(
 		context,
 		[
-			...found.map((pack) => pack.manifest),
-			...existing.filter((manifest) => manifest !== null),
+			...found,
+			...existing,
 		],
 		sidecar.packs,
 	);
@@ -110,7 +138,6 @@ export const installPackSource = async (context: Bridge.Context, source: PackSou
 			continue;
 		}
 
-		const title = await resolvePackText(context, pack.directory, pack.manifest.nameKey, source.bundle);
 		const previous = sidecar.packs[pack.manifest.uuid];
 		if (
 			previous !== undefined
@@ -129,7 +156,7 @@ export const installPackSource = async (context: Bridge.Context, source: PackSou
 			});
 		}
 		const scope = previous?.folder.startsWith("worlds/") ? `worlds/${world}/` : "";
-		const folder = `${scope}${packDirectory(pack.manifest.kind)}/${packFolderName(title, pack.manifest.uuid)}`;
+		const folder = `${scope}${packDirectory(pack.manifest.kind)}/${packFolderName(pack.title, pack.manifest.uuid)}`;
 
 		if (previous !== undefined && previous.folder !== folder) {
 			if (!safePackFolder(previous.folder)) {
@@ -146,7 +173,7 @@ export const installPackSource = async (context: Bridge.Context, source: PackSou
 			uuid: pack.manifest.uuid,
 			kind: pack.manifest.kind,
 			folder,
-			title,
+			title: pack.title,
 			version: pack.manifest.version.parts,
 			versionText: pack.manifest.version.text,
 			bundle: source.bundle,
@@ -154,7 +181,7 @@ export const installPackSource = async (context: Bridge.Context, source: PackSou
 			dependencies: pack.manifest.dependencies,
 			provider: source.provider ?? null,
 			project: source.project ?? null,
-			file: source.file ?? null,
+			file: packFileOf(source, pack.directory),
 			icon: source.icon ?? null,
 			pageUrl: source.pageUrl ?? null,
 			installedAt: new Date().toISOString(),
@@ -179,14 +206,15 @@ export const installPackSource = async (context: Bridge.Context, source: PackSou
 		installed.map((pack) => pack.uuid),
 		sidecar.packs,
 	);
-	const dependencyManifests = await Promise.all(
-		activated.filter((pack) => !candidateIds.has(pack.uuid)).map((pack) => manifestFor(context, pack)),
+	const dependencies = await recordedCandidates(
+		context,
+		activated.filter((pack) => !candidateIds.has(pack.uuid)),
 	);
 	await assertCompatible(
 		context,
 		[
-			...found.map((pack) => pack.manifest),
-			...dependencyManifests.filter((manifest) => manifest !== null),
+			...found,
+			...dependencies,
 		],
 		sidecar.packs,
 	);

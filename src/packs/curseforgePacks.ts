@@ -1,18 +1,23 @@
 import { type Bridge, BridgeKind, BridgeUserError } from "@serverkgg/bridge";
 import {
+	type CurseforgeFile,
 	CurseforgeSort,
 	CurseforgeSortOrder,
 	createCurseforgeCatalog,
 	curseforgeDownloadUrl,
 	curseforgeSha1,
 } from "@serverkgg/bridge/catalogs";
-import { PACK_SCRATCH, requireStopped } from "../shared";
+import { readInstallStamp } from "../install";
+import { PACK_SCRATCH, recoverFileTransaction, requireStopped } from "../shared";
 import { activeWorld } from "../worlds";
+import { pickCurseforgeFiles } from "./curseforgeFiles";
 import { packInstalledActivity, packsRemovedActivity, packsTitle, packsToggledActivity } from "./packActivity";
+import { discoverPacks, unpackArchive } from "./packArchive";
 import { inventoryPacks } from "./packDiscovery";
-import { installPackSource } from "./packInstall";
+import { installUnpacked } from "./packInstall";
 import { PackKind } from "./packManifest";
 import { removePacks, setPacksEnabled } from "./packMutation";
+import { walkPartnerFiles } from "./packPartners";
 import { readWorldPacks } from "./packRegistry";
 
 export const BEDROCK_GAME_ID = 78_022;
@@ -24,6 +29,8 @@ export const CLASS_TEXTURE_PACKS = 6929;
 export const PROVIDER = "curseforge";
 
 const PAGE_SIZE = 20;
+
+export const FILES_PAGE_SIZE = 10;
 
 const DOWNLOAD_TIMEOUT_MS = 600_000;
 
@@ -185,16 +192,25 @@ export const packCatalog: Bridge.Catalog = {
 		});
 		const mod = await catalog.mod(project);
 		const files = await catalog.modFiles(project, {
-			pageSize: 1,
+			pageSize: FILES_PAGE_SIZE,
 		});
-		const file = files.data.at(0);
+		const build = (await readInstallStamp(context))?.version ?? null;
+		const pick = pickCurseforgeFiles(files.data, build);
 
-		if (file === undefined) {
+		if (pick === null) {
 			throw new BridgeUserError({
 				ar: `لا يوجد لدى «${mod.name}» أي ملف قابل للتنزيل.`,
 				en: `"${mod.name}" has no downloadable file.`,
 			});
 		}
+
+		const { file, partners: older } = pick;
+
+		context.log("picked the catalog file for the server build", {
+			project: mod.id,
+			file: file.displayName,
+			build,
+		});
 
 		const url = curseforgeDownloadUrl(file);
 
@@ -205,27 +221,92 @@ export const packCatalog: Bridge.Catalog = {
 			});
 		}
 
-		const digest = curseforgeSha1(file);
-		const archive = `${PACK_SCRATCH}/${file.id}-${file.fileName}`;
+		const unpacked = `${PACK_SCRATCH}/unpacked`;
+		const directoryOf = (entry: CurseforgeFile) => `${unpacked}/${entry.id}`;
+		const pullFile = async (entry: CurseforgeFile, from: string) => {
+			const archive = `${PACK_SCRATCH}/${entry.id}-${entry.fileName}`;
+			const digest = curseforgeSha1(entry);
 
+			await context.files.download(archive, from, {
+				timeoutMs: DOWNLOAD_TIMEOUT_MS,
+				...(digest === null
+					? {}
+					: {
+							digest: `sha1:${digest}`,
+						}),
+				sizeBytes: entry.fileLength,
+			});
+			await unpackArchive(context, archive, directoryOf(entry));
+			await context.files.remove(archive);
+
+			return (await discoverPacks(context, directoryOf(entry))).map((pack) => pack.manifest);
+		};
+
+		await recoverFileTransaction(context);
 		await context.files.remove(PACK_SCRATCH);
-		await context.files.ensure(PACK_SCRATCH);
-		await context.files.download(archive, url, {
-			timeoutMs: DOWNLOAD_TIMEOUT_MS,
-			...(digest === null
-				? {}
-				: {
-						digest: `sha1:${digest}`,
-					}),
-			sizeBytes: file.fileLength,
-		});
+		await context.files.ensure(unpacked);
 
-		const result = await installPackSource(context, {
-			archive,
+		const candidates = await pullFile(file, url);
+		const installed = new Map(
+			Object.values((await inventoryPacks(context)).packs).map((pack) => [
+				pack.uuid,
+				{
+					parts: pack.version,
+					text: pack.versionText,
+				},
+			]),
+		);
+		const partners = await walkPartnerFiles({
+			candidates,
+			installed,
+			files: older,
+			open: async (entry) => {
+				const from = curseforgeDownloadUrl(entry);
+
+				if (from === null) {
+					return null;
+				}
+
+				try {
+					return await pullFile(entry, from);
+				} catch (error) {
+					context.log.warn("could not fetch a partner file of an add-on", {
+						project: mod.id,
+						file: entry.id,
+						reason: error instanceof Error ? error.message : String(error),
+					});
+
+					return [];
+				}
+			},
+			drop: async (entry) => {
+				await context.files.remove(directoryOf(entry));
+			},
+		});
+		const pulled = [
+			file,
+			...partners,
+		];
+
+		if (partners.length > 0) {
+			context.log("pulled partner files for an add-on", {
+				project: mod.id,
+				files: partners.map((entry) => entry.displayName).join(", "),
+			});
+		}
+
+		const sizeBytes = pulled.reduce((total, entry) => total + entry.fileLength, 0);
+		const result = await installUnpacked(context, unpacked, {
 			bundle: mod.name,
 			provider: PROVIDER,
 			project: String(mod.id),
 			file: String(file.id),
+			fileByDirectory: Object.fromEntries(
+				pulled.map((entry) => [
+					directoryOf(entry),
+					String(entry.id),
+				]),
+			),
 			icon: mod.logo?.thumbnailUrl ?? null,
 			pageUrl: mod.links?.websiteUrl ?? null,
 		});
@@ -234,7 +315,7 @@ export const packCatalog: Bridge.Catalog = {
 			packInstalledActivity(result, {
 				bundle: mod.name,
 				provider: PROVIDER,
-				sizeBytes: file.fileLength,
+				sizeBytes,
 			}),
 		);
 
@@ -246,7 +327,7 @@ export const packCatalog: Bridge.Catalog = {
 			path: first?.folder ?? "",
 			title: first?.title ?? mod.name,
 			version: first?.versionText ?? null,
-			sizeBytes: file.fileLength,
+			sizeBytes,
 			enabled: true,
 			gameVersion: null,
 			stale: false,

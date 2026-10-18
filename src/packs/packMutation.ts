@@ -7,8 +7,8 @@ import {
 	assertCompatible,
 	assertRemovable,
 	linkedPacks,
-	manifestFor,
 	type PackUsage,
+	recordedCandidates,
 	removalRefusal,
 } from "./packCompatibility";
 import { inventoryPacks } from "./packDiscovery";
@@ -74,18 +74,14 @@ export const setPacksEnabled = async (
 	const targets = enabled ? ids : linkedPacks(ids, sidecar.packs);
 	const ordered = enabled ? activationOrder(ids, sidecar.packs) : targets.flatMap((id) => sidecar.packs[id] ?? []);
 	if (enabled) {
-		const manifests = await Promise.all(ordered.map((pack) => manifestFor(context, pack)));
-		if (manifests.some((manifest) => manifest === null)) {
+		const candidates = await recordedCandidates(context, ordered);
+		if (candidates.length !== ordered.length) {
 			throw new BridgeUserError({
 				ar: "ملفات أحد المتطلبات ناقصة. ثبّت الإضافة مرة ثانية.",
 				en: "A required add-on has missing files. Install it again.",
 			});
 		}
-		await assertCompatible(
-			context,
-			manifests.filter((manifest) => manifest !== null),
-			sidecar.packs,
-		);
+		await assertCompatible(context, candidates, sidecar.packs);
 	} else {
 		const otherPacks = Object.fromEntries(Object.entries(sidecar.packs).filter(([id]) => !targets.includes(id)));
 		for (const pack of ordered) {

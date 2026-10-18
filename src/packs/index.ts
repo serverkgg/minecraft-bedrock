@@ -1,3 +1,4 @@
+export * from "./curseforgeFiles";
 export * from "./curseforgePacks";
 export * from "./packActivity";
 export * from "./packArchive";
@@ -5,6 +6,7 @@ export * from "./packHealth";
 export * from "./packInstall";
 export * from "./packLang";
 export * from "./packManifest";
+export * from "./packPartners";
 export * from "./packRegistry";
 export * from "./packSidecar";
 export * from "./packs";

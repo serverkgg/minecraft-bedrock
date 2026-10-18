@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { packDirectory, packFolderName } from "./packInstall";
+import { packDirectory, packFileOf, packFolderName } from "./packInstall";
 import { PackKind } from "./packManifest";
 import { parsePackSidecar } from "./packSidecar";
 
@@ -73,5 +73,36 @@ describe("reading the pack ledger back", () => {
 		});
 
 		expect(parsePackSidecar(text).packs).toEqual({});
+	});
+});
+
+describe("remembering which catalog file a pack came from", () => {
+	const origin = {
+		bundle: "Vanilla Hammers",
+		file: "8984741",
+		fileByDirectory: {
+			".serverk-staging/pack/unpacked/8984741": "8984741",
+			".serverk-staging/pack/unpacked/8984739": "8984739",
+		},
+	};
+
+	it("answers the file a pack was unpacked from, so a partner pack keeps its own file id", () => {
+		expect(packFileOf(origin, ".serverk-staging/pack/unpacked/8984739")).toBe("8984739");
+		expect(packFileOf(origin, ".serverk-staging/pack/unpacked/8984741/Hammers BP")).toBe("8984741");
+	});
+
+	it("does not mistake a folder whose name only starts with another file id for that file", () => {
+		expect(packFileOf(origin, ".serverk-staging/pack/unpacked/89847390/Other")).toBe("8984741");
+	});
+
+	it("falls back to the single file of an upload or a one-file install", () => {
+		expect(
+			packFileOf(
+				{
+					bundle: "Upload",
+				},
+				".serverk-staging/pack/unpacked/Cool",
+			),
+		).toBeNull();
 	});
 });
