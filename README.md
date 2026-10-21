@@ -1,52 +1,55 @@
-# بيدروك (Minecraft Bedrock)
+![Minecraft Bedrock](assets/banner.webp)
 
-حزمة ماينكرافت بيدروك على منصة سيرفرك (`serverk.gg`). هذا المستودع فيه كل شيء اللعبة تحتاجه عشان تشتغل على المنصة: ملف التعريف `serverk.yml`، الـ driver اللي يدير السيرفر، صورة الدوكر، والشروحات.
+# ماينكرافت بيدروك (Minecraft Bedrock)
 
-The Minecraft Bedrock game package for the Serverk platform (`serverk.gg`). This repo holds everything the game needs to run on the platform: the `serverk.yml` manifest, the driver that manages the server, the Docker image, and the guides.
+يضم هذا الريبو كل ما تحتاجه منصة سيرفرك لتشغيل سيرفرات ماينكرافت بيدروك. سيرفر ماينكرافت بيدروك أصلي يجمع الجوال والكونسول وويندوز في الماب نفسه، ويشتغل فورًا دون أي إعداد. العب مع أصحابك من أي جهاز، وسيرفرك جاهز خلال دقيقة. صفحة اللعبة: [serverk.gg/games/minecraft-bedrock](https://serverk.gg/games/minecraft-bedrock)
 
-This is the **native** Bedrock Dedicated Server, not Java with Geyser in front of it. The `minecraft` package is the Java Edition one and stays as it is; the two are siblings.
+This repository holds everything Serverk needs to run Minecraft Bedrock servers. A native Minecraft Bedrock server with phone, console and Windows players in one world, running the moment your order completes. Play with your friends from any device, with your server ready in a minute. Game page: [serverk.gg/games/minecraft-bedrock](https://serverk.gg/games/minecraft-bedrock)
 
 ## Layout
 
-- `serverk.yml` — the game manifest: metadata, resources, ports, backup rules, secrets, guides.
-- `src/` — the bridge driver: install, lifecycle, query, backup, events, and the panel modules.
-- `image/Dockerfile` — the runtime image; the compiled bridge binary is its entrypoint.
-- `assets/` — logo and banner (webp).
-- `guides/` — player guides in Arabic and English.
+- `serverk.yml`: the game manifest with its metadata, resources, ports, backup and reset rules, and the guide list.
+- `serverk.schema.json`: the JSON Schema of `serverk.yml` for the editor, written by `serverk-bridge schema`.
+- `src/`: the driver, built on `@serverkgg/bridge`; `src/driver.ts` exports it and `src/main.ts` serves it.
+- `image/Dockerfile`: the container image, with the compiled bridge as its entrypoint.
+- `assets/`: the logo and the banner the site and the panel show.
+- `guides/<id>/ar.md` and `en.md`: the guide bodies; each guide's title, summary and tags live in `serverk.yml`.
 
-## What Bedrock does not have
+## Guides
 
-Three things are missing on purpose, because the game has no equivalent and pretending otherwise would be worse than the gap:
-
-- **No ban.** BDS ships no `ban`, no `banlist`, no `pardon` and no banned-players file. The allowlist is the moderation tool, and the panel and guides say so. `driver.test.ts` asserts no ban action exists so a later change cannot quietly promise one.
-- **No death or advancement events.** BDS prints neither server-side, so there is no line to match.
-- **No per-dimension reset.** One LevelDB holds the Overworld, the Nether and the End, so there is no Nether to reset on its own.
+- [البدء بسيرفرك · Getting started](https://serverk.gg/games/minecraft-bedrock/guides/getting-started)
+- [اللاعبون: القائمة البيضاء والأوبريتر · Players: the allowlist and operators](https://serverk.gg/games/minecraft-bedrock/guides/players)
+- [المابات: الرفع والتبديل والحماية · Worlds: upload, switch and keep safe](https://serverk.gg/games/minecraft-bedrock/guides/worlds)
+- [الإضافات: السلوك والمظهر · Add-ons: behavior and resource packs](https://serverk.gg/games/minecraft-bedrock/guides/addons)
+- [إصدار البريفيو: جرّب الجديد قبل الجميع · The preview build: try what's coming next](https://serverk.gg/games/minecraft-bedrock/guides/preview)
 
 ## Develop
 
-Everything runs on [Bun](https://bun.sh):
+Everything runs on [Bun](https://bun.sh).
 
-```sh
-bun install
-bun run check
-bun run tsc
-bun run test
-bun run validate
-bun run compile
-```
+- `bun install`: installs the dependencies, points Git at the hooks in `.githooks/` and writes `.claude/rules/package.md` from the bridge.
+- `bun run check`: checks lint and formatting with Biome; `bun run fix` applies the fixes.
+- `bun run tsc`: type-checks the code.
+- `bun run test`: runs the tests.
+- `bun run validate`: runs the checks the platform runs at publish, and fails while this README is out of date.
+- `bun run compile`: builds `dist/bridge`, the linux/amd64 binary the image starts.
 
-`validate` checks the manifest, assets, and driver wiring with the exact validation the platform runs at publish. `compile` produces `dist/bridge`, an amd64 binary — serverk publishes game images for `linux/amd64` only, which suits BDS, since Mojang ships it for x86-64 alone.
+`.githooks/pre-commit` runs `bun run fix`, `bun run tsc`, `bun run test`, `bun run validate` and `bunx serverk-bridge schema --check` before every commit. There is no CI: a commit that passes the hook is ready.
 
-The `pre-commit` hook is the gate: it runs `fix`, `tsc`, `test`, `validate`, and `serverk-bridge schema --check`, and restages whatever the formatter touched. There is no CI workflow — a commit that passes the hook is a commit that is ready.
-
-The driver is built on [`@serverkgg/bridge`](https://www.npmjs.com/package/@serverkgg/bridge). `package.json` always pins the published version. When the `serverk` repository is cloned beside this one, the `postinstall` step (`serverk-bridge link`) points `node_modules/@serverkgg/bridge` at `../serverk/modules/bridge`, so you develop against the local bridge without touching `package.json` or `bun.lock`; it does nothing in CI or when the checkout is absent. `bunx serverk-bridge link --check` shows which bridge is installed, and `bunx serverk-bridge link --unlink` drops the link so the next `bun install` restores the registry package. Never use `bun link` or commit a `file:` or `link:` dependency.
+`bun install` runs `serverk-bridge link`, which links `@serverkgg/bridge` to a sibling `serverk` checkout at `../serverk/modules/bridge` when one exists. Never commit a `file:` or `link:` dependency.
 
 ## Contribute
 
-- افتح issue لأي مشكلة أو اقتراح — بالعربي أو بالإنجليزي، كلها مرحّب فيها.
-- Run `bun install` once so the `pre-commit` hook is wired, then let it gate every commit — lint, types, tests, package validation, and the schema check all run locally, with no secrets and nothing to configure.
-- Releases are done by the Serverk team through the platform's central release pipeline; merged changes ride the next release.
+افتح issue لأي مشكلة أو اقتراح، بالعربية أو بالإنجليزية. ينشر فريق سيرفرك هذا الريبو من ريبو `serverk` بالأمر `bunx outdo package --prod --name minecraft-bedrock`، ويصل كل تغيير مدموج مع النشر التالي. العربية هي لغة المصدر: يُكتب كل نص يقرؤه العميل بالعربية أولًا، بلغة رسمية مع لمسة خليجية خفيفة، ثم بالإنجليزية. أبقِ أسماء الملفات والأوامر والمفاتيح بالحروف اللاتينية.
 
-## Arabic copy
+Open an issue for any problem or suggestion, in Arabic or English. Serverk releases this repository from `serverk` with `bunx outdo package --prod --name minecraft-bedrock`; merged changes ride the next release. Arabic is the source language: every string a customer reads is written in Arabic first, formal with a light Gulf touch, then in English. Keep file names, commands and config keys in Latin script.
 
-Arabic is the source language of the platform. Player-facing strings in `serverk.yml` and the guides use Gulf gaming Arabic — the game's Arabic name is always «بيدروك», written solid.
+## License
+
+الكود متاح للقراءة، وجميع الحقوق محفوظة لمنصة سيرفرك، ولا يُمنح أي ترخيص.
+
+The code is public to read. All rights are reserved by Serverk, and no license is granted.
+
+يُنشأ هذا الملف بالأمر `serverk-bridge readme` من `serverk.yml`، فعدّل ملف التعريف لا هذا الملف.
+
+Generated by `serverk-bridge readme` from `serverk.yml`; edit the manifest, not this file.
