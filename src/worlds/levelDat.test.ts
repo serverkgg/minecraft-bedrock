@@ -6,6 +6,9 @@ import {
 	levelByte,
 	levelExperiments,
 	levelHardcore,
+	levelLong,
+	levelName,
+	levelSeed,
 	NbtTag,
 	parseLevel,
 	parseLevelExperiments,
@@ -13,6 +16,7 @@ import {
 	withByte,
 	withExperiment,
 	withHardcore,
+	withLevelName,
 } from "./levelDat";
 
 const name = (text: string) => {
@@ -319,6 +323,39 @@ describe("reading and writing a root byte in level.dat", () => {
 	});
 });
 
+describe("reading the seed from level.dat", () => {
+	it("reads a real server's seed as the decimal it would type into level-seed", () => {
+		const file = parsed(fixture());
+
+		expect(levelLong(file, "RandomSeed")).toBe(6396108708387762195n);
+		expect(levelSeed(file)).toBe("6396108708387762195");
+	});
+
+	it("reads a long past every other kind of tag, as eight little-endian bytes", () => {
+		expect(levelSeed(parsed(level(noise)))).toBe("9223372032683265301");
+	});
+
+	it("reads a negative seed as signed", () => {
+		const file = parsed(
+			level([
+				4,
+				...name("RandomSeed"),
+				...new Array<number>(8).fill(0xff),
+			]),
+		);
+
+		expect(levelSeed(file)).toBe("-1");
+	});
+
+	it("answers null for a missing seed or a tag that is not a long", () => {
+		const file = parsed(fixture());
+
+		expect(levelLong(file, "Difficulty")).toBeNull();
+		expect(levelLong(file, "NoSuchTag")).toBeNull();
+		expect(levelSeed(parsed(level(byte("IsHardcore", 0))))).toBeNull();
+	});
+});
+
 describe("switching hardcore in level.dat", () => {
 	it("turns hardcore on and off in a real level file and changes only that byte", () => {
 		const bytes = fixture();
@@ -329,5 +366,63 @@ describe("switching hardcore in level.dat", () => {
 		expect(levelHardcore(parsed(off))).toBe(false);
 		expect(on.filter((value, index) => value !== bytes[index]).length).toBe(1);
 		expect(off).toEqual(bytes);
+	});
+});
+
+describe("naming the world in level.dat", () => {
+	it("renames a real server's world and leaves every other tag exactly as it was", () => {
+		const bytes = fixture();
+		const original = parsed(bytes);
+		const written = serializeLevel(withLevelName(original, "world-old"));
+		const reread = parsed(written);
+
+		expect(levelName(original)).toBe("world");
+		expect(levelName(reread)).toBe("world-old");
+		expect(rootKeys(reread)).toEqual(rootKeys(original));
+		expect(
+			without(reread, [
+				"LevelName",
+			]),
+		).toEqual(
+			without(original, [
+				"LevelName",
+			]),
+		);
+		expect(written.length).toBe(bytes.length + "-old".length);
+		expect(new DataView(written.buffer).getInt32(4, true)).toBe(written.length - 8);
+	});
+
+	it("writes a real server's level file back byte for byte when the name does not change", () => {
+		const bytes = fixture();
+
+		expect(serializeLevel(withLevelName(parsed(bytes), "world"))).toEqual(bytes);
+	});
+
+	it("replaces a name found past every other kind of tag, without duplicating it", () => {
+		const original = parsed(level(noise));
+		const reread = parsed(serializeLevel(withLevelName(original, "skyblock")));
+
+		expect(levelName(original)).toBe("ماب الربع");
+		expect(levelName(reread)).toBe("skyblock");
+		expect(rootKeys(reread)).toEqual(rootKeys(original));
+	});
+
+	it("appends the name to a level that never had one, as a length in bytes and the UTF-8 text", () => {
+		const written = serializeLevel(withLevelName(parsed(level(byte("IsHardcore", 0))), "ماب-old"));
+
+		expect(written).toEqual(
+			level([
+				...byte("IsHardcore", 0),
+				8,
+				...name("LevelName"),
+				...name("ماب-old"),
+			]),
+		);
+		expect(levelName(parsed(written))).toBe("ماب-old");
+	});
+
+	it("answers null for a missing name or a tag that is not a string", () => {
+		expect(levelName(parsed(level(byte("IsHardcore", 0))))).toBeNull();
+		expect(levelName(parsed(level(byte("LevelName", 1))))).toBeNull();
 	});
 });

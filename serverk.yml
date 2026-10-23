@@ -267,8 +267,8 @@ guides:
       ar: "المابات: الرفع والتبديل والحماية"
       en: "Worlds: upload, switch and keep safe"
     summary:
-      ar: ارفع مابك من جوالك، وبدّل بين المابات، واعرف لماذا تُعد النسخة الاحتياطية أهم شيء في بيدروك.
-      en: Upload a world from your phone, switch between worlds, and understand why backups matter most on Bedrock.
+      ar: ارفع مابك من جوالك، وبدّل بين المابات، ونفّذ ريسيت للماب المفعّل بالسيد نفسه أو من نسخة تحتفظ بها، واعرف لماذا تُعد النسخة الاحتياطية أهم شيء في بيدروك.
+      en: Upload a world from your phone, switch between worlds, reset the active world from its own seed or from a copy you keep, and understand why backups matter most on Bedrock.
     tags:
       - features
     surfaces:

@@ -3,7 +3,9 @@ import { BridgeEventName } from "@serverkgg/bridge/protocol";
 import {
 	formatByteSize,
 	isUnder,
+	mergeProperties,
 	nameOf,
+	PROPERTY_KEYS,
 	relativeUploadPath,
 	requireStopped,
 	sizeForReport,
@@ -12,7 +14,7 @@ import {
 	withoutExtension,
 	worldPath,
 } from "../shared";
-import { readLevelHardcore, setLevelHardcore } from "./levelDat";
+import { readLevelHardcore, readLevelSeed, setLevelHardcore } from "./levelDat";
 import {
 	activeWorld,
 	discoverWorlds,
@@ -23,7 +25,15 @@ import {
 	worldDisplayName,
 	worldSize,
 } from "./world";
-import { cloneWorld, existingWorld, exportWorld } from "./worldTools";
+import {
+	archiveFolder,
+	cloneWorld,
+	copyWorldAddons,
+	existingWorld,
+	exportWorld,
+	nameWorld,
+	reportWiped,
+} from "./worldTools";
 
 const notAWorld = new BridgeUserError({
 	ar: "لا يحتوي الملف على level.dat. تأكد من أنك ترفع ملف ماب بصيغة .mcworld مُصدَّرًا من اللعبة نفسها.",
@@ -40,6 +50,11 @@ const multipleWorlds = new BridgeUserError({
 	en: "The file has more than one world. Upload them one at a time.",
 });
 
+const unreadableSeed = new BridgeUserError({
+	ar: "تعذّرت قراءة السيد من ملف الماب level.dat، لذلك لم يتم تنفيذ الريسيت. لبداية جديدة بسيد آخر، أنشئ مابًا جديدًا.",
+	en: "We couldn't read the seed from the world's level.dat, so the world wasn't reset. To start fresh with another seed, create a new world.",
+});
+
 const ACTIVE_MARK = "✓";
 
 const ACTIVE_WORLD_DELETE: Bridge.Text = {
@@ -50,6 +65,11 @@ const ACTIVE_WORLD_DELETE: Bridge.Text = {
 const ACTIVE_WORLD_ACTIVATE: Bridge.Text = {
 	ar: "هذا الماب مفعّل مسبقًا.",
 	en: "This world is already the active one.",
+};
+
+const INACTIVE_WORLD_RESET: Bridge.Text = {
+	ar: "لا يمكن تنفيذ ريسيت إلا للماب المفعّل. فعّل هذا الماب أولًا.",
+	en: "You can only reset the active world. Activate this one first.",
 };
 
 const HARDCORE_ALREADY_ON: Bridge.Text = {
@@ -85,6 +105,7 @@ export const worlds: Bridge.Collection = {
 	kind: BridgeKind.Collection,
 	protectedActions: [
 		"delete",
+		"resetWorld",
 	],
 
 	async list(context) {
@@ -281,11 +302,46 @@ export const worlds: Bridge.Collection = {
 				},
 			});
 		},
+
+		async resetWorld(context, row) {
+			const folder = await existingWorld(context, String(row.id));
+
+			if (folder !== (await activeWorld(context))) {
+				throw new BridgeUserError(INACTIVE_WORLD_RESET);
+			}
+
+			const seed = await readLevelSeed(context, folder);
+
+			if (seed === null) {
+				throw unreadableSeed;
+			}
+
+			const archive = await archiveFolder(context, folder);
+
+			await context.files.move(worldPath(folder), worldPath(archive));
+			await mergeProperties(context, {
+				[PROPERTY_KEYS.levelSeed]: seed,
+			});
+			await nameWorld(context, archive);
+			await copyWorldAddons(context, archive, folder);
+
+			context.log("reset a world", {
+				folder,
+				archive,
+			});
+
+			reportWiped(context, folder, "world", {
+				ar: `تم ريسيت ماب ${folder}، وحُفظ الماب السابق باسم ${archive}`,
+				en: `Reset world ${folder}, previous world kept as ${archive}`,
+			});
+		},
 	},
 
 	async unavailable(_context, row): Promise<Bridge.Unavailable> {
 		if (row.active !== ACTIVE_MARK) {
-			return {};
+			return {
+				resetWorld: INACTIVE_WORLD_RESET,
+			};
 		}
 
 		return {

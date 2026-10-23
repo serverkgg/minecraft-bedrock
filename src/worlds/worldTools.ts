@@ -4,9 +4,64 @@ import { execDetail } from "@serverkgg/bridge/utils";
 import { safePackFolder } from "../packs/packCompatibility";
 import { listPackManifests } from "../packs/packDiscovery";
 import { PackKind, parsePackManifest } from "../packs/packManifest";
-import { readWorldPacks } from "../packs/packRegistry";
-import { mergeProperties, PROPERTY_KEYS, publishFiles, requireStopped, worldPath } from "../shared";
-import { discoverWorlds, safeWorldFolder } from "./world";
+import { readWorldPacks, worldPackFile } from "../packs/packRegistry";
+import {
+	BEHAVIOR_PACKS_DIRECTORY,
+	LEVEL_NAME_FILE,
+	mergeProperties,
+	PROPERTY_KEYS,
+	publishFiles,
+	RESOURCE_PACKS_DIRECTORY,
+	requireStopped,
+	worldPath,
+} from "../shared";
+import { setLevelName } from "./levelDat";
+import { activeWorld, discoverWorlds, safeWorldFolder, suffixedWorldFolder } from "./world";
+
+const FOLDER_ATTEMPT_LIMIT = 100;
+
+const ARCHIVE_SUFFIX = "-old";
+
+const COPY_SUFFIX = "-new";
+
+export const NO_ACTIVE_WORLD: Bridge.Text = {
+	ar: "لم يتولد الماب المفعّل بعد، فلا يوجد ماب يتم استبداله. شغّل سيرفرك أولًا ليتولد الماب.",
+	en: "The active world hasn't generated yet, so there's nothing to replace. Start your server first to generate it.",
+};
+
+export const ONLY_WORLD: Bridge.Text = {
+	ar: "لا يوجد في قائمة المابات ماب آخر لتنفيذ الريسيت منه. احتفظ أولًا بنسخة من الماب عبر «انسخ الماب».",
+	en: "There's no other world in the Worlds list to reset from. Keep a copy of the world first with Copy world.",
+};
+
+const ACTIVE_WORLD_SOURCE: Bridge.Text = {
+	ar: "لا يمكن تنفيذ ريسيت للماب المفعّل من نفسه. اكتب اسم مجلد ماب آخر من قائمة المابات.",
+	en: "You can't reset the active world from itself. Type the folder name of another world from the Worlds list.",
+};
+
+const COPY_FAILED: Bridge.Text = {
+	ar: "تعذّر نسخ الماب الأصلي، لذلك لم يتم تنفيذ الريسيت. تأكد من أن مساحة سيرفرك تكفي لنسخة ثانية من الماب، وجرب مرة ثانية.",
+	en: "We couldn't copy the source world, so the world wasn't reset. Make sure your server has room for a second copy of the world, then try again.",
+};
+
+export const reportWiped = (
+	context: Bridge.Context,
+	folder: string,
+	scope: string,
+	text: Bridge.Text,
+	details: Record<string, string> = {},
+) => {
+	context.activity.report({
+		name: BridgeEventName.WorldWiped,
+		text,
+		subject: folder,
+		details: {
+			folder,
+			scope,
+			...details,
+		},
+	});
+};
 
 export const validateWorldFolder = (folder: string) => {
 	if (folder.length === 0 || folder === "." || folder === ".." || /[\\/\r\n\0]/.test(folder)) {
@@ -41,6 +96,30 @@ const newWorld = async (context: Bridge.Context, name: string) => {
 	return folder;
 };
 
+export const freeWorldFolder = async (context: Bridge.Context, base: string) => {
+	for (let attempt = 1; attempt <= FOLDER_ATTEMPT_LIMIT; attempt += 1) {
+		const candidate = attempt === 1 ? base : suffixedWorldFolder(base, `-${attempt}`);
+		if (!(await context.files.exists(worldPath(candidate)))) {
+			return candidate;
+		}
+	}
+	throw new BridgeUserError({
+		ar: `لديك مابات كثيرة بالاسم نفسه «${base}». احذف ما لا تحتاجه منها وجرب مرة ثانية.`,
+		en: `Too many worlds are already named "${base}". Delete the ones you don't need and try again.`,
+	});
+};
+
+export const archiveFolder = async (context: Bridge.Context, folder: string) => {
+	return await freeWorldFolder(context, suffixedWorldFolder(folder, ARCHIVE_SUFFIX));
+};
+
+export const nameWorld = async (context: Bridge.Context, folder: string) => {
+	await context.files.write(`${worldPath(folder)}/${LEVEL_NAME_FILE}`, folder);
+	if (!(await setLevelName(context, worldPath(folder), folder))) {
+		throw new Error("could not name the world in its level file");
+	}
+};
+
 export const cloneWorld = async (context: Bridge.Context, source: string, name: string) => {
 	requireStopped(context);
 	await existingWorld(context, source);
@@ -51,7 +130,13 @@ export const cloneWorld = async (context: Bridge.Context, source: string, name: 
 	try {
 		const staged = `${staging}/world`;
 		await copyDirectory(context, worldPath(source), staged);
-		await context.files.write(`${staged}/levelname.txt`, folder);
+		await context.files.write(`${staged}/${LEVEL_NAME_FILE}`, folder);
+		if (!(await setLevelName(context, staged, folder))) {
+			throw new BridgeUserError({
+				ar: "تعذّرت قراءة ملف الماب level.dat، لذلك لم يتم نسخ الماب. رجّع نسخة احتياطية وجرب مرة ثانية.",
+				en: "We couldn't read the world's level.dat, so the world wasn't copied. Restore a backup and try again.",
+			});
+		}
 		await publishFiles(context, [
 			{
 				source: staged,
@@ -78,7 +163,7 @@ const copyDirectory = async (context: Bridge.Context, source: string, destinatio
 		},
 	);
 	if (links.code !== 0 || links.stdout.trim().length > 0) {
-		throw new Error("world exports cannot contain symbolic links");
+		throw new Error("a world copy cannot contain symbolic links");
 	}
 	const result = await context.exec(
 		[
@@ -93,7 +178,23 @@ const copyDirectory = async (context: Bridge.Context, source: string, destinatio
 		},
 	);
 	if (result.code !== 0) {
-		throw new Error(`could not stage world files: ${execDetail(result)}`);
+		throw new Error(`could not copy world files: ${execDetail(result)}`);
+	}
+};
+
+const worldAddons = (world: string) => [
+	worldPackFile(world, PackKind.Behavior),
+	worldPackFile(world, PackKind.Resource),
+	`${worldPath(world)}/${BEHAVIOR_PACKS_DIRECTORY}`,
+	`${worldPath(world)}/${RESOURCE_PACKS_DIRECTORY}`,
+];
+
+export const copyWorldAddons = async (context: Bridge.Context, source: string, destination: string) => {
+	await context.files.ensure(worldPath(destination));
+	for (const path of worldAddons(source)) {
+		if (await context.files.exists(path)) {
+			await copyDirectory(context, path, `${worldPath(destination)}${path.slice(worldPath(source).length)}`);
+		}
 	}
 };
 
@@ -178,8 +279,42 @@ export const exportWorld = async (context: Bridge.Context, source: string) => {
 	}
 };
 
+const resetFromCopyRefusal = async (context: Bridge.Context, folder: string) => {
+	const listed = await discoverWorlds(context);
+	if (!listed.includes(folder)) {
+		return NO_ACTIVE_WORLD;
+	}
+	if (listed.every((entry) => entry === folder)) {
+		return ONLY_WORLD;
+	}
+	return null;
+};
+
+const copyForReset = async (context: Bridge.Context, source: string, folder: string) => {
+	const copy = await freeWorldFolder(context, suffixedWorldFolder(folder, COPY_SUFFIX));
+	try {
+		return await cloneWorld(context, source, copy);
+	} catch (error) {
+		if (error instanceof BridgeUserError) {
+			throw error;
+		}
+		context.log.error("could not copy the source world", {
+			from: source,
+			reason: error instanceof Error ? error.message : String(error),
+		});
+		await context.files.remove(worldPath(copy));
+		if (await context.files.exists(worldPath(copy))) {
+			throw error;
+		}
+		throw new BridgeUserError(COPY_FAILED);
+	}
+};
+
 export const worldTools: Bridge.Actions = {
 	kind: BridgeKind.Actions,
+	protectedActions: [
+		"resetFromCopy",
+	],
 	actions: {
 		async create(context, args) {
 			requireStopped(context);
@@ -216,5 +351,50 @@ export const worldTools: Bridge.Actions = {
 							},
 			});
 		},
+
+		async resetFromCopy(context, args) {
+			requireStopped(context);
+			const folder = await activeWorld(context);
+			const refusal = await resetFromCopyRefusal(context, folder);
+			if (refusal !== null) {
+				throw new BridgeUserError(refusal);
+			}
+			const source = await existingWorld(context, String(args.source ?? "").trim());
+			if (source === folder) {
+				throw new BridgeUserError(ACTIVE_WORLD_SOURCE);
+			}
+			const archive = await archiveFolder(context, folder);
+			const copy = await copyForReset(context, source, folder);
+			await context.files.move(worldPath(folder), worldPath(archive));
+			await nameWorld(context, archive);
+			await context.files.move(worldPath(copy), worldPath(folder));
+			await nameWorld(context, folder);
+			context.log("reset a world from a copy", {
+				folder,
+				from: source,
+				archive,
+			});
+			reportWiped(
+				context,
+				folder,
+				"copy",
+				{
+					ar: `تم ريسيت ماب ${folder} من نسخة ${source}، وحُفظ الماب السابق باسم ${archive}`,
+					en: `Reset world ${folder} from the copy ${source}, previous world kept as ${archive}`,
+				},
+				{
+					source,
+				},
+			);
+		},
+	},
+
+	async unavailable(context): Promise<Bridge.Unavailable> {
+		const refusal = await resetFromCopyRefusal(context, await activeWorld(context));
+		return refusal === null
+			? {}
+			: {
+					resetFromCopy: refusal,
+				};
 	},
 };

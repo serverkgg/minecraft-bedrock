@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { levelDirectories, safeWorldFolder, worldFolders } from "./world";
+import { levelDirectories, safeWorldFolder, suffixedWorldFolder, worldFolders } from "./world";
 
 describe("discovering bedrock worlds", () => {
 	it("reads the folder out of each worlds/<name>/level.dat hit", () => {
@@ -46,5 +46,22 @@ describe("naming an imported world folder", () => {
 
 	it("refuses to build a path out of a traversal attempt", () => {
 		expect(safeWorldFolder("../../etc")).toBe("etc");
+	});
+});
+
+describe("naming a world folder after another one", () => {
+	it("adds the suffix to the safe form of the name", () => {
+		expect(suffixedWorldFolder("Survival with the kids", "-old")).toBe("Survival-with-the-kids-old");
+	});
+
+	it("shortens the name, not the suffix, so the folder stays within the limit", () => {
+		const folder = suffixedWorldFolder("a".repeat(64), "-old");
+
+		expect(folder).toBe(`${"a".repeat(60)}-old`);
+		expect(folder.length).toBe(64);
+	});
+
+	it("falls back to the default world name when nothing in the name is safe", () => {
+		expect(suffixedWorldFolder("+++", "-old")).toBe("world-old");
 	});
 });

@@ -10,6 +10,10 @@ const EXPERIMENTS_TAG = "experiments";
 
 const HARDCORE_TAG = "IsHardcore";
 
+const SEED_TAG = "RandomSeed";
+
+const LEVEL_NAME_TAG = "LevelName";
+
 const LEVEL_STAGING = ".serverk-level";
 
 export const BETA_APIS_EXPERIMENT = "gametest";
@@ -368,6 +372,13 @@ export const levelByte = (level: LevelFile, key: string) => {
 	return payload?.tag === NbtTag.Byte ? payload.value : null;
 };
 
+export const levelLong = (level: LevelFile, key: string) => {
+	const payload = level.root.entries.find((entry) => textOf(entry.name) === key)?.payload;
+	return payload?.tag === NbtTag.Long
+		? new DataView(payload.bytes.buffer, payload.bytes.byteOffset, 8).getBigInt64(0, true)
+		: null;
+};
+
 export const withByte = (level: LevelFile, key: string, value: number) => {
 	return withRootEntry(level, {
 		name: encoder.encode(key),
@@ -410,6 +421,25 @@ export const levelHardcore = (level: LevelFile) => {
 
 export const withHardcore = (level: LevelFile, enabled: boolean) => {
 	return withByte(level, HARDCORE_TAG, enabled ? 1 : 0);
+};
+
+export const levelSeed = (level: LevelFile) => {
+	return levelLong(level, SEED_TAG)?.toString() ?? null;
+};
+
+export const levelName = (level: LevelFile) => {
+	const payload = level.root.entries.find((entry) => textOf(entry.name) === LEVEL_NAME_TAG)?.payload;
+	return payload?.tag === NbtTag.String ? textOf(payload.bytes) : null;
+};
+
+export const withLevelName = (level: LevelFile, name: string) => {
+	return withRootEntry(level, {
+		name: encoder.encode(LEVEL_NAME_TAG),
+		payload: {
+			tag: NbtTag.String,
+			bytes: encoder.encode(name),
+		},
+	});
 };
 
 export const parseLevelExperiments = (bytes: Uint8Array): Record<string, number> | null => {
@@ -502,6 +532,11 @@ export const readLevelHardcore = async (context: Bridge.Context, world: string):
 	return level === null ? null : levelHardcore(level);
 };
 
+export const readLevelSeed = async (context: Bridge.Context, world: string): Promise<string | null> => {
+	const level = await readLevel(context, levelPath(world));
+	return level === null ? null : levelSeed(level);
+};
+
 export const enableBetaApis = async (context: Bridge.Context, world: string) => {
 	requireStopped(context);
 	const path = levelPath(world);
@@ -539,5 +574,16 @@ export const setLevelHardcore = async (context: Bridge.Context, world: string, e
 	context.log(enabled ? "turned on hardcore for the world" : "turned off hardcore for the world", {
 		world,
 	});
+	return true;
+};
+
+export const setLevelName = async (context: Bridge.Context, directory: string, name: string) => {
+	requireStopped(context);
+	const path = `${directory}/${LEVEL_FILE}`;
+	const level = await readLevel(context, path);
+	if (level === null) {
+		return false;
+	}
+	await writeLevel(context, path, serializeLevel(withLevelName(level, name)));
 	return true;
 };

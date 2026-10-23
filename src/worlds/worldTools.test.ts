@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import type { Bridge } from "@serverkgg/bridge";
 import { BridgeEventName } from "@serverkgg/bridge/protocol";
-import { existingWorld, exportWorld, validateWorldFolder, worldTools } from "./worldTools";
+import { existingWorld, exportWorld, freeWorldFolder, validateWorldFolder, worldTools } from "./worldTools";
 
 describe("safe world tools", () => {
 	it("rejects separators and traversal while keeping existing world names with spaces", () => {
@@ -203,5 +203,46 @@ describe("safe world tools", () => {
 			"behavior_packs/Cool",
 			`.serverk-world-export/world/behavior_packs/${uuid}`,
 		]);
+	});
+});
+
+describe("choosing a free folder for a world", () => {
+	const taken = (exists: (path: string) => boolean) =>
+		({
+			files: {
+				exists: async (path: string) => exists(path),
+			},
+		}) as unknown as Bridge.Context;
+
+	it("takes the folder it was given when nothing is there", async () => {
+		expect(
+			await freeWorldFolder(
+				taken(() => false),
+				"world-old",
+			),
+		).toBe("world-old");
+	});
+
+	it("numbers the folder from 2 while the earlier ones are taken", async () => {
+		const folders = [
+			"worlds/world-old",
+			"worlds/world-old-2",
+		];
+
+		expect(
+			await freeWorldFolder(
+				taken((path) => folders.includes(path)),
+				"world-old",
+			),
+		).toBe("world-old-3");
+	});
+
+	it("refuses once every numbered folder is taken", async () => {
+		await expect(
+			freeWorldFolder(
+				taken(() => true),
+				"world-old",
+			),
+		).rejects.toThrow('Too many worlds are already named "world-old".');
 	});
 });

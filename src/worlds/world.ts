@@ -54,6 +54,13 @@ export const safeWorldFolder = (name: string) => {
 	return name.replace(UNSAFE_CHARACTERS, "-").slice(0, NAME_LIMIT).replace(EDGE_CHARACTERS, "");
 };
 
+export const suffixedWorldFolder = (name: string, suffix: string) => {
+	const folder = safeWorldFolder(name);
+	const stem = folder.length === 0 ? DEFAULT_LEVEL : folder;
+
+	return `${stem.slice(0, NAME_LIMIT - suffix.length).replace(EDGE_CHARACTERS, "")}${suffix}`;
+};
+
 const find = async (context: Bridge.Context, root: string, depth: string) => {
 	const result = await context.exec(
 		[

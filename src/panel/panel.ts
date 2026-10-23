@@ -814,8 +814,8 @@ const worldsTab: Bridge.Tab = {
 			layout: BridgeLayout.Actions,
 			id: "new-world",
 			title: {
-				ar: "ماب جديد",
-				en: "New world",
+				ar: "أدوات المابات",
+				en: "World tools",
 			},
 			module: "worldTools",
 			actions: [
@@ -847,6 +847,33 @@ const worldsTab: Bridge.Tab = {
 						},
 					],
 				},
+				{
+					id: "resetFromCopy",
+					label: {
+						ar: "ريسيت من نسخة",
+						en: "Reset from a copy",
+					},
+					confirm: BridgeConfirm.Normal,
+					confirmText: {
+						ar: "نستبدل الماب المفعّل بنسخة من الماب الذي تكتب اسمه، فتعود المباني وأغراض اللاعبين وتقدّمهم كما هي في تلك النسخة. يبقى الماب الحالي في قائمة المابات ويُضاف old إلى اسمه، ويشغل المساحة نفسها. لا يتغيّر الماب الذي كتبت اسمه، ونسخ الماب الكبير يستغرق وقتًا أطول.",
+						en: "We replace the active world with a copy of the world you name, so builds, inventories and progress go back to how they are in that copy. Your current world stays in the Worlds list, renamed with -old, and takes the same space. The world you named stays as it is, and a large world takes a while to copy.",
+					},
+					fields: [
+						{
+							key: "source",
+							control: BridgeControl.Text,
+							label: {
+								ar: "الماب الأصلي",
+								en: "Source world",
+							},
+							help: {
+								ar: "اكتب اسم المجلد تمامًا كما يظهر في عمود «المجلد» في قائمة المابات.",
+								en: "Type the folder name exactly as it shows in the Folder column of the Worlds list.",
+							},
+							maxLength: 64,
+						},
+					],
+				},
 			],
 		},
 		{
@@ -857,8 +884,8 @@ const worldsTab: Bridge.Tab = {
 				en: "Worlds",
 			},
 			help: {
-				ar: "أي تغيير على المابات يتطلب أن يكون سيرفرك متوقفًا. عند الحذف فقط نأخذ نسخة احتياطية ونشغّل السيرفر من جديد إذا كان شغّالًا. في بيدروك تُحفظ الأبعاد كلها في قاعدة بيانات واحدة، لذلك لا يمكن تنفيذ ريسيت لبُعد واحد وحده.",
-				en: "Every world change needs your server stopped. Only a delete takes a backup first and starts the server again if it was running. Bedrock stores all dimensions together, so a single dimension can't be reset on its own.",
+				ar: "أي تغيير على المابات يتطلب أن يكون سيرفرك متوقفًا، إلا الحذف والريسيت: نوقف السيرفر لهما ثم نشغّله من جديد إذا كان شغّالًا. في بيدروك تُحفظ الأبعاد كلها في قاعدة بيانات واحدة، لذلك يشمل الريسيت الماب كله ولا يمكن تنفيذه لبُعد واحد وحده.",
+				en: "Every world change needs your server stopped, except a delete or a reset: we stop the server for them and start it again if it was running. Bedrock stores all dimensions together, so a reset covers the whole world and can't target a single dimension.",
 			},
 			module: "worlds",
 			columns: [
@@ -984,8 +1011,20 @@ const worldsTab: Bridge.Tab = {
 					},
 					confirm: BridgeConfirm.Strong,
 					confirmText: {
-						ar: "حذف الماب يزيل الأوفرورلد والنذر والإند وكل ما بنيتموه نهائيًا. نأخذ نسخة احتياطية قبل الحذف، وإذا تعذّر أخذها لا يتم الحذف.",
-						en: "Deleting the world removes the Overworld, Nether, End and everything you built for good. We take a backup first, and if the backup fails, nothing is deleted.",
+						ar: "حذف الماب يزيل الأوفرورلد والنذر والإند وكل ما بنيتموه نهائيًا. النسخة الاحتياطية هي طريقك الوحيد للرجوع، لذلك خذ نسخة احتياطية قبل المتابعة.",
+						en: "Deleting the world removes the Overworld, Nether, End and everything you built for good. A backup is your only way back, so take one before you continue.",
+					},
+				},
+				{
+					id: "resetWorld",
+					label: {
+						ar: "ريسيت الماب",
+						en: "Reset world",
+					},
+					confirm: BridgeConfirm.Normal,
+					confirmText: {
+						ar: "يتولد الماب من البداية بالسيد نفسه، وتبدأ المباني وأغراض اللاعبين وتقدّمهم من جديد. تبقى الإضافات المفعّلة على الماب كما هي، ويعود الهاردكور وقوانين اللعبة إلى الوضع الافتراضي. يبقى الماب الحالي في قائمة المابات ويُضاف old إلى اسمه، ويشغل المساحة نفسها. فعّله للرجوع إليه، أو احذفه عندما تتأكد.",
+						en: "The world generates again from the start with its own seed, and builds, inventories and progress start over. The add-ons activated on the world stay, while hardcore and game rules go back to their defaults. Your current world stays in the Worlds list, renamed with -old, and takes the same space. Activate it to go back, or delete it once you're sure.",
 					},
 				},
 			],
