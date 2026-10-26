@@ -98,8 +98,8 @@ const versionTab: Bridge.Tab = {
 				en: "Server build",
 			},
 			help: {
-				ar: "اختر الإصدار العادي أو إصدار البريفيو، وثبّت رقم إصدار محددًا إذا أردت.",
-				en: "Choose the release or the preview build, and pin a specific version if you want one.",
+				ar: "اختر الإصدار العادي أو البريفيو. يتابع السيرفر أحدث إصدار من قناته، إلا إذا اخترت رقم إصدار محددًا.",
+				en: "Choose the release or the preview channel. Your server follows the channel's latest build unless you pick a build number.",
 			},
 			target: BridgeFormTarget.Variables,
 			reinstall: true,
@@ -145,8 +145,8 @@ const versionTab: Bridge.Tab = {
 						en: "Build",
 					},
 					help: {
-						ar: "احتفظ بالإصدار المثبّت، أو اختر رقم الإصدار الجديد للتحديث.",
-						en: "Keep the installed build, or pick a new build number to update.",
+						ar: "تابع أحدث إصدار، أو اختر رقمًا محددًا ليبقى السيرفر عليه. إذا كانت إضافاتك تستخدم Beta APIs، فاختر رقمًا محددًا.",
+						en: "Follow the latest build, or pick a build number to keep your server on it. If your add-ons use Beta APIs, pick a build number.",
 					},
 					options: {
 						module: "gameVersion",
@@ -388,6 +388,10 @@ const settingsTab: Bridge.Tab = {
 						ar: "مسافة الرؤية",
 						en: "View distance",
 					},
+					help: {
+						ar: "كلما زادت، زادت مساحة الماب التي يحمّلها السيرفر حول كل لاعب، وزاد استهلاك المعالج. على الباقات الصغيرة تسبب القيمة العالية لاقًا.",
+						en: "Higher values make the server load more chunks around every player, which costs CPU. On a small plan, a high value makes the server lag.",
+					},
 					min: 5,
 					max: 96,
 					step: 1,
@@ -398,6 +402,10 @@ const settingsTab: Bridge.Tab = {
 					label: {
 						ar: "مسافة التفاعل",
 						en: "Tick distance",
+					},
+					help: {
+						ar: "كلما زادت، زادت مساحة الماب النشطة حول كل لاعب، وزاد استهلاك المعالج. على الباقات الصغيرة تسبب القيمة العالية لاقًا.",
+						en: "Higher values keep more chunks active around every player, which costs CPU. On a small plan, a high value makes the server lag.",
 					},
 					min: 4,
 					max: 12,

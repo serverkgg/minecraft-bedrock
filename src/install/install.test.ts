@@ -11,14 +11,16 @@ const fixture = (
 	unavailable = false,
 	stamped = true,
 	channel = "release",
+	stampChannel = "release",
 ) => {
+	let current = selected;
 	const files = new Map<string, string>(
 		stamped
 			? [
 					[
 						".serverk-install.json",
 						JSON.stringify({
-							channel: "release",
+							channel: stampChannel,
 							version: "1.26.45.1",
 							label: "1.26.45.1",
 							files: [
@@ -50,7 +52,7 @@ const fixture = (
 			if (name === "BEDROCK_CHANNEL") {
 				return channel;
 			}
-			return name === "BEDROCK_VERSION" ? selected : SECRET;
+			return name === "BEDROCK_VERSION" ? current : SECRET;
 		},
 		port: () => 19_132,
 		emit: (event: string) => {
@@ -143,6 +145,9 @@ const fixture = (
 		emitted,
 		downloads,
 		lookups: () => lookups,
+		select: (value: string | null) => {
+			current = value;
+		},
 	};
 };
 
@@ -167,6 +172,40 @@ describe("restoring exact Bedrock builds", () => {
 		await expect(install.run(run.context)).rejects.toThrow("We couldn't download Bedrock 1.26.90.1. Try again.");
 		expect(run.files.get("bedrock_server")).toBe("old binary");
 		expect(JSON.parse(run.files.get(".serverk-install.json") ?? "{}").version).toBe("1.26.45.1");
+	});
+});
+
+describe("following the latest build through a delivered pin", () => {
+	it("a delivered build installs exactly that build from the preview link on preview", async () => {
+		const run = fixture(true, "1.26.70.21", false, true, "preview", "preview");
+		await install.run(run.context);
+		expect(run.downloads).toEqual([
+			"https://www.minecraft.net/bedrockdedicatedserver/bin-linux-preview/bedrock-server-1.26.70.21.zip",
+		]);
+		expect(JSON.parse(run.files.get(".serverk-install.json") ?? "{}")).toMatchObject({
+			channel: "preview",
+			version: "1.26.70.21",
+		});
+	});
+
+	it("a delivered build on release installs from the release link", async () => {
+		const run = fixture(true, "1.26.52.3");
+		await install.run(run.context);
+		expect(run.downloads).toEqual([
+			"https://www.minecraft.net/bedrockdedicatedserver/bin-linux/bedrock-server-1.26.52.3.zip",
+		]);
+	});
+
+	it("an empty value after the update keeps the delivered build on the next container", async () => {
+		const run = fixture(true, "1.26.52.3");
+		await install.run(run.context);
+		run.select(null);
+		await install.run(run.context);
+		expect(run.downloads).toEqual([
+			"https://www.minecraft.net/bedrockdedicatedserver/bin-linux/bedrock-server-1.26.52.3.zip",
+		]);
+		expect(run.lookups()).toBe(1);
+		expect(JSON.parse(run.files.get(".serverk-install.json") ?? "{}").version).toBe("1.26.52.3");
 	});
 });
 

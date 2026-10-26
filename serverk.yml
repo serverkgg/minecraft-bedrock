@@ -21,6 +21,10 @@ metadata:
       sources:
         - curseforge
 
+mojang:
+  channelVariable: BEDROCK_CHANNEL
+  buildVariable: BEDROCK_VERSION
+
 resources:
   minMemoryMb: 512
   recommendedMemoryMb: 1024

@@ -66,14 +66,16 @@ To control who gets in, open the Players tab and read the allowlist guide.
 
 ## Updates {#updates}
 
-Your server stays on the build it has installed. A restart doesn't change it, and we don't update it for you. To update, open **Version** and pick the new build number under **Build**. We take a backup before installing it.
+While **Build** under **Version** is set to **Follow the latest build**, we update your server to each new Mojang build on its channel. We take a backup first and wait until no one is playing, or update right away if the server is stopped. A restart never changes the build on its own. The **Game version** card shows the installed and the latest build, and there you can pick **Ask me** to update only when you say so.
+
+To keep your server on one build, pick its number under **Build**. Your server stays on it until you pick another number or go back to **Follow the latest build**.
 
 @[open](panel:version)
 
-Minecraft on your players' devices, from phones to consoles and Windows, usually updates on its own. So after each new Mojang release, players see **Outdated Server** until you update your server. A player who sees **Outdated Client** has an older game than your server and needs to update it.
+Minecraft on your players' devices, from phones to consoles and Windows, usually updates on its own. So after each new Mojang release, players see **Outdated Server** until your server updates. A player who sees **Outdated Client** has an older game than your server and needs to update it.
 
 > [!warning]
-> An update can break add-ons that use Beta APIs. Those APIs change with almost every major Minecraft release, so such an add-on may stop loading until its author updates it. Before you update, open the **Add-on check** on the **Add-ons** tab to see which add-ons need Beta APIs.
+> An update can break add-ons that use Beta APIs. Those APIs change with almost every major Minecraft release, so such an add-on may stop loading until its author updates it. If your add-ons use Beta APIs, pick a build number to keep your server on it, and move to a new build after their authors update them. Open the **Add-on check** on the **Add-ons** tab to see which add-ons need Beta APIs.
 
 ## The console
 

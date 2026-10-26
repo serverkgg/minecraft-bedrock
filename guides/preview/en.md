@@ -22,8 +22,8 @@ So if you switch, all of your friends have to switch with you.
 
 If neither is true, stay on the release build. It's the steadier one, and it's the one all of your friends can already join.
 
-## Updates are explicit
+## Updates
 
-**Keep installed build** picks the latest build only on the first install. Ordinary restarts keep that exact version. To update, choose a new version number in **Version**. Backups also keep the installed build details. If the requested build isn't available, the operation stops and tells you, instead of quietly installing another one.
+While **Build** is set to **Follow the latest build**, your server moves to each new preview build once no one is playing, with a backup first. A preview server never moves to the release channel on its own. To keep your server on one build, pick its number under **Build**. Backups also keep the installed build details. If the requested build isn't available, the operation stops and tells you, instead of quietly installing another one.
 
-Your players' games usually update on their own, so after each new build players see **Outdated Server** until you update your server. Preview builds come out often, and Microsoft advises checking for upgrades frequently when you run a preview server. An update can also break add-ons that use Beta APIs, so open the **Add-on check** on the **Add-ons** tab before you update to see which add-ons need them. The details are in [Getting started](/games/minecraft-bedrock/guides/getting-started#updates).
+Your players' games usually update on their own, so after each new build players see **Outdated Server** until your server updates, and preview builds come out often. An update can also break add-ons that use Beta APIs. If yours use them, pick a build number, and open the **Add-on check** on the **Add-ons** tab to see which add-ons need them. The details are in [Getting started](/games/minecraft-bedrock/guides/getting-started#updates).

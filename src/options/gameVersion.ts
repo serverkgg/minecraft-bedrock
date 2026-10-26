@@ -18,12 +18,12 @@ export const gameVersion: Bridge.Options = {
 			{
 				value: "",
 				label: {
-					ar: "احتفظ بالإصدار المثبّت",
-					en: "Keep installed build",
+					ar: "تابع أحدث إصدار",
+					en: "Follow the latest build",
 				},
 				help: {
-					ar: "نختار الأحدث عند التثبيت الأول فقط. للتحديث، اختر رقم الإصدار الجديد من القائمة.",
-					en: "We pick the latest only on the first install. To update, pick the new build number from the list.",
+					ar: "نحدّث السيرفر إلى كل إصدار جديد بعد أخذ نسخة احتياطية، وننتظر خلوه من اللاعبين. اختر رقم إصدار محددًا ليبقى السيرفر عليه.",
+					en: "We move your server to each new build with a backup first, and wait until no one is playing. Pick a build number to keep your server on it.",
 				},
 			},
 		];
