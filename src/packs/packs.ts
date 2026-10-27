@@ -1,13 +1,6 @@
 import { type Bridge, BridgeKind, BridgeUserError } from "@serverkgg/bridge";
-import {
-	isUnder,
-	nameOf,
-	PACK_STAGING,
-	relativeUploadPath,
-	requireStopped,
-	sizeForReport,
-	withoutExtension,
-} from "../shared";
+import { relativeUploadPath } from "@serverkgg/bridge/utils";
+import { isUnder, nameOf, PACK_STAGING, requireStopped, sizeForReport, withoutExtension } from "../shared";
 import { activeWorld, betaApisEnabled, readLevelExperiments } from "../worlds";
 import {
 	PackMove,

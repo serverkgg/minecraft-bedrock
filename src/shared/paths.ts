@@ -44,18 +44,6 @@ export const PACK_EXTENSIONS = [
 	"zip",
 ];
 
-const UPLOAD_PREFIX = /^\.?\//;
-
-export const relativeUploadPath = (input: string): string | null => {
-	const trimmed = input.trim().replace(UPLOAD_PREFIX, "");
-
-	if (trimmed.length === 0 || trimmed.includes("..") || trimmed.startsWith("/")) {
-		return null;
-	}
-
-	return trimmed;
-};
-
 export const isUnder = (path: string, directory: string) => {
 	return path === directory || path.startsWith(`${directory}/`);
 };
