@@ -1,12 +1,13 @@
 import { type Bridge, BridgeKind } from "@serverkgg/bridge";
-import { loopbackText } from "@serverkgg/bridge/net";
 import { createRosterSync } from "@serverkgg/bridge/presence";
 import {
 	type BedrockPlayer,
 	BedrockTransport,
+	listeningOn,
 	PROPERTY_KEYS,
 	presenceOf,
 	readProperties,
+	readTcpSockets,
 	roster,
 	sampleRoster,
 	transportFrom,
@@ -16,10 +17,6 @@ import {
 const REFRESH_SECONDS = 20;
 
 const RECONCILE_EVERY = 3;
-
-const PROBE_TIMEOUT_MS = 5000;
-
-const joinUrlOf = (port: number) => `http://127.0.0.1:${port}/v1/join`;
 
 const maxOf = (properties: Record<string, string>) => {
 	const raw = (properties[PROPERTY_KEYS.maxPlayers] ?? "").trim();
@@ -93,12 +90,16 @@ export const createQuery = (): Bridge.Query => {
 		};
 	};
 
-	const sampleNetherNet = async (context: Bridge.Context, max: number | null): Promise<Bridge.Sample> => {
+	const listening = async (context: Bridge.Context) => {
 		try {
-			await loopbackText(joinUrlOf(context.port("game")), {
-				timeoutMs: PROBE_TIMEOUT_MS,
-			});
+			return listeningOn(await readTcpSockets(context), context.port("game"));
 		} catch {
+			return false;
+		}
+	};
+
+	const sampleNetherNet = async (context: Bridge.Context, max: number | null): Promise<Bridge.Sample> => {
+		if (!(await listening(context))) {
 			return await sampleRakNet(context, max);
 		}
 

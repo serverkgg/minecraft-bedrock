@@ -5,24 +5,16 @@ import { createQuery } from "./query";
 
 let answering = true;
 
-const joins: string[] = [];
+const connections: string[] = [];
 
 const bedrock = Bun.serve({
 	hostname: "127.0.0.1",
 	port: 0,
 	fetch(request) {
-		const url = new URL(request.url);
-
-		if (url.pathname === "/v1/join" && answering) {
-			joins.push(request.method);
-
-			return new Response(null, {
-				status: 200,
-			});
-		}
+		connections.push(new URL(request.url).pathname);
 
 		return new Response(null, {
-			status: 404,
+			status: 200,
 		});
 	},
 });
@@ -36,16 +28,21 @@ interface Harness {
 	warnings: string[];
 	commands: string[];
 	pings: number[];
+	reads: string[][];
 }
 
 const unreachable = async () => {
 	throw new Error("timed out");
 };
 
+const listenerOf = (port: number) =>
+	`   0: 00000000000000000000000000000000:${port.toString(16).toUpperCase().padStart(4, "0")} 00000000000000000000000000000000:0000 0A 00000000:00000000 00:00000000 00000000  1000        0 310794817 1 0000000000000000 100 0 0 10 0`;
+
 const harness = (properties: Record<string, string>, listed = 0): Harness => {
 	const warnings: string[] = [];
 	const commands: string[] = [];
 	const pings: number[] = [];
+	const reads: string[][] = [];
 	const context = {
 		port: () => bedrock.port,
 		codec: {
@@ -56,6 +53,15 @@ const harness = (properties: Record<string, string>, listed = 0): Harness => {
 		logs: {
 			follow: () => () => {},
 			tail: async () => [],
+		},
+		exec: async (command: string[]) => {
+			reads.push(command);
+
+			return {
+				code: 0,
+				stdout: answering ? listenerOf(bedrock.port ?? 0) : "",
+				stderr: "",
+			};
 		},
 		command: async (input: string) => {
 			commands.push(input);
@@ -98,18 +104,19 @@ const harness = (properties: Record<string, string>, listed = 0): Harness => {
 		warnings,
 		commands,
 		pings,
+		reads,
 	};
 };
 
 beforeEach(() => {
 	stopWatchingRoster();
 	answering = true;
-	joins.length = 0;
+	connections.length = 0;
 });
 
 describe("sampling a nethernet server", () => {
-	it("probes the join endpoint on loopback and counts the roster off the log", async () => {
-		const { context, pings, warnings } = harness({
+	it("finds the listener in the socket table and counts the roster off the log", async () => {
+		const { context, pings, reads, warnings } = harness({
 			[PROPERTY_KEYS.transport]: BedrockTransport.NetherNet,
 			[PROPERTY_KEYS.maxPlayers]: "20",
 		});
@@ -117,9 +124,7 @@ describe("sampling a nethernet server", () => {
 
 		const sample = await createQuery().sample(context);
 
-		expect(joins).toEqual([
-			"GET",
-		]);
+		expect(reads).toHaveLength(1);
 		expect(pings).toEqual([]);
 		expect(warnings).toEqual([]);
 		expect(sample).toEqual({
@@ -128,12 +133,25 @@ describe("sampling a nethernet server", () => {
 		});
 	});
 
+	it("never connects to the join port, because each connection bedrock closes keeps a restarted bedrock from listening for a minute", async () => {
+		const { context } = harness({
+			[PROPERTY_KEYS.transport]: BedrockTransport.NetherNet,
+		});
+		const query = createQuery();
+
+		for (let index = 0; index < 4; index++) {
+			await query.sample(context);
+		}
+
+		expect(connections).toEqual([]);
+	});
+
 	it("treats a file without a transport as nethernet, the transport seedConfig writes", async () => {
-		const { context, pings } = harness({});
+		const { context, pings, reads } = harness({});
 
 		const sample = await createQuery().sample(context);
 
-		expect(joins).toHaveLength(1);
+		expect(reads).toHaveLength(1);
 		expect(pings).toEqual([]);
 		expect(sample.max).toBeNull();
 	});
@@ -227,7 +245,7 @@ describe("reconciling the roster with list", () => {
 	});
 });
 
-describe("a nethernet server that does not answer on nethernet", () => {
+describe("a nethernet server that does not listen on the join port", () => {
 	it("tries the raknet ping, because a build pinned before nethernet runs raknet whatever the file says", async () => {
 		answering = false;
 		const { context, pings, warnings } = harness({
@@ -250,7 +268,7 @@ describe("a nethernet server that does not answer on nethernet", () => {
 
 describe("sampling a raknet server", () => {
 	it("keeps the raknet ping and takes the counts from the pong", async () => {
-		const { context, pings } = harness({
+		const { context, pings, reads } = harness({
 			[PROPERTY_KEYS.transport]: BedrockTransport.RakNet,
 			[PROPERTY_KEYS.maxPlayers]: "10",
 		});
@@ -260,7 +278,7 @@ describe("sampling a raknet server", () => {
 		expect(pings).toEqual([
 			context.port("game"),
 		]);
-		expect(joins).toEqual([]);
+		expect(reads).toEqual([]);
 		expect(sample).toEqual({
 			online: 0,
 			max: 25,

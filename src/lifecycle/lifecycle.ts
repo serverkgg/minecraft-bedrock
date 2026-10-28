@@ -1,6 +1,7 @@
 import { type Bridge, BridgeKind } from "@serverkgg/bridge";
 import { BridgeEventName } from "@serverkgg/bridge/protocol";
-import { SERVER_BINARY, SERVER_STARTED, stopWatchingRoster, watchRoster } from "../shared";
+import { SERVER_STARTED, stopWatchingRoster, watchRoster } from "../shared";
+import { startCommand } from "./startCommand";
 
 const STOP_TIMEOUT_SECONDS = 120;
 
@@ -13,10 +14,8 @@ export const lifecycle: Bridge.Lifecycle = {
 	ready: SERVER_STARTED,
 	stopTimeoutSeconds: STOP_TIMEOUT_SECONDS,
 
-	async command() {
-		return [
-			`./${SERVER_BINARY}`,
-		];
+	async command(context) {
+		return startCommand(context.port("game"));
 	},
 
 	async onReady(context) {

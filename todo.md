@@ -136,7 +136,7 @@ Measured on a throwaway container and on the dev stack (`c72mrym8dv` on `riyadh-
   TRANSPORT TYPE ERROR banner. With the key absent or `raknet` the banner prints, but RakNet still accepts 1.26.52 clients.
 - At idle BDS binds only TCP `<server-port>` (dual-stack) and UDP 7551 (LAN discovery). Nothing on UDP `<server-port>`.
 - `GET http://127.0.0.1:<server-port>/v1/join` answers `200`, `Content-Type: application/json`, empty body, `Connection: close`.
-  That is the liveness probe the query uses.
+  The query no longer sends it: every request costs the port a minute of `TIME_WAIT` (the 1.26.60.6 section).
 - Every connected player takes one UDP socket from the `server-udp-ports` range (libwebrtc `BasicPortAllocator`); the first
   player landed on the first port of the block. The block is therefore sized to the player cap: `count: 64` and `max-players`
   capped at 64. A reconnecting player may hold a second socket until the old one times out; measured once, not exhaustively.
@@ -160,6 +160,41 @@ Measured on a throwaway container and on the dev stack (`c72mrym8dv` on `riyadh-
   the workaround until 1.26.60.
 - Unverified since 2026-10-17: an iPhone join against a Serverk server on either transport. Verify it on the dev stack
   before the release.
+
+## NetherNet, verified 2026-10-28 on BDS 1.26.60.6
+
+26.60 shipped on 2026-10-27, and Mojang's links API serves BDS `1.26.60.6` on release. Read from the archive's own
+`server.properties` and `bedrock_server_how_to.html`, and from scratch runs inside a dev game container.
+
+- `transport` still allows `raknet` or `nethernet`, default `nethernet`. Under `raknet` BDS 1.26.60.6 starts on RakNet and
+  prints `TRANSPORT TYPE ERROR` with `In this release, NetherNet is the only supported transport type.` and `Players will not
+  be able to connect to your game without NetherNet.` That is why `seedValues` forces `nethernet` from 1.26.60.
+- `server-udp-ports` grammar is now one entry: a port or range, `public:local`, or `IP:public:local`. The 1.26.52.3 comment
+  allowed comma-separated entries; the new one does not mention them. `<ip>:<range>:<range>` and the empty-address form
+  `:<range>:<range>` both boot without an error. A malformed value logs `ERROR server-udp-ports: …` before the banner and
+  the server still starts, so read that line after changing the format.
+- At idle BDS binds TCP `<server-port>` dual-stack and UDP 7551 only, as on 1.26.52.3. `GET /v1/join` now answers `200`
+  with a status body: `{"name","protocol":2225,"version":"1.26.60","level","players","maxPlayers","gameType"}`.
+- **BDS cannot listen on `server-port` while a closed connection still holds it.** BDS answers signaling with
+  `Connection: close` and closes first, so every request leaves a `TIME_WAIT` socket on the port for 60 seconds. A BDS started
+  inside that minute prints `Server started.` with no `Accepting clients on` line and no error, nothing listens, and no
+  player can join until the next start. Reproduced on 1.26.60.6 and 1.26.52.3 in a dev container: three `GET /v1/join`, stop,
+  start again. A restart inside the same container keeps its network namespace and hits it; a recreated container does
+  not. The query used to send that request every sample, so nearly every in-container restart lost the listener. The
+  query now reads the listener from `/proc/net/tcp6` without connecting (`listeningOn`). Players' own signaling and the
+  server-list status requests leave the same sockets, so the start goes through a `sh -c` wrapper (`startCommand`) that
+  waits up to 75 seconds while a non-listening socket holds the port, then `exec`s `bedrock_server`. Nothing new arrives
+  while BDS is down, because a refused connection leaves no `TIME_WAIT`.
+- The wait lives in the process, not in `lifecycle.command`: a wait there holds the bridge's `start` reply, the agent's
+  `start` call timed out after 15 seconds on dev and the platform stopped the container.
+- Not yet reported to Mojang. A platform alternative is `net.ipv4.tcp_max_tw_buckets=0` on the container, which is per
+  network namespace; unverified.
+- **Server identity is new in 1.26.60.** BDS loads `keys/server_identity_key.pem` (unencrypted P-384 PEM) at start. Without
+  it the server generates a key in memory each start, so every player has to accept the server again after every restart.
+  `seedServerIdentity` writes a SEC1 key once when the file is absent and never replaces one; `backup.only` carries
+  `keys/**` and `reset.keep` keeps `keys`. BDS accepted the key (`serveridentity status` answered `A saved server identity
+  key exists at keys/server_identity_key.pem.`) and logs `Invalid server identity key file` at `ERROR` for a broken one.
+- Unverified: a real 26.60 client join, the trust prompt staying away across a restart, and iPhone joins on 1.26.60.6.
 
 ## Deferred, on purpose
 

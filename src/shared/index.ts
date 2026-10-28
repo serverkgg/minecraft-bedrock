@@ -4,6 +4,7 @@ export * from "./choices";
 export * from "./console";
 export * from "./fileTransaction";
 export * from "./format";
+export * from "./joinPort";
 export * from "./jsonList";
 export * from "./knownPlayers";
 export * from "./paths";
