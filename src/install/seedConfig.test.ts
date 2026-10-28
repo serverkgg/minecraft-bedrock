@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import type { Bridge } from "@serverkgg/bridge";
-import { BedrockTransport, PROPERTY_KEYS } from "../shared";
+import { BedrockTransport, PROPERTY_KEYS, SERVER_IDENTITY_KEY_FILE } from "../shared";
 import { DEFAULT_LEVEL_NAME, seedConfig, seedValues } from "./seedConfig";
 
 const BLOCK = {
@@ -10,17 +10,20 @@ const BLOCK = {
 
 const ADDRESS = "203.0.113.7";
 
-const seeding = (properties: Record<string, string>, version: string) => {
+const seeding = (properties: Record<string, string>, version: string, missing: string[] = []) => {
 	const logs: string[] = [];
 	const merged: Record<string, string>[] = [];
+	const written: string[] = [];
 	const remember = (message: string) => {
 		logs.push(message);
 	};
 	const context = {
 		files: {
 			ensure: async () => {},
-			exists: async () => true,
-			write: async () => {},
+			exists: async (path: string) => !missing.includes(path),
+			write: async (path: string) => {
+				written.push(path);
+			},
 			read: async () =>
 				JSON.stringify({
 					channel: "release",
@@ -53,6 +56,7 @@ const seeding = (properties: Record<string, string>, version: string) => {
 		context,
 		logs,
 		merged,
+		written,
 	};
 };
 
@@ -144,6 +148,18 @@ describe("seeding server.properties", () => {
 		);
 
 		expect(values[PROPERTY_KEYS.contentLogFileEnabled]).toBe("false");
+	});
+
+	it("saves a server identity key before the first start, so players accept the server once", async () => {
+		const run = seeding({}, "1.26.60.6", [
+			SERVER_IDENTITY_KEY_FILE,
+		]);
+
+		await seedConfig(run.context);
+
+		expect(run.written).toEqual([
+			SERVER_IDENTITY_KEY_FILE,
+		]);
 	});
 
 	it("keeps lan visibility on, because bedrock stops advertising itself to players without it", () => {

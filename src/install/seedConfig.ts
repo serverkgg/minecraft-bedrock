@@ -13,6 +13,7 @@ import {
 	WORLDS_DIRECTORY,
 } from "../shared";
 import { readInstallStamp } from "./installStamp";
+import { seedServerIdentity } from "./serverIdentity";
 
 export const DEFAULT_LEVEL_NAME = "world";
 
@@ -104,6 +105,8 @@ export const seedConfig = async (context: Bridge.Context) => {
 			await context.files.write(file, "[]\n");
 		}
 	}
+
+	await seedServerIdentity(context);
 
 	const current = await readProperties(context);
 	const build = (await readInstallStamp(context))?.version ?? null;

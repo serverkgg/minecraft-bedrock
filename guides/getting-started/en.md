@@ -45,7 +45,7 @@ On PS5, the DNS is under **Settings** → **Network** → **Settings** → **Set
 
 Bedrock connects to your server over NetherNet, Mojang's new connection method. The address and port a player types reach your server first, and the game data then runs over a range of ports we reserve for your server. We set those ports on every start, so a change you make to `server-port` or `server-udp-ports` in `server.properties` is replaced on the next start.
 
-The first time you join, Bedrock asks whether you trust the server. Accept it and continue. It won't ask again.
+The first time you join, Bedrock asks whether you trust the server. Accept it and continue. It won't ask again. We keep your server's identity in `keys/server_identity_key.pem`, so the question doesn't come back after a restart or an update. If you delete that file, every player is asked again.
 
 ### iPhone and iPad players {#iphone-ipad}
 

@@ -12,6 +12,10 @@ export const BEHAVIOR_PACKS_DIRECTORY = "behavior_packs";
 
 export const RESOURCE_PACKS_DIRECTORY = "resource_packs";
 
+export const SERVER_IDENTITY_DIRECTORY = "keys";
+
+export const SERVER_IDENTITY_KEY_FILE = `${SERVER_IDENTITY_DIRECTORY}/server_identity_key.pem`;
+
 export const LEVEL_FILE = "level.dat";
 
 export const LEVEL_NAME_FILE = "levelname.txt";

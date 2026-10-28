@@ -79,6 +79,7 @@ backup:
     - development_behavior_packs/**
     - development_resource_packs/**
     - world_templates/**
+    - keys/**
     - .serverk-packs.json
     - .serverk-players.json
   except:
@@ -102,6 +103,7 @@ reset:
     - behavior_packs
     - resource_packs
     - config
+    - keys
     - data
     - definitions
     - minecraftpe
@@ -193,6 +195,16 @@ files:
       note:
         ar: صلاحيات اللاعبين. يحفظها بيدروك بمعرّف اللاعب (XUID) وليس بالاسم، لذلك يلزم أن يدخل اللاعب مرة واحدة قبل أن تجعله أوبريتر.
         en: Player permissions. Bedrock stores these by account id (XUID), not by name, which is why a player has to join once before you can make them an operator.
+    - match: keys
+      label:
+        ar: هوية السيرفر
+        en: Server identity
+      icon: shield
+      color: "#e0a458"
+      restart: true
+      note:
+        ar: مفتاح هوية سيرفرك. يتعرف به بيدروك على سيرفرك، لذلك يسأل كل لاعب مرة واحدة فقط هل يثق فيه. إذا حذفت المفتاح، يُسأل كل لاعب من جديد بعد التشغيل التالي. لا تشاركه مع أحد.
+        en: Your server's identity key. Bedrock recognizes your server by it, so it asks each player only once whether they trust your server. If you delete the key, every player is asked again after the next start. Don't share it with anyone.
     - match: behavior_packs
       label:
         ar: إضافات السلوك
